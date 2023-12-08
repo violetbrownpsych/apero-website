@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>working memory on Violet Brown</title>
-    <link>/tags/working-memory/</link>
+    <link>https://www.violetabrown.com/tags/working-memory/</link>
     <description>Recent content in working memory on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sun, 30 Dec 2018 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/working-memory/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/working-memory/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Noise Increases Listening Effort in Normal-Hearing Young Adults, Regardless of Working Memory Capacity</title>
-      <link>/publications/brown_strand_2018/</link>
+      <link>https://www.violetabrown.com/publications/brown_strand_2018/</link>
       <pubDate>Sun, 30 Dec 2018 00:00:00 +0000</pubDate>
-      <guid>/publications/brown_strand_2018/</guid>
+      <guid>https://www.violetabrown.com/publications/brown_strand_2018/</guid>
       <description>As listening conditions worsen (e.g. background noise increases), additional cognitive effort is required to process speech. The existing literature is mixed on whether and how cognitive traits like working memory capacity moderate the amount of effort that listeners must expend to successfully understand speech. Here, we validate a dual-task measure of listening effort (Experiment 1) and demonstrate that for normal-hearing young adults, effort increases as steady-state masking noise increases, but working memory capacity is unrelated to the amount of effort expended (Experiment 2).</description>
     </item>
   </channel>

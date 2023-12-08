@@ -2,52 +2,52 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>online research on Violet Brown</title>
-    <link>/tags/online-research/</link>
+    <link>https://www.violetabrown.com/tags/online-research/</link>
     <description>Recent content in online research on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 29 Nov 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/online-research/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/online-research/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>The Effects of Temporal Cues, Point-Light Displays, and Faces on Speech Identification and Listening Effort</title>
-      <link>/publications/sewell_etal_2023/</link>
+      <link>https://www.violetabrown.com/publications/sewell_etal_2023/</link>
       <pubDate>Wed, 29 Nov 2023 00:00:00 +0000</pubDate>
-      <guid>/publications/sewell_etal_2023/</guid>
+      <guid>https://www.violetabrown.com/publications/sewell_etal_2023/</guid>
       <description>Among the most robust findings in speech research is that the presence of a talking face improves the intelligibility of spoken language. Talking faces supplement the auditory signal by providing fine phonetic cues based on the placement of the articulators, as well as temporal cues to when speech is occurring. In this study, we varied the amount of information contained in the visual signal, ranging from temporal information alone to a natural talking face.</description>
     </item>
     <item>
       <title>Revisiting the Target-Masker Linguistic Similarity Hypothesis</title>
-      <link>/publications/brown_etal_2022/</link>
+      <link>https://www.violetabrown.com/publications/brown_etal_2022/</link>
       <pubDate>Tue, 26 Apr 2022 00:00:00 +0000</pubDate>
-      <guid>/publications/brown_etal_2022/</guid>
+      <guid>https://www.violetabrown.com/publications/brown_etal_2022/</guid>
       <description>Purpose: The linguistic similarity hypothesis states that it is more difficult to segregate target and masker speech when they are linguistically similar. For example, recognition of English target speech should be more impaired by the presence of Dutch masking speech than Mandarin masking speech because Dutch and English are more linguistically similar than Mandarin and English. Across four experiments, English target speech was consistently recognized more poorly when presented in English masking speech than in silence, speech-shaped noise, or an unintelligible masker (i.</description>
     </item>
     <item>
       <title>Revisiting the Relationship Between Implicit Racial Bias and Audiovisual Benefit for Nonnative-Accented Speech</title>
-      <link>/publications/mclaughlin_etal_2022/</link>
+      <link>https://www.violetabrown.com/publications/mclaughlin_etal_2022/</link>
       <pubDate>Wed, 05 Jan 2022 00:00:00 +0000</pubDate>
-      <guid>/publications/mclaughlin_etal_2022/</guid>
+      <guid>https://www.violetabrown.com/publications/mclaughlin_etal_2022/</guid>
       <description>Speech intelligibility is improved when the listener can see the talker in addition to hearing their voice. Notably, though, previous work has suggested that this “audiovisual benefit” for nonnative (i.e., foreign-accented) speech is smaller than the benefit for native speech, an effect that may be partially accounted for by listeners’ implicit racial biases (Yi et al., 2013, The Journal of the Acoustical Society of America, 134[5], EL387–EL393.). In the present study, we sought to replicate these find- ings in a significantly larger sample of online participants.</description>
     </item>
     <item>
       <title>Face Mask Type Affects Audiovisual Speech Intelligibility and Subjective Listening Effort in Young and Older Adults</title>
-      <link>/publications/brown_vanengen_peelle_2021/</link>
+      <link>https://www.violetabrown.com/publications/brown_vanengen_peelle_2021/</link>
       <pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate>
-      <guid>/publications/brown_vanengen_peelle_2021/</guid>
+      <guid>https://www.violetabrown.com/publications/brown_vanengen_peelle_2021/</guid>
       <description>Identifying speech requires that listeners make rapid use of fine-grained acoustic cues—a process that is facilitated by being able to see the talker’s face. Face masks present a challenge to this process because they can both alter acoustic information and conceal the talker’s mouth. Here, we investigated the degree to which different types of face masks and noise levels affect speech intelligibility and subjective listening effort for young (N = 180) and older (N = 180) adult listeners.</description>
     </item>
     <item>
       <title>Recall of Speech is Impaired by Subsequent Masking Noise: A Replication of Rabbitt (1968) Experiment 2</title>
-      <link>/publications/guang_etal_2021/</link>
+      <link>https://www.violetabrown.com/publications/guang_etal_2021/</link>
       <pubDate>Mon, 15 Mar 2021 00:00:00 +0000</pubDate>
-      <guid>/publications/guang_etal_2021/</guid>
+      <guid>https://www.violetabrown.com/publications/guang_etal_2021/</guid>
       <description>The presence of masking noise can impair speech intelligibility and increase the cognitive resources necessary to understand speech. The first study to demonstrate the negative cognitive consequences of noisy speech—published by Rabbitt in 1968—found that participants had poorer recall for aurally presented digits early in a list when later digits were presented in noise relative to quiet. However, despite being cited nearly 500 times and providing the foundation for a wealth of subsequent research on the topic, the original study has never been directly replicated.</description>
     </item>
     <item>
       <title>What Accounts for Individual Differences in Susceptibility to the McGurk Effect?</title>
-      <link>/publications/brown_etal_2018/</link>
+      <link>https://www.violetabrown.com/publications/brown_etal_2018/</link>
       <pubDate>Mon, 12 Nov 2018 00:00:00 +0000</pubDate>
-      <guid>/publications/brown_etal_2018/</guid>
+      <guid>https://www.violetabrown.com/publications/brown_etal_2018/</guid>
       <description>The McGurk effect is a classic audiovisual speech illusion in which discrepant auditory and visual syllables can lead to a fused percept (e.g., an auditory /bɑ/ paired with a visual /gɑ/ often leads to the perception of /dɑ/). The McGurk effect is robust and easily replicated in pooled group data, but there is tremendous variability in the extent to which individual participants are susceptible to it. In some studies, the rate at which individuals report fusion responses ranges from 0% to 100%.</description>
     </item>
   </channel>

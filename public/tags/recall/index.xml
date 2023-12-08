@@ -2,24 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>recall on Violet Brown</title>
-    <link>/tags/recall/</link>
+    <link>https://www.violetabrown.com/tags/recall/</link>
     <description>Recent content in recall on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Mon, 15 Mar 2021 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/recall/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/recall/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Recall of Speech is Impaired by Subsequent Masking Noise: A Replication of Rabbitt (1968) Experiment 2</title>
-      <link>/publications/guang_etal_2021/</link>
+      <link>https://www.violetabrown.com/publications/guang_etal_2021/</link>
       <pubDate>Mon, 15 Mar 2021 00:00:00 +0000</pubDate>
-      <guid>/publications/guang_etal_2021/</guid>
+      <guid>https://www.violetabrown.com/publications/guang_etal_2021/</guid>
       <description>The presence of masking noise can impair speech intelligibility and increase the cognitive resources necessary to understand speech. The first study to demonstrate the negative cognitive consequences of noisy speech—published by Rabbitt in 1968—found that participants had poorer recall for aurally presented digits early in a list when later digits were presented in noise relative to quiet. However, despite being cited nearly 500 times and providing the foundation for a wealth of subsequent research on the topic, the original study has never been directly replicated.</description>
     </item>
     <item>
       <title>About Face: Seeing the Talker Improves Spoken  Word Recognition but Increases Listening Effort</title>
-      <link>/publications/brown_strand_2019/</link>
+      <link>https://www.violetabrown.com/publications/brown_strand_2019/</link>
       <pubDate>Fri, 22 Nov 2019 00:00:00 +0000</pubDate>
-      <guid>/publications/brown_strand_2019/</guid>
+      <guid>https://www.violetabrown.com/publications/brown_strand_2019/</guid>
       <description>It is widely accepted that seeing a talker improves a listener’s ability to understand what a talker is saying in background noise (e.g., Erber, 1969; Sumby &amp;amp; Pollack, 1954). The literature is mixed, however, regarding the influence of the visual modality on the listening effort required to recognize speech (e.g., Fraser, Gagné, Alepins, &amp;amp; Dubois, 2010; Sommers &amp;amp; Phelps, 2016). Here, we present data showing that even when the visual modality robustly benefits recognition, processing audiovisual speech can still result in greater cognitive load than processing speech in the auditory modality alone.</description>
     </item>
   </channel>

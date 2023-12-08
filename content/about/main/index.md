@@ -21,14 +21,7 @@ intro: |
 
   Lastly, and perhaps most importantly, my main academic interest is getting people interested in and excited about science and math, and making science and math accessible to everyone. I love teaching; there's nothing quite like seeing a student's eyes light up when they grasp a concept that had previous been opaque to them. In that vein, I have several tutorial papers on topics ranging from mixed effects modeling to writing preregistration documents (check out the Publications tab), and I have a few publicly available stats tutorial videos on [my YouTube channel](https://www.youtube.com/channel/UCqWs3JYH1hTO_9xwVTj5fpQ).
 
-Finally I've taught Introduction to Psychology at WashU, and I'll be teaching [Sensation and Perception](https://www.carleton.edu/psychology/courses/) at Carleton Spring 2024. Yay!
+  Finally I've taught Introduction to Psychology at WashU, and I'll be teaching [Sensation and Perception](https://www.carleton.edu/psychology/courses/) at Carleton in the Spring of 2024. 
 
-Outside of academia, I LOVE watching baseball and listening to baseball podcasts—especially. I'm a massive Phillies phan (DelCo born and rasied), so naturally I listen to [High Hopes Pod](https://open.spotify.com/show/6S6suf6ETAsHOL0glC9wXI), but I also just love baseball (and the oodles of data it comes with) deep in my soul, so [Effectively Wild](https://blogs.fangraphs.com/category/effectively-wild/) is a favorite. I'm also into other Phildelphia sports, but ultimately, [Go Phils](https://www.mlbshop.com/philadelphia-phillies/t-36785512+z-9993788-1469888814). I also love riding my [Peloton](https://www.onepeloton.com/) bike, going for bike rides outside when it's not cold, cooking elaborate meals, exploring new restaurants and bars in the Minneapolis/St. Paul area with friends, and making cocktails. I bartended for about a year and a half during and after college in the cocktail room at an amazing grain-to-glass distillery in Northfield, MN called [Loon Liquors](https://loonliquors.com/) and haven't turned back. 
-  
-show_outro: false
-outro: |
-  <i class="fas fa-glass-cheers pr2"></i>Sincere thanks to [Maëlle Salmon](https://masalmon.eu/) for her help naming this Hugo theme!
+  Outside of academia, I LOVE watching baseball and listening to baseball podcasts. I'm a massive Phillies phan (DelCo born and rasied), so naturally I listen to [High Hopes Pod](https://open.spotify.com/show/6S6suf6ETAsHOL0glC9wXI), but I also just love baseball (and the oodles of data it comes with) deep in my soul, so [Effectively Wild](https://blogs.fangraphs.com/category/effectively-wild/) is a favorite. I'm also into other Phildelphia sports, but ultimately, [Go Phils](https://www.mlbshop.com/philadelphia-phillies/t-36785512+z-9993788-1469888814). I also love riding my [Peloton](https://www.onepeloton.com/) bike, going for bike rides outside when it's not cold, cooking elaborate meals, exploring new restaurants and bars in the Minneapolis/St. Paul area with friends, and making cocktails. I bartended for about a year and a half during and after college in the cocktail room at an amazing grain-to-glass distillery in Northfield, MN called [Loon Liquors](https://loonliquors.com/) and haven't turned back. 
 ---
-
-** index doesn't contain a body, just front matter above.
-See about/list.html in the layouts folder **

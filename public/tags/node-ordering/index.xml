@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>node ordering on Violet Brown</title>
-    <link>/tags/node-ordering/</link>
+    <link>https://www.violetabrown.com/tags/node-ordering/</link>
     <description>Recent content in node ordering on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sun, 02 Dec 2018 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/node-ordering/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/node-ordering/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Node Ordering for Rescalable Network Summarization (or, the Apparent Magic of Word Frequency and Age of Acquisition in the Lexicon)</title>
-      <link>/publications/brown_chen_etal_2018/</link>
+      <link>https://www.violetabrown.com/publications/brown_chen_etal_2018/</link>
       <pubDate>Sun, 02 Dec 2018 00:00:00 +0000</pubDate>
-      <guid>/publications/brown_chen_etal_2018/</guid>
+      <guid>https://www.violetabrown.com/publications/brown_chen_etal_2018/</guid>
       <description>How can we “scale down” an n-node network G to a smaller network, with k &amp;laquo; n nodes, so that G (approximately) maintains the important structural properties of G? There is a voluminous literature on many versions of this problem if k is given in advance, but one’s tolerance for approximation (and the resulting value of k) will vary. Here, then, we formulate a “rescalable” version of this approximation task for complex networks.</description>
     </item>
   </channel>

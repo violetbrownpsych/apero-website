@@ -2,24 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>temporal cues on Violet Brown</title>
-    <link>/tags/temporal-cues/</link>
+    <link>https://www.violetabrown.com/tags/temporal-cues/</link>
     <description>Recent content in temporal cues on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 29 Nov 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/temporal-cues/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/temporal-cues/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>The Effects of Temporal Cues, Point-Light Displays, and Faces on Speech Identification and Listening Effort</title>
-      <link>/publications/sewell_etal_2023/</link>
+      <link>https://www.violetabrown.com/publications/sewell_etal_2023/</link>
       <pubDate>Wed, 29 Nov 2023 00:00:00 +0000</pubDate>
-      <guid>/publications/sewell_etal_2023/</guid>
+      <guid>https://www.violetabrown.com/publications/sewell_etal_2023/</guid>
       <description>Among the most robust findings in speech research is that the presence of a talking face improves the intelligibility of spoken language. Talking faces supplement the auditory signal by providing fine phonetic cues based on the placement of the articulators, as well as temporal cues to when speech is occurring. In this study, we varied the amount of information contained in the visual signal, ranging from temporal information alone to a natural talking face.</description>
     </item>
     <item>
       <title>Talking Points: A Modulating Circle Increases Listening Effort Without Improving Speech Recognition in Young Adults</title>
-      <link>/publications/strand_brown_barbour_2020/</link>
+      <link>https://www.violetabrown.com/publications/strand_brown_barbour_2020/</link>
       <pubDate>Tue, 03 Mar 2020 00:00:00 +0000</pubDate>
-      <guid>/publications/strand_brown_barbour_2020/</guid>
+      <guid>https://www.violetabrown.com/publications/strand_brown_barbour_2020/</guid>
       <description>Speech recognition is improved when the acoustic input is accompanied by visual cues provided by a talking face (Erber in Journal of Speech and Hearing Research, 12(2), 423–425, 1969; Sumby &amp;amp; Pollack in The Journal of the Acoustical Society of America, 26(2), 212–215, 1954). One way that the visual signal facilitates speech recognition is by providing the listener with information about fine phonetic detail that complements information from the auditory signal.</description>
     </item>
   </channel>

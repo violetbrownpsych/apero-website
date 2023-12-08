@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>implicit bias on Violet Brown</title>
-    <link>/tags/implicit-bias/</link>
+    <link>https://www.violetabrown.com/tags/implicit-bias/</link>
     <description>Recent content in implicit bias on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 05 Jan 2022 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/implicit-bias/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/implicit-bias/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Revisiting the Relationship Between Implicit Racial Bias and Audiovisual Benefit for Nonnative-Accented Speech</title>
-      <link>/publications/mclaughlin_etal_2022/</link>
+      <link>https://www.violetabrown.com/publications/mclaughlin_etal_2022/</link>
       <pubDate>Wed, 05 Jan 2022 00:00:00 +0000</pubDate>
-      <guid>/publications/mclaughlin_etal_2022/</guid>
+      <guid>https://www.violetabrown.com/publications/mclaughlin_etal_2022/</guid>
       <description>Speech intelligibility is improved when the listener can see the talker in addition to hearing their voice. Notably, though, previous work has suggested that this “audiovisual benefit” for nonnative (i.e., foreign-accented) speech is smaller than the benefit for native speech, an effect that may be partially accounted for by listeners’ implicit racial biases (Yi et al., 2013, The Journal of the Acoustical Society of America, 134[5], EL387–EL393.). In the present study, we sought to replicate these find- ings in a significantly larger sample of online participants.</description>
     </item>
   </channel>

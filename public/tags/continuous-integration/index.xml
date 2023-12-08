@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>continuous integration on Violet Brown</title>
-    <link>/tags/continuous-integration/</link>
+    <link>https://www.violetabrown.com/tags/continuous-integration/</link>
     <description>Recent content in continuous integration on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Thu, 02 Nov 2017 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/continuous-integration/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.violetabrown.com/tags/continuous-integration/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Keep Listening: Grammatical Context Reduces But Does Not Eliminate Activation of Unexpected Words</title>
-      <link>/publications/strand_etal_2017/</link>
+      <link>https://www.violetabrown.com/publications/strand_etal_2017/</link>
       <pubDate>Thu, 02 Nov 2017 00:00:00 +0000</pubDate>
-      <guid>/publications/strand_etal_2017/</guid>
+      <guid>https://www.violetabrown.com/publications/strand_etal_2017/</guid>
       <description>To understand spoken language, listeners combine acoustic-phonetic input with expectations derived from context (Dahan &amp;amp; Magnuson, 2006). Eye-tracking studies on semantic context have demonstrated that the activation levels of competing lexical candidates depend on the relative strengths of the bottom-up input and top-down expectations (cf. Dahan &amp;amp; Tanenhaus, 2004). In the grammatical realm, however, graded effects of context on lexical competition have been predicted (Magnuson, Tanenhaus, &amp;amp; Aslin, 2008), but not demonstrated.</description>
     </item>
   </channel>
