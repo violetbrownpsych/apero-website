@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>transparency on Violet Brown</title>
+    <link>/tags/transparency/</link>
+    <description>Recent content in transparency on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 20 Jun 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/transparency/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spread the Word: Enhancing Replicability of Speech Research Through Stimulus Sharing</title>
+      <link>/publications/strand_brown_2023/</link>
+      <pubDate>Tue, 20 Jun 2023 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_brown_2023/</guid>
+      <description>Purpose: The ongoing replication crisis within and beyond psychology has revealed the numerous ways in which flexibility in the research process can affect study outcomes. In speech research, examples of these “researcher degrees of freedom” include the particular syllables, words, or sentences presented; the talkers who produce the stimuli and the instructions given to them; the population tested; whether and how stimuli are matched on amplitude; the type of masking noise used and its presentation level; and many others.</description>
+    </item>
+  </channel>
+</rss>

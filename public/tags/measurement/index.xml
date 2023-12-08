@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>measurement on Violet Brown</title>
+    <link>/tags/measurement/</link>
+    <description>Recent content in measurement on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 24 May 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/measurement/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Speech and Non-Speech Measures of Audiovisual Integration are not Correlated</title>
+      <link>/publications/wilbiks_etal_2022/</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0000</pubDate>
+      <guid>/publications/wilbiks_etal_2022/</guid>
+      <description>Many natural events generate both visual and auditory signals, and humans are remarkably adept at integrating information from those sources. However, individuals appear to differ markedly in their ability or propensity to combine what they hear with what they see. Individual differences in audiovisual integration have been established using a range of materials, including speech stimuli (seeing and hearing a talker) and simpler audiovisual stimuli (seeing flashes of light combined with tones).</description>
+    </item>
+    <item>
+      <title>Understanding Speech amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
+      <link>/publications/strand_etal_2021/</link>
+      <pubDate>Tue, 23 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_etal_2021/</guid>
+      <description>The latent constructs psychologists study are typically not directly accessible, so researchers must design measurement instruments that are intended to provide insights about those constructs. Construct validation—assessing whether instruments measure what they intend to—is therefore critical for ensuring that the conclusions we draw actually reflect the intended phenomena. Insufficient construct validation can lead to the jingle fallacy—falsely assuming two instruments measure the same construct because the instruments share a name—and the jangle fallacy—falsely assuming two instruments measure different constructs because the instruments have different names.</description>
+    </item>
+    <item>
+      <title>Rapid Adaptation to Fully Intelligible Nonnative-Accented Speech Reduces Listening Effort</title>
+      <link>/publications/brown_etal_2020/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_etal_2020/</guid>
+      <description>In noisy settings or when listening to an unfamiliar talker or accent, it can be difficult to understand spoken language. This difficulty typically results in reductions in speech intelligibility, but may also increase the effort necessary to process the speech even when intelligibility is unaffected. In this study, we used a dual-task paradigm and pupillometry to assess the cognitive costs associated with processing fully intelligible accented speech, predicting that rapid perceptual adaptation to an accent would result in decreased listening effort over time.</description>
+    </item>
+    <item>
+      <title>About Face: Seeing the Talker Improves Spoken  Word Recognition but Increases Listening Effort</title>
+      <link>/publications/brown_strand_2019/</link>
+      <pubDate>Fri, 22 Nov 2019 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_strand_2019/</guid>
+      <description>It is widely accepted that seeing a talker improves a listener’s ability to understand what a talker is saying in background noise (e.g., Erber, 1969; Sumby &amp;amp; Pollack, 1954). The literature is mixed, however, regarding the influence of the visual modality on the listening effort required to recognize speech (e.g., Fraser, Gagné, Alepins, &amp;amp; Dubois, 2010; Sommers &amp;amp; Phelps, 2016). Here, we present data showing that even when the visual modality robustly benefits recognition, processing audiovisual speech can still result in greater cognitive load than processing speech in the auditory modality alone.</description>
+    </item>
+    <item>
+      <title>&#34;Paying&#34; Attention to Audiovisual Speech: Do Incongruent Stimuli Incur Greater Costs?</title>
+      <link>/publications/brown_strand_2019_app/</link>
+      <pubDate>Thu, 13 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_strand_2019_app/</guid>
+      <description>The McGurk effect is a multisensory phenomenon in which discrepant auditory and visual speech signals typically result in an illusory percept. McGurk stimuli are often used in studies assessing the attentional requirements of audiovisual integration, but no study has directly compared the costs associated with integrating congruent versus incongruent audiovisual speech. Some evidence suggests that the McGurk effect may not be representative of naturalistic audiovisual speech processing – susceptibility to the McGurk effect is not associated with the ability to derive benefit from the addition of the visual signal, and distinct cortical regions are recruited when processing congruent versus incongruent speech.</description>
+    </item>
+    <item>
+      <title>Measuring Listening Effort: Convergent Validity, Sensitivity, and Links With Cognitive and Personality Measures</title>
+      <link>/publications/strand_etal_2018/</link>
+      <pubDate>Tue, 19 Jun 2018 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_etal_2018/</guid>
+      <description>Purpose: Listening effort (LE) describes the attentional or cognitive requirements for successful listening. Despite substantial theoretical and clinical interest in LE, inconsistent operationalization makes it difficult to make generalizations across studies. The aims of this large-scale validation study were to evaluate the convergent validity and sensitivity of commonly used measures of LE and assess how scores on those tasks relate to cognitive and personality variables.
+Method: Young adults with normal hearing (N = 111) completed 7 tasks designed to measure LE, 5 tests of cognitive ability, and 2 personality measures.</description>
+    </item>
+  </channel>
+</rss>

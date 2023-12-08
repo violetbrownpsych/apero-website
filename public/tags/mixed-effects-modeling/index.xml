@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mixed-effects modeling on Violet Brown</title>
+    <link>/tags/mixed-effects-modeling/</link>
+    <description>Recent content in mixed-effects modeling on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 25 Mar 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/mixed-effects-modeling/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>An Introduction to Linear Mixed-Effects Modeling in R</title>
+      <link>/publications/brown_2021/</link>
+      <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_2021/</guid>
+      <description>This Tutorial serves as both an approachable theoretical introduction to mixed-effects modeling and a practical introduction to how to implement mixed-effects models in R. The intended audience is researchers who have some basic statistical knowledge, but little or no experience implementing mixed-effects models in R using their own data. In an attempt to increase the accessibility of this Tutorial, I deliberately avoid using mathematical terminology beyond what a student would learn in a standard graduate-level statistics course, but I reference articles and textbooks that provide more detail for interested readers.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cross-modal masking on Violet Brown</title>
+    <link>/tags/cross-modal-masking/</link>
+    <description>Recent content in cross-modal masking on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 26 Apr 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/cross-modal-masking/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Revisiting the Target-Masker Linguistic Similarity Hypothesis</title>
+      <link>/publications/brown_etal_2022/</link>
+      <pubDate>Tue, 26 Apr 2022 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_etal_2022/</guid>
+      <description>Purpose: The linguistic similarity hypothesis states that it is more difficult to segregate target and masker speech when they are linguistically similar. For example, recognition of English target speech should be more impaired by the presence of Dutch masking speech than Mandarin masking speech because Dutch and English are more linguistically similar than Mandarin and English. Across four experiments, English target speech was consistently recognized more poorly when presented in English masking speech than in silence, speech-shaped noise, or an unintelligible masker (i.</description>
+    </item>
+  </channel>
+</rss>

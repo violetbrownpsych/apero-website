@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>individual differences on Violet Brown</title>
+    <link>/tags/individual-differences/</link>
+    <description>Recent content in individual differences on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 24 May 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/individual-differences/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Speech and Non-Speech Measures of Audiovisual Integration are not Correlated</title>
+      <link>/publications/wilbiks_etal_2022/</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0000</pubDate>
+      <guid>/publications/wilbiks_etal_2022/</guid>
+      <description>Many natural events generate both visual and auditory signals, and humans are remarkably adept at integrating information from those sources. However, individuals appear to differ markedly in their ability or propensity to combine what they hear with what they see. Individual differences in audiovisual integration have been established using a range of materials, including speech stimuli (seeing and hearing a talker) and simpler audiovisual stimuli (seeing flashes of light combined with tones).</description>
+    </item>
+    <item>
+      <title>Noise Increases Listening Effort in Normal-Hearing Young Adults, Regardless of Working Memory Capacity</title>
+      <link>/publications/brown_strand_2018/</link>
+      <pubDate>Sun, 30 Dec 2018 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_strand_2018/</guid>
+      <description>As listening conditions worsen (e.g. background noise increases), additional cognitive effort is required to process speech. The existing literature is mixed on whether and how cognitive traits like working memory capacity moderate the amount of effort that listeners must expend to successfully understand speech. Here, we validate a dual-task measure of listening effort (Experiment 1) and demonstrate that for normal-hearing young adults, effort increases as steady-state masking noise increases, but working memory capacity is unrelated to the amount of effort expended (Experiment 2).</description>
+    </item>
+    <item>
+      <title>What Accounts for Individual Differences in Susceptibility to the McGurk Effect?</title>
+      <link>/publications/brown_etal_2018/</link>
+      <pubDate>Mon, 12 Nov 2018 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_etal_2018/</guid>
+      <description>The McGurk effect is a classic audiovisual speech illusion in which discrepant auditory and visual syllables can lead to a fused percept (e.g., an auditory /bɑ/ paired with a visual /gɑ/ often leads to the perception of /dɑ/). The McGurk effect is robust and easily replicated in pooled group data, but there is tremendous variability in the extent to which individual participants are susceptible to it. In some studies, the rate at which individuals report fusion responses ranges from 0% to 100%.</description>
+    </item>
+    <item>
+      <title>Measuring Listening Effort: Convergent Validity, Sensitivity, and Links With Cognitive and Personality Measures</title>
+      <link>/publications/strand_etal_2018/</link>
+      <pubDate>Tue, 19 Jun 2018 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_etal_2018/</guid>
+      <description>Purpose: Listening effort (LE) describes the attentional or cognitive requirements for successful listening. Despite substantial theoretical and clinical interest in LE, inconsistent operationalization makes it difficult to make generalizations across studies. The aims of this large-scale validation study were to evaluate the convergent validity and sensitivity of commonly used measures of LE and assess how scores on those tasks relate to cognitive and personality variables.
+Method: Young adults with normal hearing (N = 111) completed 7 tasks designed to measure LE, 5 tests of cognitive ability, and 2 personality measures.</description>
+    </item>
+  </channel>
+</rss>

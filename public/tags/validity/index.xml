@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>validity on Violet Brown</title>
+    <link>/tags/validity/</link>
+    <description>Recent content in validity on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 24 May 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/validity/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Speech and Non-Speech Measures of Audiovisual Integration are not Correlated</title>
+      <link>/publications/wilbiks_etal_2022/</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0000</pubDate>
+      <guid>/publications/wilbiks_etal_2022/</guid>
+      <description>Many natural events generate both visual and auditory signals, and humans are remarkably adept at integrating information from those sources. However, individuals appear to differ markedly in their ability or propensity to combine what they hear with what they see. Individual differences in audiovisual integration have been established using a range of materials, including speech stimuli (seeing and hearing a talker) and simpler audiovisual stimuli (seeing flashes of light combined with tones).</description>
+    </item>
+    <item>
+      <title>Understanding Speech amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
+      <link>/publications/strand_etal_2021/</link>
+      <pubDate>Tue, 23 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_etal_2021/</guid>
+      <description>The latent constructs psychologists study are typically not directly accessible, so researchers must design measurement instruments that are intended to provide insights about those constructs. Construct validation—assessing whether instruments measure what they intend to—is therefore critical for ensuring that the conclusions we draw actually reflect the intended phenomena. Insufficient construct validation can lead to the jingle fallacy—falsely assuming two instruments measure the same construct because the instruments share a name—and the jangle fallacy—falsely assuming two instruments measure different constructs because the instruments have different names.</description>
+    </item>
+    <item>
+      <title>Measuring Listening Effort: Convergent Validity, Sensitivity, and Links With Cognitive and Personality Measures</title>
+      <link>/publications/strand_etal_2018/</link>
+      <pubDate>Tue, 19 Jun 2018 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_etal_2018/</guid>
+      <description>Purpose: Listening effort (LE) describes the attentional or cognitive requirements for successful listening. Despite substantial theoretical and clinical interest in LE, inconsistent operationalization makes it difficult to make generalizations across studies. The aims of this large-scale validation study were to evaluate the convergent validity and sensitivity of commonly used measures of LE and assess how scores on those tasks relate to cognitive and personality variables.
+Method: Young adults with normal hearing (N = 111) completed 7 tasks designed to measure LE, 5 tests of cognitive ability, and 2 personality measures.</description>
+    </item>
+  </channel>
+</rss>

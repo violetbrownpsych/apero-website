@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>audiovisual speech on Violet Brown</title>
+    <link>/tags/audiovisual-speech/</link>
+    <description>Recent content in audiovisual speech on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 29 Nov 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/audiovisual-speech/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Effects of Temporal Cues, Point-Light Displays, and Faces on Speech Identification and Listening Effort</title>
+      <link>/publications/sewell_etal_2023/</link>
+      <pubDate>Wed, 29 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>/publications/sewell_etal_2023/</guid>
+      <description>Among the most robust findings in speech research is that the presence of a talking face improves the intelligibility of spoken language. Talking faces supplement the auditory signal by providing fine phonetic cues based on the placement of the articulators, as well as temporal cues to when speech is occurring. In this study, we varied the amount of information contained in the visual signal, ranging from temporal information alone to a natural talking face.</description>
+    </item>
+    <item>
+      <title>Revisiting the Relationship Between Implicit Racial Bias and Audiovisual Benefit for Nonnative-Accented Speech</title>
+      <link>/publications/mclaughlin_etal_2022/</link>
+      <pubDate>Wed, 05 Jan 2022 00:00:00 +0000</pubDate>
+      <guid>/publications/mclaughlin_etal_2022/</guid>
+      <description>Speech intelligibility is improved when the listener can see the talker in addition to hearing their voice. Notably, though, previous work has suggested that this “audiovisual benefit” for nonnative (i.e., foreign-accented) speech is smaller than the benefit for native speech, an effect that may be partially accounted for by listeners’ implicit racial biases (Yi et al., 2013, The Journal of the Acoustical Society of America, 134[5], EL387–EL393.). In the present study, we sought to replicate these find- ings in a significantly larger sample of online participants.</description>
+    </item>
+    <item>
+      <title>Talking Points: A Modulating Circle Increases Listening Effort Without Improving Speech Recognition in Young Adults</title>
+      <link>/publications/strand_brown_barbour_2020/</link>
+      <pubDate>Tue, 03 Mar 2020 00:00:00 +0000</pubDate>
+      <guid>/publications/strand_brown_barbour_2020/</guid>
+      <description>Speech recognition is improved when the acoustic input is accompanied by visual cues provided by a talking face (Erber in Journal of Speech and Hearing Research, 12(2), 423–425, 1969; Sumby &amp;amp; Pollack in The Journal of the Acoustical Society of America, 26(2), 212–215, 1954). One way that the visual signal facilitates speech recognition is by providing the listener with information about fine phonetic detail that complements information from the auditory signal.</description>
+    </item>
+    <item>
+      <title>About Face: Seeing the Talker Improves Spoken  Word Recognition but Increases Listening Effort</title>
+      <link>/publications/brown_strand_2019/</link>
+      <pubDate>Fri, 22 Nov 2019 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_strand_2019/</guid>
+      <description>It is widely accepted that seeing a talker improves a listener’s ability to understand what a talker is saying in background noise (e.g., Erber, 1969; Sumby &amp;amp; Pollack, 1954). The literature is mixed, however, regarding the influence of the visual modality on the listening effort required to recognize speech (e.g., Fraser, Gagné, Alepins, &amp;amp; Dubois, 2010; Sommers &amp;amp; Phelps, 2016). Here, we present data showing that even when the visual modality robustly benefits recognition, processing audiovisual speech can still result in greater cognitive load than processing speech in the auditory modality alone.</description>
+    </item>
+    <item>
+      <title>&#34;Paying&#34; Attention to Audiovisual Speech: Do Incongruent Stimuli Incur Greater Costs?</title>
+      <link>/publications/brown_strand_2019_app/</link>
+      <pubDate>Thu, 13 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_strand_2019_app/</guid>
+      <description>The McGurk effect is a multisensory phenomenon in which discrepant auditory and visual speech signals typically result in an illusory percept. McGurk stimuli are often used in studies assessing the attentional requirements of audiovisual integration, but no study has directly compared the costs associated with integrating congruent versus incongruent audiovisual speech. Some evidence suggests that the McGurk effect may not be representative of naturalistic audiovisual speech processing – susceptibility to the McGurk effect is not associated with the ability to derive benefit from the addition of the visual signal, and distinct cortical regions are recruited when processing congruent versus incongruent speech.</description>
+    </item>
+  </channel>
+</rss>

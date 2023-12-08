@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>audiovisual integration on Violet Brown</title>
+    <link>/tags/audiovisual-integration/</link>
+    <description>Recent content in audiovisual integration on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 24 May 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/audiovisual-integration/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Speech and Non-Speech Measures of Audiovisual Integration are not Correlated</title>
+      <link>/publications/wilbiks_etal_2022/</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0000</pubDate>
+      <guid>/publications/wilbiks_etal_2022/</guid>
+      <description>Many natural events generate both visual and auditory signals, and humans are remarkably adept at integrating information from those sources. However, individuals appear to differ markedly in their ability or propensity to combine what they hear with what they see. Individual differences in audiovisual integration have been established using a range of materials, including speech stimuli (seeing and hearing a talker) and simpler audiovisual stimuli (seeing flashes of light combined with tones).</description>
+    </item>
+  </channel>
+</rss>

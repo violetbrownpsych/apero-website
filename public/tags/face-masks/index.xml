@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>face masks on Violet Brown</title>
+    <link>/tags/face-masks/</link>
+    <description>Recent content in face masks on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 18 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/face-masks/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Face Mask Type Affects Audiovisual Speech Intelligibility and Subjective Listening Effort in Young and Older Adults</title>
+      <link>/publications/brown_vanengen_peelle_2021/</link>
+      <pubDate>Sun, 18 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_vanengen_peelle_2021/</guid>
+      <description>Identifying speech requires that listeners make rapid use of fine-grained acoustic cues—a process that is facilitated by being able to see the talker’s face. Face masks present a challenge to this process because they can both alter acoustic information and conceal the talker’s mouth. Here, we investigated the degree to which different types of face masks and noise levels affect speech intelligibility and subjective listening effort for young (N = 180) and older (N = 180) adult listeners.</description>
+    </item>
+  </channel>
+</rss>

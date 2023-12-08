@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mcgurk effect on Violet Brown</title>
+    <link>/tags/mcgurk-effect/</link>
+    <description>Recent content in mcgurk effect on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 13 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/tags/mcgurk-effect/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>&#34;Paying&#34; Attention to Audiovisual Speech: Do Incongruent Stimuli Incur Greater Costs?</title>
+      <link>/publications/brown_strand_2019_app/</link>
+      <pubDate>Thu, 13 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_strand_2019_app/</guid>
+      <description>The McGurk effect is a multisensory phenomenon in which discrepant auditory and visual speech signals typically result in an illusory percept. McGurk stimuli are often used in studies assessing the attentional requirements of audiovisual integration, but no study has directly compared the costs associated with integrating congruent versus incongruent audiovisual speech. Some evidence suggests that the McGurk effect may not be representative of naturalistic audiovisual speech processing – susceptibility to the McGurk effect is not associated with the ability to derive benefit from the addition of the visual signal, and distinct cortical regions are recruited when processing congruent versus incongruent speech.</description>
+    </item>
+    <item>
+      <title>What Accounts for Individual Differences in Susceptibility to the McGurk Effect?</title>
+      <link>/publications/brown_etal_2018/</link>
+      <pubDate>Mon, 12 Nov 2018 00:00:00 +0000</pubDate>
+      <guid>/publications/brown_etal_2018/</guid>
+      <description>The McGurk effect is a classic audiovisual speech illusion in which discrepant auditory and visual syllables can lead to a fused percept (e.g., an auditory /bɑ/ paired with a visual /gɑ/ often leads to the perception of /dɑ/). The McGurk effect is robust and easily replicated in pooled group data, but there is tremendous variability in the extent to which individual participants are susceptible to it. In some studies, the rate at which individuals report fusion responses ranges from 0% to 100%.</description>
+    </item>
+  </channel>
+</rss>
