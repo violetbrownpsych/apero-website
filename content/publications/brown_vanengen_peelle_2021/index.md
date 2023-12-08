@@ -5,6 +5,13 @@ excerpt: "Identifying speech requires that listeners make rapid use of fine-grai
 date: "2021-07-18"
 author: "Violet A. Brown, Kristin J. Van Engen, & Jonathan E. Peelle"
 draft: false
+categories:
+  - face masks
+  - Bayesian statistics
+  - aging
+  - subjective listening effort
+  - online research
+  - speech perception 
 tags:
   - face masks
   - Bayesian statistics

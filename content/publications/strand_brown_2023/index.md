@@ -7,6 +7,11 @@ Conclusions: Our reanalysis revealed relatively low correlations among word iden
 date: "2023-06-20"
 author: "Julia F. Strand & Violet A. Brown"
 draft: false
+categories:
+  - open science
+  - transparency
+  - tutorial
+  - speech perception 
 tags:
   - open science
   - transparency

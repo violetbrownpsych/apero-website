@@ -5,6 +5,12 @@ excerpt: "The latent constructs psychologists study are typically not directly a
 date: "2021-03-23"
 author: "Julia F. Strand, Lucia Raya, Naseem H. Dillman-Hasso, Jed Villanueva, and Violet A. Brown"
 draft: false
+categories:
+  - measurement
+  - validity
+  - listening effort
+  - tutorial
+  - speech perception 
 tags:
   - measurement
   - validity

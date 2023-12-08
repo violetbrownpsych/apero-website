@@ -5,6 +5,13 @@ excerpt: "Speech recognition is improved when the acoustic input is accompanied 
 date: "2020-03-03"
 author: "Julia F. Strand, Violet A. Brown, & Dennis L. Barbour"
 draft: false
+categories:
+  - audiovisual speech
+  - temporal cues
+  - attention
+  - listening effort
+  - dual-task
+  - speech perception 
 tags:
   - audiovisual speech
   - temporal cues

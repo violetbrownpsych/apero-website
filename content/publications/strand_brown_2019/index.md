@@ -7,10 +7,15 @@ In this paper, we will not attempt to catalog the entirety of the open science m
 date: "2019-03-20"
 author: "Julia F. Strand & Violet A. Brown"
 draft: false
+categories:
+  - open science
+  - undergraduate research
+  - preregistration
+  - replicability
+  - tutorial
 tags:
   - open science
   - undergraduate research
-  - training
   - preregistration
   - replicability
   - tutorial

@@ -5,6 +5,13 @@ excerpt: "The McGurk effect is a multisensory phenomenon in which discrepant aud
 date: "2019-06-13"
 author: "Violet A. Brown & Julia F. Strand"
 draft: false
+categories:
+  - mcgurk effect
+  - audiovisual speech
+  - dual-task
+  - listening effort
+  - measurement
+  - speech perception 
 tags:
   - mcgurk effect
   - audiovisual speech

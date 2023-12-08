@@ -5,6 +5,12 @@ excerpt: "Many natural events generate both visual and auditory signals, and hum
 date: "2022-05-24"
 author: "Jonathan M. P. Wilbiks, Violet A. Brown, & Julia F. Strand"
 draft: false
+categories:
+  - audiovisual integration
+  - validity
+  - measurement
+  - individual differences
+  - speech perception 
 tags:
   - audiovisual integration
   - validity

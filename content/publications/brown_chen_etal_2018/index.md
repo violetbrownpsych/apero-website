@@ -6,6 +6,11 @@ excerpt: "How can we “scale down” an n-node network G to a smaller network, 
 date: "2018-12-02"
 author: "Violet A. Brown, Xi Chen, Maryam Hedayati, Camden Sikes, Julia F. Strand, Tegan Wilson, & David Liben-Nowell "
 draft: false
+categories:
+  - network summarization
+  - node ordering
+  - phonological networks
+  - conference proceeding
 tags:
   - network summarization
   - node ordering

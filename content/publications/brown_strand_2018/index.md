@@ -5,6 +5,12 @@ excerpt: "As listening conditions worsen (e.g. background noise increases), addi
 date: "2018-12-30"
 author: "Violet A. Brown & Julia F. Strand"
 draft: false
+categories:
+  - listening effort
+  - working memory
+  - individual differences
+  - dual-task
+  - speech perception 
 tags:
   - listening effort
   - working memory

@@ -5,6 +5,12 @@ excerpt: "To understand spoken language, listeners combine acoustic-phonetic inp
 date: "2017-11-02"
 author: "Julia F. Strand, Violet A. Brown, Hunter E. Brown, Jeffrey J. Berg"
 draft: false
+categories:
+  - eye tracking
+  - grammatical context
+  - continuous integration
+  - visual world paradigm
+  - speech perception 
 tags:
   - eye tracking
   - grammatical context

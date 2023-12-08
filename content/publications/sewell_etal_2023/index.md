@@ -5,6 +5,13 @@ excerpt: "Among the most robust findings in speech research is that the presence
 date: "2023-11-29"
 author: "Katrina Sewell, Violet A. Brown, Grace Farwell, Maya Rogers, Xingyi Zhang, & Julia F. Strand"
 draft: false
+categories:
+  - audiovisual speech
+  - point-light display
+  - attention
+  - temporal cues
+  - online research
+  - speech perception 
 tags:
   - audiovisual speech
   - point-light display

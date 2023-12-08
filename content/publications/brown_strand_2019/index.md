@@ -5,6 +5,13 @@ excerpt: "It is widely accepted that seeing a talker improves a listener’s abi
 date: "2019-11-22"
 author: "Violet A. Brown & Julia F. Strand"
 draft: false
+categories:
+  - listening effort
+  - audiovisual speech
+  - dual-task
+  - recall
+  - measurement
+  - speech perception 
 tags:
   - listening effort
   - audiovisual speech

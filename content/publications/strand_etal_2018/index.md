@@ -11,6 +11,12 @@ Conclusions: Given that LE measures do not show consistent, strong intercorrelat
 date: "2018-06-19"
 author: "Julia F. Strand, Violet A. Brown, Madeleine B. Merchant, Hunter E. Brown, and Julia Smith"
 draft: false
+categories:
+  - listening effort
+  - measurement
+  - validity
+  - individual differences
+  - speech perception 
 tags:
   - listening effort
   - measurement
