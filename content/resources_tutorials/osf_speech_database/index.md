@@ -9,7 +9,6 @@ tags:
   - transparency
   - speech perception
   - resources
-  - tutorial
 layout: single
 links:
   - icon: osf
