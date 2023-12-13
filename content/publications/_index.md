@@ -22,7 +22,7 @@ sidebar:
   text_link_url: https://scholar.google.com/citations?user=SrLYUXMAAAAJ&hl=en
   categories_link: false
   series_link: false
-  tags_link: false
+  tags_link: true
   show_sidebar_adunit: false # show ad container
   
 type: blog
@@ -31,7 +31,7 @@ type: blog
 cascade:
   type: blog
   author: "Violet Brown"
-  show_author_byline: true
+  show_author_byline: false
   show_post_date: false
   show_post_time: false
   show_comments: false # see site config to choose Disqus or Utterances

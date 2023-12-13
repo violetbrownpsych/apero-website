@@ -115,9 +115,9 @@ enableEmoji = true
       url       = "mailto:violet@violetabrown.com"
 
 [taxonomies]
+  tag = "tags"
   category = "categories"
   series = "series"
-  tag = "tags"
 
 [menu]
   # Configure header 
