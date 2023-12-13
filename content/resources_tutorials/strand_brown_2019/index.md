@@ -6,10 +6,6 @@ date: "2019-03-20"
 author: "Julia F. Strand & Violet A. Brown"
 draft: false
 categories:
-  - open science
-  - undergraduate research
-  - preregistration
-  - replicability
   - tutorial
 tags:
   - open science

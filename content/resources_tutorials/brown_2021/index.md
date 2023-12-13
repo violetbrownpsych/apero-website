@@ -6,10 +6,7 @@ date: "2021-03-25"
 author: "Violet A. Brown"
 draft: false
 categories:
-  - mixed-effects modeling
-  - R
   - tutorial
-  - speech perception 
 tags:
   - mixed-effects modeling
   - R

@@ -8,12 +8,10 @@ draft: false
 categories:
   - preregistration
   - open science
-  - tutorial
   - speech perception 
 tags:
   - preregistration
   - open science
-  - tutorial
   - speech perception 
 layout: single
 links:

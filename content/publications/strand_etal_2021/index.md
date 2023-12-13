@@ -9,13 +9,11 @@ categories:
   - measurement
   - validity
   - listening effort
-  - tutorial
   - speech perception 
 tags:
   - measurement
   - validity
   - listening effort
-  - tutorial
   - speech perception 
 layout: single
 links:

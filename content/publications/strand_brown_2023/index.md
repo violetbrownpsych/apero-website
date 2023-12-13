@@ -10,12 +10,10 @@ draft: false
 categories:
   - open science
   - transparency
-  - tutorial
   - speech perception 
 tags:
   - open science
   - transparency
-  - tutorial
   - speech perception 
 layout: single
 links:

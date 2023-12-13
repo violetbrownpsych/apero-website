@@ -8,12 +8,10 @@ draft: false
 categories:
   - mixed-effects modeling
   - R
-  - tutorial
   - speech perception 
 tags:
   - mixed-effects modeling
   - R
-  - tutorial
   - speech perception 
 layout: single
 links:
