@@ -5,12 +5,6 @@ excerpt: "The presence of masking noise can impair speech intelligibility and in
 date: "2021-03-15"
 author: "Claire Guang, Emmett Lefkowitz, Naseem Dillman-Hasso, Violet A. Brown, & Julia F. Strand"
 draft: false
-categories:
-  - listening effort
-  - replication
-  - recall
-  - online research
-  - speech perception 
 tags:
   - listening effort
   - replication

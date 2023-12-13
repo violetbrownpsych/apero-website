@@ -9,7 +9,6 @@ tags:
   - preregistration
   - open science
   - speech perception 
-  - tutorial
 layout: single
 links:
   - icon: osf

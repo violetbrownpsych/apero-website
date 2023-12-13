@@ -10,7 +10,6 @@ tags:
   - undergraduate research
   - preregistration
   - replicability
-  - tutorial
 layout: single
 links:
   - icon: doi

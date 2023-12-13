@@ -5,12 +5,6 @@ excerpt: "Speech intelligibility is improved when the listener can see the talke
 date: "2022-01-05"
 author: "Drew J. McLaughlin, Violet A. Brown, Sita Carraturo, & Kristin J. Van Engen"
 draft: false
-categories:
-  - implicit bias
-  - audiovisual speech
-  - accented speech
-  - online research
-  - speech perception 
 tags:
   - implicit bias
   - audiovisual speech

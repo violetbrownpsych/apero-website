@@ -8,6 +8,7 @@ tags:
   - mixed-effects modeling
   - R
   - video lecture
+  - resources
   - tutorial
 layout: single
 links:

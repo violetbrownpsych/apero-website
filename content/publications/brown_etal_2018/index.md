@@ -5,12 +5,6 @@ excerpt: "The McGurk effect is a classic audiovisual speech illusion in which di
 date: "2018-11-12"
 author: "Violet A. Brown, Maryam Hedayati, Annie Zanger, Sasha Mayn, Lucia Ray, Naseem Dillman-Hasso, & Julia F. Strand"
 draft: false
-categories:
-  - mcgurk effect
-  - individual differences
-  - lipreading 
-  - online research
-  - speech perception 
 tags:
   - mcgurk effect
   - individual differences

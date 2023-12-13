@@ -5,11 +5,6 @@ excerpt: "The linguistic similarity hypothesis states that it is more difficult 
 author: "Violet A. Brown, Naseem H. Dillman-Hasso, ZhaoBin Li, Lucia Ray, Ellen Mamantov, Kristin J. Van Engen, & Julia F. Strand"
 date: "2022-04-26"
 draft: false
-categories:
-  - linguistic similarity hypothesis
-  - cross-modal masking
-  - online research
-  - speech perception 
 tags:
   - linguistic similarity hypothesis
   - cross-modal masking

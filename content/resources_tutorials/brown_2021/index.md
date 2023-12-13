@@ -9,7 +9,6 @@ tags:
   - mixed-effects modeling
   - R
   - speech perception 
-  - tutorial
 layout: single
 links:
   - icon: osf

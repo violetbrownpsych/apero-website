@@ -5,13 +5,6 @@ excerpt: 'Listeners make use of contextual cues during continuous speech process
 date: "2021-05-20"
 author: "Violet A. Brown, Neal P. Fox, & Julia F. Strand"
 draft: false
-categories:
-  - contextual cues
-  - grammatical number
-  - sentence processing
-  - visual world paradigm
-  - speech perception 
-  - eye tracking
 tags:
   - contextual cues
   - grammatical number

@@ -5,10 +5,10 @@ date: "2020-08-31"
 author: "Violet A. Brown"
 draft: false
 tags:
-  - resources
   - open science
   - transparency
   - speech perception
+  - resources
   - tutorial
 layout: single
 links:

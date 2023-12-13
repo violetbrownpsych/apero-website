@@ -5,13 +5,6 @@ excerpt: "In noisy settings or when listening to an unfamiliar talker or accent,
 date: "2020-03-19"
 author: "Violet A. Brown, Drew, J. McLaughlin, Julia F. Strand, & Kristin J. Van Engen"
 draft: false
-categories:
-  - accented speech
-  - listening effort
-  - dual-task 
-  - pupillometry
-  - measurement
-  - speech perception 
 tags:
   - accented speech
   - listening effort

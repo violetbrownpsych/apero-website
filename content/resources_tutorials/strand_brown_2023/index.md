@@ -11,7 +11,6 @@ tags:
   - open science
   - transparency
   - speech perception 
-  - tutorial
 layout: single
 links:
   - icon: osf
