@@ -9,6 +9,7 @@ categories:
   - mixed-effects modeling
   - R
   - speech perception 
+  - tutorial
 tags:
   - mixed-effects modeling
   - R

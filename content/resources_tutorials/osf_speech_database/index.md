@@ -4,16 +4,12 @@ excerpt: "This is a database I put together where speech researchers can share t
 date: "2020-08-31"
 author: "Violet A. Brown"
 draft: false
-categories:
-  - resources
-  - open science
-  - transparency
-  - speech perception 
 tags:
   - resources
   - open science
   - transparency
-  - speech perception 
+  - speech perception
+  - tutorial
 layout: single
 links:
   - icon: osf

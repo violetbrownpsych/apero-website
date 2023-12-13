@@ -5,13 +5,11 @@ excerpt: "This Tutorial serves as both an approachable theoretical introduction 
 date: "2021-03-25"
 author: "Violet A. Brown"
 draft: false
-categories:
-  - tutorial
 tags:
   - mixed-effects modeling
   - R
-  - tutorial
   - speech perception 
+  - tutorial
 layout: single
 links:
   - icon: osf

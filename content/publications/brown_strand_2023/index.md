@@ -9,6 +9,7 @@ categories:
   - preregistration
   - open science
   - speech perception 
+  - tutorial
 tags:
   - preregistration
   - open science

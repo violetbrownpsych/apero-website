@@ -5,13 +5,11 @@ excerpt: "In the last decade, psychology and other sciences have implemented num
 date: "2023-06-20"
 author: "Violet A. Brown & Julia F. Strand"
 draft: false
-categories:
-  - tutorial
 tags:
   - preregistration
   - open science
-  - tutorial
   - speech perception 
+  - tutorial
 layout: single
 links:
   - icon: osf

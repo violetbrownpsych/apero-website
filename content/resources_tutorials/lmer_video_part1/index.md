@@ -4,11 +4,6 @@ excerpt: "This is part 1 of a 2 of a series of videos on mixed effects modeling.
 date: "2021-04-27"
 author: "Violet A. Brown"
 draft: false
-categories:
-  - mixed-effects modeling
-  - R
-  - video lecture
-  - tutorial
 tags:
   - mixed-effects modeling
   - R

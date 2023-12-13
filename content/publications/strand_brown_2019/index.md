@@ -12,6 +12,7 @@ categories:
   - undergraduate research
   - preregistration
   - replicability
+  - tutorial
 tags:
   - open science
   - undergraduate research

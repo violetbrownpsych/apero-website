@@ -11,6 +11,7 @@ categories:
   - open science
   - transparency
   - speech perception 
+  - tutorial
 tags:
   - open science
   - transparency

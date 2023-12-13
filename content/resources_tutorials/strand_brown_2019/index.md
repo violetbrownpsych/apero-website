@@ -5,8 +5,6 @@ excerpt: "In this paper, we highlight why adopting open science practices may be
 date: "2019-03-20"
 author: "Julia F. Strand & Violet A. Brown"
 draft: false
-categories:
-  - tutorial
 tags:
   - open science
   - undergraduate research
