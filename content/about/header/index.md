@@ -7,6 +7,6 @@ headline: |
 ---
 
 <!-- this is a subheadline -->
-I'm a Postdoctoral Research Fellow at Carleton College working under [Dr. Julia Strand](https://www.juliastrand.com/) with the [Carleton Perception Lab](https://www.carleton.edu/perception-lab/). Below you'll find a little more information about who I am and what I'm interested in. :grinning: 
+I'm a Visiting Assistant Professor of Psychology at [Carleton College](https://www.carleton.edu/), and along with teaching, I study spoken language processing with the wonderful [Carleton Perception Lab](https://www.carleton.edu/perception-lab/). Below you'll find a little more information about who I am and what I'm interested in. :grinning: 
 
 <!-- https://gohugo.io/quick-reference/emojis/#face-smiling -->

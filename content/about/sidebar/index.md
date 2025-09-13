@@ -1,7 +1,7 @@
 ---
 ## Configure sidebar content in narrow column
 author: "Violet Brown"
-role: "Postdoctoral Fellow at Carleton College"
+role: "Visiting Assistant Professor of Psychology, Carleton College"
 avatar_shape: rounded # circle, square, rounded, leave blank to exclude
 show_social_links: true # specify social accounts in site config
 audio_link_label: "" # leave blank to exclude

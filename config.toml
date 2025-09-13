@@ -30,7 +30,7 @@ enableEmoji = true
 [params]
   orgName = "Violet A. Brown"
   orgLocal = ""
-  description = "Postdoctoral Fellow in Dr. Julia Strand's Perception Lab at Carleton College."
+  description = "Visiting Assistant Professor of Psychology at Carleton College."
   favicon = "/img/VB_logo.PNG"
   logo = "/img/VB_logo.PNG"
   mainSections = ["Home", "About", "Publications", "CV"]
