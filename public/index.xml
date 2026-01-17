@@ -6,8 +6,15 @@
     <description>Recent content on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 29 Nov 2023 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.violetabrown.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Measuring the Dual-Task Costs of Audiovisual Speech Processing Across Levels of Background Noise </title>
+      <link>https://www.violetabrown.com/publications/brown_2025/</link>
+      <pubDate>Mon, 15 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/publications/brown_2025/</guid>
+      <description>Successful communication requires that listeners not only identify speech, but do so while maintaining performance on other tasks, like remembering what a conversational partner said or paying attention while driving. This set of four experiments systematically evaluated how audiovisual speech—which reliably improves speech intelligibility—affects dual-task costs during speech perception (i.e., one facet of listening effort). Results indicated that audiovisual speech reduces dual-task costs in difficult listening conditions (those in which visual cues substantially benefit intelligibility), but may actually increase costs in easy conditions—a pattern of results that was internally replicated multiple times.</description>
+    </item>
     <item>
       <title>The Effects of Temporal Cues, Point-Light Displays, and Faces on Speech Identification and Listening Effort</title>
       <link>https://www.violetabrown.com/publications/sewell_etal_2023/</link>
@@ -23,10 +30,24 @@
       <description>In the last decade, psychology and other sciences have implemented numerous reforms to improve the robustness of our research, many of which are based on increasing transparency throughout the research process. Among these reforms is the practice of preregistration, in which researchers create a time- stamped and uneditable document before data collection that describes the methods of the study, how the data will be analyzed, the sample size, and many other decisions.</description>
     </item>
     <item>
+      <title>Preregistration: Practical Considerations for Speech, Language, and Hearing Research</title>
+      <link>https://www.violetabrown.com/resources_tutorials/brown_strand_2023/</link>
+      <pubDate>Tue, 20 Jun 2023 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/brown_strand_2023/</guid>
+      <description>In the last decade, psychology and other sciences have implemented numerous reforms to improve the robustness of our research, many of which are based on increasing transparency throughout the research process. Among these reforms is the practice of preregistration, in which researchers create a time- stamped and uneditable document before data collection that describes the methods of the study, how the data will be analyzed, the sample size, and many other decisions.</description>
+    </item>
+    <item>
       <title>Spread the Word: Enhancing Replicability of Speech Research Through Stimulus Sharing</title>
       <link>https://www.violetabrown.com/publications/strand_brown_2023/</link>
       <pubDate>Tue, 20 Jun 2023 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/strand_brown_2023/</guid>
+      <description>Purpose: The ongoing replication crisis within and beyond psychology has revealed the numerous ways in which flexibility in the research process can affect study outcomes. In speech research, examples of these “researcher degrees of freedom” include the particular syllables, words, or sentences presented; the talkers who produce the stimuli and the instructions given to them; the population tested; whether and how stimuli are matched on amplitude; the type of masking noise used and its presentation level; and many others.</description>
+    </item>
+    <item>
+      <title>Spread the Word: Enhancing Replicability of Speech Research Through Stimulus Sharing</title>
+      <link>https://www.violetabrown.com/resources_tutorials/strand_brown_2023/</link>
+      <pubDate>Tue, 20 Jun 2023 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/strand_brown_2023/</guid>
       <description>Purpose: The ongoing replication crisis within and beyond psychology has revealed the numerous ways in which flexibility in the research process can affect study outcomes. In speech research, examples of these “researcher degrees of freedom” include the particular syllables, words, or sentences presented; the talkers who produce the stimuli and the instructions given to them; the population tested; whether and how stimuli are matched on amplitude; the type of masking noise used and its presentation level; and many others.</description>
     </item>
     <item>
@@ -41,7 +62,7 @@
       <link>https://www.violetabrown.com/publications/brown_etal_2022/</link>
       <pubDate>Tue, 26 Apr 2022 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/brown_etal_2022/</guid>
-      <description>Purpose: The linguistic similarity hypothesis states that it is more difficult to segregate target and masker speech when they are linguistically similar. For example, recognition of English target speech should be more impaired by the presence of Dutch masking speech than Mandarin masking speech because Dutch and English are more linguistically similar than Mandarin and English. Across four experiments, English target speech was consistently recognized more poorly when presented in English masking speech than in silence, speech-shaped noise, or an unintelligible masker (i.</description>
+      <description>The linguistic similarity hypothesis states that it is more difficult to segregate target and masker speech when they are linguistically similar. For example, recognition of English target speech should be more impaired by the presence of Dutch masking speech than Mandarin masking speech because Dutch and English are more linguistically similar than Mandarin and English. Across four experiments, English target speech was consistently recognized more poorly when presented in English masking speech than in silence, speech-shaped noise, or an unintelligible masker (i.</description>
     </item>
     <item>
       <title>Revisiting the Relationship Between Implicit Racial Bias and Audiovisual Benefit for Nonnative-Accented Speech</title>
@@ -65,6 +86,20 @@
       <description>Listeners make use of contextual cues during continuous speech processing that help overcome the limitations of the acoustic input. These semantic, grammatical, and pragmatic cues facilitate prediction of upcoming words and/or reduce the lexical search space by inhibiting activation of contextually inappropriate words that share phonological information with the target. The current study used the visual world paradigm to assess whether and how listeners use contextual cues about grammatical number during sentence processing by presenting target words in carrier phrases that were grammatically unconstraining (&amp;ldquo;Click on the .</description>
     </item>
     <item>
+      <title>Introduction to Mixed Modeling Video: Part 2</title>
+      <link>https://www.violetabrown.com/resources_tutorials/lmer_video_part2/</link>
+      <pubDate>Mon, 03 May 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/lmer_video_part2/</guid>
+      <description>This is part 2 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
+    </item>
+    <item>
+      <title>Introduction to Mixed Modeling Video: Part 1</title>
+      <link>https://www.violetabrown.com/resources_tutorials/lmer_video_part1/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/lmer_video_part1/</guid>
+      <description>This is part 1 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
+    </item>
+    <item>
       <title>An Introduction to Linear Mixed-Effects Modeling in R</title>
       <link>https://www.violetabrown.com/publications/brown_2021/</link>
       <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
@@ -72,10 +107,24 @@
       <description>This Tutorial serves as both an approachable theoretical introduction to mixed-effects modeling and a practical introduction to how to implement mixed-effects models in R. The intended audience is researchers who have some basic statistical knowledge, but little or no experience implementing mixed-effects models in R using their own data. In an attempt to increase the accessibility of this Tutorial, I deliberately avoid using mathematical terminology beyond what a student would learn in a standard graduate-level statistics course, but I reference articles and textbooks that provide more detail for interested readers.</description>
     </item>
     <item>
-      <title>Understanding Speech amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
+      <title>An Introduction to Linear Mixed-Effects Modeling in R</title>
+      <link>https://www.violetabrown.com/resources_tutorials/brown_2021/</link>
+      <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/brown_2021/</guid>
+      <description>This Tutorial serves as both an approachable theoretical introduction to mixed-effects modeling and a practical introduction to how to implement mixed-effects models in R. The intended audience is researchers who have some basic statistical knowledge, but little or no experience implementing mixed-effects models in R using their own data. In an attempt to increase the accessibility of this Tutorial, I deliberately avoid using mathematical terminology beyond what a student would learn in a standard graduate-level statistics course, but I reference articles and textbooks that provide more detail for interested readers.</description>
+    </item>
+    <item>
+      <title>Understanding Speech Amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
       <link>https://www.violetabrown.com/publications/strand_etal_2021/</link>
       <pubDate>Tue, 23 Mar 2021 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/strand_etal_2021/</guid>
+      <description>The latent constructs psychologists study are typically not directly accessible, so researchers must design measurement instruments that are intended to provide insights about those constructs. Construct validation—assessing whether instruments measure what they intend to—is therefore critical for ensuring that the conclusions we draw actually reflect the intended phenomena. Insufficient construct validation can lead to the jingle fallacy—falsely assuming two instruments measure the same construct because the instruments share a name—and the jangle fallacy—falsely assuming two instruments measure different constructs because the instruments have different names.</description>
+    </item>
+    <item>
+      <title>Understanding Speech Amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
+      <link>https://www.violetabrown.com/resources_tutorials/strand_etal_2021/</link>
+      <pubDate>Tue, 23 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/strand_etal_2021/</guid>
       <description>The latent constructs psychologists study are typically not directly accessible, so researchers must design measurement instruments that are intended to provide insights about those constructs. Construct validation—assessing whether instruments measure what they intend to—is therefore critical for ensuring that the conclusions we draw actually reflect the intended phenomena. Insufficient construct validation can lead to the jingle fallacy—falsely assuming two instruments measure the same construct because the instruments share a name—and the jangle fallacy—falsely assuming two instruments measure different constructs because the instruments have different names.</description>
     </item>
     <item>
@@ -84,6 +133,13 @@
       <pubDate>Mon, 15 Mar 2021 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/guang_etal_2021/</guid>
       <description>The presence of masking noise can impair speech intelligibility and increase the cognitive resources necessary to understand speech. The first study to demonstrate the negative cognitive consequences of noisy speech—published by Rabbitt in 1968—found that participants had poorer recall for aurally presented digits early in a list when later digits were presented in noise relative to quiet. However, despite being cited nearly 500 times and providing the foundation for a wealth of subsequent research on the topic, the original study has never been directly replicated.</description>
+    </item>
+    <item>
+      <title>Stimuli and Other Resources for Speech Researchers</title>
+      <link>https://www.violetabrown.com/resources_tutorials/osf_speech_database/</link>
+      <pubDate>Mon, 31 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/osf_speech_database/</guid>
+      <description>This is part 1 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
     </item>
     <item>
       <title>Rapid Adaptation to Fully Intelligible Nonnative-Accented Speech Reduces Listening Effort</title>
@@ -118,6 +174,13 @@
       <link>https://www.violetabrown.com/publications/strand_brown_2019/</link>
       <pubDate>Wed, 20 Mar 2019 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/strand_brown_2019/</guid>
+      <description>In response to growing concern in psychology and other sciences about low rates of replicability of published findings (Open Science Collaboration, 2015), there has been a movement toward conducting open and transparent research (see Chambers, 2017). This has led to changes in statistical reporting guidelines in journals (Appelbaum et al., 2018), new professional societies (e.g., Society for the Improvement of Psychological Science), frameworks for posting materials, data, code, and manuscripts (e.</description>
+    </item>
+    <item>
+      <title>Publishing Open, Reproducible Research With Undergraduates</title>
+      <link>https://www.violetabrown.com/resources_tutorials/strand_brown_2019/</link>
+      <pubDate>Wed, 20 Mar 2019 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/strand_brown_2019/</guid>
       <description>In response to growing concern in psychology and other sciences about low rates of replicability of published findings (Open Science Collaboration, 2015), there has been a movement toward conducting open and transparent research (see Chambers, 2017). This has led to changes in statistical reporting guidelines in journals (Appelbaum et al., 2018), new professional societies (e.g., Society for the Improvement of Psychological Science), frameworks for posting materials, data, code, and manuscripts (e.</description>
     </item>
     <item>

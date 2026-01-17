@@ -6,13 +6,34 @@
     <description>Recent content in R on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 25 Mar 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 03 May 2021 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.violetabrown.com/tags/r/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Introduction to Mixed Modeling Video: Part 2</title>
+      <link>https://www.violetabrown.com/resources_tutorials/lmer_video_part2/</link>
+      <pubDate>Mon, 03 May 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/lmer_video_part2/</guid>
+      <description>This is part 2 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
+    </item>
+    <item>
+      <title>Introduction to Mixed Modeling Video: Part 1</title>
+      <link>https://www.violetabrown.com/resources_tutorials/lmer_video_part1/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/lmer_video_part1/</guid>
+      <description>This is part 1 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
+    </item>
     <item>
       <title>An Introduction to Linear Mixed-Effects Modeling in R</title>
       <link>https://www.violetabrown.com/publications/brown_2021/</link>
       <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/brown_2021/</guid>
+      <description>This Tutorial serves as both an approachable theoretical introduction to mixed-effects modeling and a practical introduction to how to implement mixed-effects models in R. The intended audience is researchers who have some basic statistical knowledge, but little or no experience implementing mixed-effects models in R using their own data. In an attempt to increase the accessibility of this Tutorial, I deliberately avoid using mathematical terminology beyond what a student would learn in a standard graduate-level statistics course, but I reference articles and textbooks that provide more detail for interested readers.</description>
+    </item>
+    <item>
+      <title>An Introduction to Linear Mixed-Effects Modeling in R</title>
+      <link>https://www.violetabrown.com/resources_tutorials/brown_2021/</link>
+      <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/brown_2021/</guid>
       <description>This Tutorial serves as both an approachable theoretical introduction to mixed-effects modeling and a practical introduction to how to implement mixed-effects models in R. The intended audience is researchers who have some basic statistical knowledge, but little or no experience implementing mixed-effects models in R using their own data. In an attempt to increase the accessibility of this Tutorial, I deliberately avoid using mathematical terminology beyond what a student would learn in a standard graduate-level statistics course, but I reference articles and textbooks that provide more detail for interested readers.</description>
     </item>
   </channel>

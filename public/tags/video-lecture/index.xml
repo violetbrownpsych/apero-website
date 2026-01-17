@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>video lecture on Violet Brown</title>
+    <link>https://www.violetabrown.com/tags/video-lecture/</link>
+    <description>Recent content in video lecture on Violet Brown</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 03 May 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.violetabrown.com/tags/video-lecture/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Introduction to Mixed Modeling Video: Part 2</title>
+      <link>https://www.violetabrown.com/resources_tutorials/lmer_video_part2/</link>
+      <pubDate>Mon, 03 May 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/lmer_video_part2/</guid>
+      <description>This is part 2 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
+    </item>
+    <item>
+      <title>Introduction to Mixed Modeling Video: Part 1</title>
+      <link>https://www.violetabrown.com/resources_tutorials/lmer_video_part1/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/resources_tutorials/lmer_video_part1/</guid>
+      <description>This is part 1 of a 2 of a series of videos on mixed effects modeling. The intended audience is graduate student or anyone with some regression background but no background in mixed modeling.</description>
+    </item>
+  </channel>
+</rss>

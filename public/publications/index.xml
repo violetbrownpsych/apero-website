@@ -6,8 +6,15 @@
     <description>Recent content on Violet Brown</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 29 Nov 2023 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.violetabrown.com/publications/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Measuring the Dual-Task Costs of Audiovisual Speech Processing Across Levels of Background Noise </title>
+      <link>https://www.violetabrown.com/publications/brown_2025/</link>
+      <pubDate>Mon, 15 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>https://www.violetabrown.com/publications/brown_2025/</guid>
+      <description>Successful communication requires that listeners not only identify speech, but do so while maintaining performance on other tasks, like remembering what a conversational partner said or paying attention while driving. This set of four experiments systematically evaluated how audiovisual speech—which reliably improves speech intelligibility—affects dual-task costs during speech perception (i.e., one facet of listening effort). Results indicated that audiovisual speech reduces dual-task costs in difficult listening conditions (those in which visual cues substantially benefit intelligibility), but may actually increase costs in easy conditions—a pattern of results that was internally replicated multiple times.</description>
+    </item>
     <item>
       <title>The Effects of Temporal Cues, Point-Light Displays, and Faces on Speech Identification and Listening Effort</title>
       <link>https://www.violetabrown.com/publications/sewell_etal_2023/</link>
@@ -41,7 +48,7 @@
       <link>https://www.violetabrown.com/publications/brown_etal_2022/</link>
       <pubDate>Tue, 26 Apr 2022 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/brown_etal_2022/</guid>
-      <description>Purpose: The linguistic similarity hypothesis states that it is more difficult to segregate target and masker speech when they are linguistically similar. For example, recognition of English target speech should be more impaired by the presence of Dutch masking speech than Mandarin masking speech because Dutch and English are more linguistically similar than Mandarin and English. Across four experiments, English target speech was consistently recognized more poorly when presented in English masking speech than in silence, speech-shaped noise, or an unintelligible masker (i.</description>
+      <description>The linguistic similarity hypothesis states that it is more difficult to segregate target and masker speech when they are linguistically similar. For example, recognition of English target speech should be more impaired by the presence of Dutch masking speech than Mandarin masking speech because Dutch and English are more linguistically similar than Mandarin and English. Across four experiments, English target speech was consistently recognized more poorly when presented in English masking speech than in silence, speech-shaped noise, or an unintelligible masker (i.</description>
     </item>
     <item>
       <title>Revisiting the Relationship Between Implicit Racial Bias and Audiovisual Benefit for Nonnative-Accented Speech</title>
@@ -72,7 +79,7 @@
       <description>This Tutorial serves as both an approachable theoretical introduction to mixed-effects modeling and a practical introduction to how to implement mixed-effects models in R. The intended audience is researchers who have some basic statistical knowledge, but little or no experience implementing mixed-effects models in R using their own data. In an attempt to increase the accessibility of this Tutorial, I deliberately avoid using mathematical terminology beyond what a student would learn in a standard graduate-level statistics course, but I reference articles and textbooks that provide more detail for interested readers.</description>
     </item>
     <item>
-      <title>Understanding Speech amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
+      <title>Understanding Speech Amid the Jingle and Jangle: Recommendations for Improving Measurement Practices in Listening Effort Research</title>
       <link>https://www.violetabrown.com/publications/strand_etal_2021/</link>
       <pubDate>Tue, 23 Mar 2021 00:00:00 +0000</pubDate>
       <guid>https://www.violetabrown.com/publications/strand_etal_2021/</guid>
