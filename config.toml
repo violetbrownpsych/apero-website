@@ -144,7 +144,7 @@ enableEmoji = true
   [[menu.header]]
     name = "CV"
     title = "CV"
-    url = "http://violetabrown.com/pdfs/brown_cv.pdf"
+    url = "/static/CV/Brown_CV_2025.pdf"
     weight = 5
   
   # Configure footer  
