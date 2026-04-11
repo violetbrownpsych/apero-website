@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOOL NAME HERE</title><!-- CUSTOMIZE: change title -->
+  <link rel="icon" href="tool_icon.png"><!-- CUSTOMIZE: change favicon filename -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      /* CUSTOMIZE: add per-tool color tokens here, e.g.:
+      --c-thing1: #4eaaec;
+      --c-thing2: #52c97e;
+      --c-thing3: #c89850;
+      --c-thing4: #b87fd4;
+      --c-thing5: #e8a030;
+      */
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle (horizontal pill) */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Vertical stack (3+ options or long labels) */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* CUSTOMIZE: add tool-specific CSS here (tables, special components, etc.) */
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 1px 6px 1px 9px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+    /* CUSTOMIZE: add .cl-thing1, .cl-thing2 etc. matching your color tokens */
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }            /* function names */
+    .sv { color: #f78c6c; }            /* variable / data frame names */
+    .sk { color: #89ddff; }            /* argument keywords */
+    .ss { color: #c3e88d; }            /* strings */
+    .sn { color: #f0ab70; }            /* numeric literals */
+    .so { color: #89ddff; }            /* operators */
+    .sb { color: #c3e88d; }            /* boolean / logical operators */
+    .sc { color: #6a7a6a; font-style: italic; }  /* comments */
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      max-width: 1360px; margin: 0 auto 18px;
+      padding: 13px 18px;
+      border-radius: 9px; border: 1.5px solid var(--border);
+      font-size: 0.84rem; line-height: 1.65;
+      background: var(--panel);
+    }
+    .ann.show { display: block; }
+    .ann-welcome { border-color: var(--accent); background: #fdf6f0; }
+    /* CUSTOMIZE: add .ann-thing1, .ann-thing2 etc. matching your color tokens */
+
+    /* inline code in annotations */
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>TOOL TITLE HERE</h1><!-- CUSTOMIZE -->
+    <p>One-line description of what students will learn</p><!-- CUSTOMIZE -->
+    <span class="pill">package_name</span><!-- CUSTOMIZE -->
+    <span class="pill">function_name()</span><!-- CUSTOMIZE -->
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-label">Controls</div>
+      <!-- CUSTOMIZE: add controls here -->
+    </div>
+
+    <!-- MIDDLE: MAIN VISUAL PANEL -->
+    <div class="panel" id="main-panel">
+      <div class="panel-label">VISUAL LABEL HERE</div><!-- CUSTOMIZE -->
+      <!-- CUSTOMIZE: add visual content here (tables, SVG, etc.) -->
+    </div>
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANNOTATION BOX (below grid) -->
+  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // === DATA & COLUMN DEFINITIONS ===
+
+    // === STATE ===
+    // const DEFAULTS = { ... };
+    // let S = Object.assign({}, DEFAULTS);
+
+    // === RENDER FUNCTIONS ===
+    // function render() { renderMain(); renderCode(); ... }
+    // function renderMain() { ... }
+
+    // === CODE BUILDER ===
+    // function buildCode() { ... }
+
+    // === ANNOTATION ===
+    // function getAnn() { ... }
+
+    // === EVENT HANDLERS ===
+
+    // === RESET ===
+    // function resetAll() { S = Object.assign({}, DEFAULTS); S.changed='welcome'; render(); }
+
+    // === COPY CODE ===
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // === TOOLTIP ===
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      if (tip.style.display === 'block') {
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+      }
+    });
+
+    // === INIT ===
+    // render();
+  </script>
+
+</body>
+</html>
