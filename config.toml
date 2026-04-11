@@ -142,10 +142,15 @@ enableEmoji = true
     url = "/resources_tutorials"
     weight = 4
   [[menu.header]]
+    name = "Explorers"
+    title = "Explorers"
+    url = "/explorers/"
+    weight = 5
+  [[menu.header]]
     name = "CV"
     title = "CV"
     url = "/cv/brown_cv.pdf"
-    weight = 5
+    weight = 6
   
   # Configure footer  
   [[menu.footer]]

@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dplyr Pipeline Explorer</title>
+  <link rel="icon" href="dplyr_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      --c-filter:    #4eaaec;
+      --c-select:    #52c97e;
+      --c-mutate:    #e8a030;
+      --c-summarize: #b87fd4;
+      --c-arrange:   #38c4b4;
+      --c-sepunite:  #e87070;
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle (horizontal pill) */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Vertical stack (3+ options or long labels) */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+    .verb-sub { display: block; font-size: 0.68rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
+    .mbtn:hover .verb-sub { color: var(--accent); }
+    .mbtn.on .verb-sub { color: rgba(255,255,255,0.8); }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === TOOL-SPECIFIC: DATA TABLE === */
+    .dtable-wrap { overflow-x: auto; }
+    .dtable { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .dtable th {
+      font-family: 'Fira Code', monospace; font-size: 0.73rem; font-weight: 500;
+      padding: 5px 10px; border-bottom: 2px solid var(--border);
+      background: #f5f0e8; text-align: left; white-space: nowrap;
+    }
+    .dtable td {
+      padding: 4px 10px; border-bottom: 1px solid var(--border);
+      font-family: 'Fira Code', monospace; font-size: 0.77rem;
+      white-space: nowrap; color: var(--text);
+    }
+    .dtable tbody tr:hover td { background: #f5f0e8; }
+    /* group-by row shading — alternating tints per group */
+    .dtable .grp-0 td { background: rgba(184,127,212,0.06); }
+    .dtable .grp-1 td { background: rgba(184,127,212,0.14); }
+    .dtable .grp-2 td { background: rgba(184,127,212,0.22); }
+    /* new column added by mutate */
+    .dtable td.new-col { color: var(--c-mutate); font-weight: 500; }
+    /* group label cell */
+    .dtable td.grp-label {
+      color: var(--c-summarize); font-weight: 600; font-size: 0.72rem;
+      letter-spacing: 0.04em; padding-top: 7px;
+    }
+    .row-meta {
+      font-size: 0.74rem; color: var(--muted); margin-bottom: 8px;
+      font-family: 'Fira Code', monospace;
+    }
+    .row-meta strong { color: var(--text); }
+    .empty-state {
+      padding: 24px 0; text-align: center; color: var(--muted);
+      font-size: 0.84rem;
+    }
+    .plain-english {
+      margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--border);
+      font-size: 0.78rem; color: var(--text); line-height: 1.55;
+    }
+    .plain-english em { font-style: normal; color: var(--accent); font-weight: 600; }
+
+    /* === TOOL-SPECIFIC: PIPELINE STEPS LIST === */
+    .pipeline-steps { margin-bottom: 8px; min-height: 22px; }
+    .pstep {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 7px; margin-bottom: 4px;
+      border-radius: 6px; border: 1.5px solid var(--border);
+      background: white; cursor: pointer; transition: all .1s;
+    }
+    .pstep:hover { border-color: var(--accent); }
+    .pstep.active { border-color: var(--accent); background: #fdf6f0; }
+    .pstep-verb {
+      font-family: 'Fira Code', monospace; font-weight: 500;
+      font-size: 0.72rem; padding: 1px 6px; border-radius: 4px;
+      color: white; flex-shrink: 0;
+    }
+    .pstep-desc {
+      flex: 1; color: var(--muted); font-size: 0.73rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pstep-del {
+      color: var(--muted); background: none; border: none;
+      font-size: 1rem; line-height: 1; padding: 0 2px;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .pstep-del:hover { color: #c0392b; }
+    .pipe-arrow {
+      text-align: center; font-family: 'Fira Code', monospace;
+      font-size: 0.7rem; color: var(--muted); margin: -1px 0 3px;
+      user-select: none;
+    }
+
+    /* === TOOL-SPECIFIC: VERB CONFIGURATOR === */
+    .verb-config {
+      background: #f5f0e8; border-radius: 7px;
+      padding: 10px 10px 8px; margin-bottom: 8px;
+    }
+    .verb-config .ch { margin-bottom: 7px; }
+    .vcfg-row { margin-bottom: 7px; }
+    .vcfg-row label {
+      display: block; font-size: 0.74rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 4px;
+    }
+    .vcfg-row select {
+      width: 100%; padding: 4px 26px 4px 7px; border: 1.5px solid var(--border);
+      border-radius: 5px; background: white; font-family: 'Fira Code', monospace;
+      font-size: 0.76rem; color: var(--text); appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2379705f'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+    }
+    .vcfg-row select:focus { outline: none; border-color: var(--accent); }
+    .vcfg-row input[type=text], .vcfg-row input[type=number] {
+      width: 100%; padding: 4px 7px; border: 1.5px solid var(--border);
+      border-radius: 5px; font-family: 'Fira Code', monospace;
+      font-size: 0.76rem; color: var(--text);
+    }
+    .vcfg-row input:focus { outline: none; border-color: var(--accent); }
+    .add-step-btn {
+      width: 100%; padding: 6px 0; border: 1.5px dashed var(--border);
+      border-radius: 6px; background: white; font-size: 0.79rem;
+      font-weight: 600; color: var(--muted); cursor: pointer; transition: all .1s;
+      margin-bottom: 8px;
+    }
+    .add-step-btn:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+    /* checkbox grid for select verb */
+    .col-checks { display: flex; flex-direction: column; gap: 3px; }
+    .col-check-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.78rem; }
+    .col-check-item input[type=checkbox] { accent-color: var(--c-select); width: 13px; height: 13px; }
+    .col-check-item span { font-family: 'Fira Code', monospace; font-size: 0.76rem; }
+
+    /* code line colors moved below .cl so they override its border-left shorthand */
+
+    /* === TOOL-SPECIFIC: ANNOTATION VARIANTS === */
+    .ann-filter    { border-color: var(--c-filter);    background: #f0f7ff; }
+    .ann-select    { border-color: var(--c-select);    background: #f0faf4; }
+    .ann-mutate    { border-color: var(--c-mutate);    background: #fdf6ec; }
+    .ann-summarize { border-color: var(--c-summarize); background: #f8f0fc; }
+    .ann-arrange   { border-color: var(--c-arrange);   background: #f0fbf9; }
+    .ann-sepunite  { border-color: var(--c-sepunite);  background: #fdf0f0; }
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 1px 6px 1px 9px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup     { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+    .cl-filter    { border-left-color: var(--c-filter); }
+    .cl-select    { border-left-color: var(--c-select); }
+    .cl-mutate    { border-left-color: var(--c-mutate); }
+    .cl-summarize { border-left-color: var(--c-summarize); }
+    .cl-arrange   { border-left-color: var(--c-arrange); }
+    .cl-sepunite  { border-left-color: var(--c-sepunite); }
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }            /* function names */
+    .sv { color: #f78c6c; }            /* variable / data frame names */
+    .sk { color: #89ddff; }            /* argument keywords */
+    .ss { color: #c3e88d; }            /* strings */
+    .sn { color: #f0ab70; }            /* numeric literals */
+    .so { color: #89ddff; }            /* operators */
+    .sb { color: #c3e88d; }            /* boolean / logical operators */
+    .sc { color: #6a7a6a; font-style: italic; }  /* comments */
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      max-width: 1360px; margin: 0 auto 18px;
+      padding: 13px 18px;
+      border-radius: 9px; border: 1.5px solid var(--border);
+      font-size: 0.84rem; line-height: 1.65;
+      background: var(--panel);
+    }
+    .ann.show { display: block; }
+    .ann-welcome { border-color: var(--accent); background: #fdf6f0; }
+
+    /* inline code in annotations */
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>dplyr Pipeline Explorer</h1>
+    <p>Build a step-by-step data pipeline and watch the table transform in real time</p>
+    <span class="pill">filter()</span>
+    <span class="pill">select()</span>
+    <span class="pill">mutate()</span>
+    <span class="pill">group_by()</span>
+    <span class="pill">summarize()</span>
+    <span class="pill">arrange()</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Pipeline</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <!-- Live pipeline step list (populated by JS) -->
+      <div id="pipeline-steps" class="pipeline-steps"></div>
+
+      <!-- Add a step CTA -->
+      <button class="add-step-btn" id="add-step-btn" onclick="startAddStep()">+ Add a step</button>
+
+      <!-- ── Verb configurator (revealed on add / step click) ── -->
+      <div id="verb-config" class="verb-config" style="display:none">
+        <div class="ch" id="vcfg-title">Choose a verb</div>
+
+        <!-- Verb picker -->
+        <div id="verb-picker">
+          <div class="mode-stack" style="margin-bottom:6px">
+            <button class="mbtn" data-verb="filter"    onclick="selectVerb(this)">filter()
+              <span class="verb-sub">keep rows matching a condition</span></button>
+            <button class="mbtn" data-verb="select"    onclick="selectVerb(this)">select()
+              <span class="verb-sub">choose which columns to keep</span></button>
+            <button class="mbtn" data-verb="mutate"    onclick="selectVerb(this)">mutate() / case_when()
+              <span class="verb-sub">add or transform a column</span></button>
+            <button class="mbtn" data-verb="summarize" onclick="selectVerb(this)">group_by() + summarize()
+              <span class="verb-sub">collapse groups into summary rows</span></button>
+            <button class="mbtn" data-verb="arrange"   onclick="selectVerb(this)">arrange()
+              <span class="verb-sub">reorder rows by a column's values</span></button>
+            <button class="mbtn" data-verb="separate"  onclick="selectVerb(this)">separate()
+              <span class="verb-sub">split one column into two</span></button>
+            <button class="mbtn" data-verb="unite"     onclick="selectVerb(this)">unite()
+              <span class="verb-sub">combine two columns into one</span></button>
+          </div>
+        </div>
+
+        <!-- filter config -->
+        <div id="cfg-filter" style="display:none">
+          <div class="vcfg-row">
+            <label>Column</label>
+            <select id="f-col" onchange="onFilterColChange()"></select>
+          </div>
+          <div class="vcfg-row">
+            <label>Operator</label>
+            <select id="f-op">
+              <option value="==">== &nbsp;equals</option>
+              <option value="!=">!= &nbsp;not equal</option>
+              <option value=">">&gt; &nbsp;greater than</option>
+              <option value=">=">&gt;= at least</option>
+              <option value="<">&lt; &nbsp;less than</option>
+              <option value="<=">&lt;= at most</option>
+            </select>
+          </div>
+          <div class="vcfg-row">
+            <label>Value</label>
+            <select id="f-val"></select>
+          </div>
+          <!-- second condition (optional) -->
+          <button class="add-step-btn" id="f2-add-btn" onclick="toggleF2()"
+            style="font-size:0.72rem;padding:4px 0;margin-top:5px;margin-bottom:0">+ Add second condition</button>
+          <div id="f2-block" style="display:none;margin-top:6px">
+            <div class="vcfg-row">
+              <label>Join with</label>
+              <div class="tog2">
+                <button class="btn on" data-join="&amp;" onclick="setJoin(this)">&amp; AND</button>
+                <button class="btn"    data-join="|"   onclick="setJoin(this)">| OR</button>
+              </div>
+            </div>
+            <div class="vcfg-row">
+              <label>Column</label>
+              <select id="f2-col" onchange="onFilter2ColChange()"></select>
+            </div>
+            <div class="vcfg-row">
+              <label>Operator</label>
+              <select id="f2-op">
+                <option value="==">== &nbsp;equals</option>
+                <option value="!=">!= &nbsp;not equal</option>
+                <option value=">">&gt; &nbsp;greater than</option>
+                <option value=">=">&gt;= at least</option>
+                <option value="<">&lt; &nbsp;less than</option>
+                <option value="<=">&lt;= at most</option>
+              </select>
+            </div>
+            <div class="vcfg-row">
+              <label>Value</label>
+              <select id="f2-val"></select>
+            </div>
+            <button class="add-step-btn" onclick="toggleF2()"
+              style="font-size:0.72rem;padding:3px 0;color:var(--muted);margin-bottom:0">&#x2715; Remove 2nd condition</button>
+          </div>
+        </div>
+
+        <!-- select config -->
+        <div id="cfg-select" style="display:none">
+          <div class="vcfg-row">
+            <label>Columns to keep</label>
+            <div class="col-checks" id="select-checks">
+              <!-- populated by JS from current column list -->
+            </div>
+          </div>
+        </div>
+
+        <!-- mutate config -->
+        <div id="cfg-mutate" style="display:none">
+          <div class="vcfg-row">
+            <label>Expression preset</label>
+            <select id="m-expr" onchange="onMutateExprChange()">
+              <option value="mass_kg">body_mass_kg = body_mass_g / 1000</option>
+              <option value="bill_ratio">bill_ratio = bill_length_mm / flipper_length_mm</option>
+              <option value="is_large">is_large = body_mass_g &gt; 4500</option>
+              <option value="size_cat">size_cat = case_when( … )</option>
+            </select>
+          </div>
+          <div class="sub" id="m-hint" style="margin-top:4px;line-height:1.4"></div>
+        </div>
+
+        <!-- group_by + summarize config -->
+        <div id="cfg-summarize" style="display:none">
+          <div class="vcfg-row">
+            <label>Group by</label>
+            <select id="s-group"></select>
+          </div>
+          <div class="vcfg-row">
+            <label>Calculate</label>
+            <select id="s-fn" onchange="onSfnChange()">
+              <option value="n">n() — count rows</option>
+              <option value="mean">mean(col)</option>
+              <option value="median">median(col)</option>
+              <option value="sum">sum(col)</option>
+              <option value="min">min(col)</option>
+              <option value="max">max(col)</option>
+            </select>
+          </div>
+          <div class="vcfg-row" id="s-col-row">
+            <label>Of column</label>
+            <select id="s-col"></select>
+          </div>
+        </div>
+
+        <!-- arrange config -->
+        <div id="cfg-arrange" style="display:none">
+          <div class="vcfg-row">
+            <label>Sort by column</label>
+            <select id="a-col"></select>
+          </div>
+          <div class="vcfg-row">
+            <label>Direction</label>
+            <div class="tog2">
+              <button class="btn on" data-dir="asc"  onclick="setDir(this)">asc ↑</button>
+              <button class="btn"    data-dir="desc" onclick="setDir(this)">desc ↓</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- separate config -->
+        <div id="cfg-separate" style="display:none">
+          <div class="vcfg-row">
+            <label>Column to split</label>
+            <select id="sep-col"></select>
+          </div>
+          <div class="vcfg-row">
+            <label>Separator character</label>
+            <input type="text" id="sep-sep" value="_" maxlength="3">
+          </div>
+          <div class="vcfg-row">
+            <label>New col 1 name</label>
+            <input type="text" id="sep-into1" value="part1" maxlength="20">
+          </div>
+          <div class="vcfg-row">
+            <label>New col 2 name</label>
+            <input type="text" id="sep-into2" value="part2" maxlength="20">
+          </div>
+        </div>
+
+        <!-- unite config -->
+        <div id="cfg-unite" style="display:none">
+          <div class="vcfg-row">
+            <label>Column 1</label>
+            <select id="u-col1"></select>
+          </div>
+          <div class="vcfg-row">
+            <label>Column 2</label>
+            <select id="u-col2"></select>
+          </div>
+          <div class="vcfg-row">
+            <label>New column name</label>
+            <input type="text" id="u-name" value="combined" maxlength="20">
+          </div>
+          <div class="vcfg-row">
+            <label>Separator</label>
+            <input type="text" id="u-sep" value="_" maxlength="3">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:5px;margin-top:8px">
+          <button class="btn on" id="add-btn" onclick="addOrUpdateStep()" style="flex:1">Add</button>
+          <button class="btn"              onclick="cancelCfg()"        style="flex:1">Cancel</button>
+        </div>
+      </div><!-- /verb-config -->
+    </div><!-- /controls-panel -->
+
+    <!-- MIDDLE: MAIN VISUAL PANEL -->
+    <div class="panel" id="main-panel">
+      <div class="panel-label">Data — penguins</div>
+      <div id="row-meta" class="row-meta"></div>
+      <div class="dtable-wrap">
+        <table class="dtable" id="main-table">
+          <thead id="main-thead"></thead>
+          <tbody id="main-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="display:none">
+          No rows match the current pipeline.
+        </div>
+      </div>
+      <div id="plain-english" class="plain-english" style="display:none"></div>
+    </div>
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANNOTATION BOX (below grid) -->
+  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // === DATA & COLUMN DEFINITIONS ===
+    const COLS = ['species','island','bill_length_mm','flipper_length_mm','body_mass_g','sex'];
+    const COL_IDX = {species:0,island:1,bill_length_mm:2,flipper_length_mm:3,body_mass_g:4,sex:5};
+    const NUMERIC_COLS = new Set(['bill_length_mm','flipper_length_mm','body_mass_g']);
+    const DATA = [
+      ['Adelie',   'Torgersen', 39.1, 181, 3750, 'male'],
+      ['Adelie',   'Torgersen', 39.5, 186, 3800, 'female'],
+      ['Adelie',   'Dream',     40.3, 195, 3250, 'female'],
+      ['Adelie',   'Dream',     36.7, 193, 3450, 'female'],
+      ['Adelie',   'Biscoe',    39.3, 190, 3650, 'male'],
+      ['Chinstrap','Dream',     46.5, 192, 3500, 'female'],
+      ['Chinstrap','Dream',     50.0, 196, 3900, 'male'],
+      ['Chinstrap','Dream',     51.3, 197, 3750, 'male'],
+      ['Chinstrap','Dream',     45.4, 188, 3525, 'female'],
+      ['Gentoo',   'Biscoe',    46.1, 211, 4500, 'female'],
+      ['Gentoo',   'Biscoe',    50.0, 230, 5700, 'male'],
+      ['Gentoo',   'Biscoe',    48.7, 222, 5350, 'female'],
+      ['Gentoo',   'Biscoe',    50.2, 218, 5550, 'male'],
+      ['Gentoo',   'Biscoe',    45.1, 215, 5100, 'female'],
+      ['Adelie',   'Torgersen', 38.9, 187, 3625, 'male']
+    ];
+
+    // R-literal values for the filter value dropdowns (same as indexing_explorer)
+    const F_VALS = {
+      species:           ['"Adelie"','"Chinstrap"','"Gentoo"'],
+      island:            ['"Biscoe"','"Dream"','"Torgersen"'],
+      bill_length_mm:    ['40','45','50'],
+      flipper_length_mm: ['185','200','215'],
+      body_mass_g:       ['3500','4000','5000'],
+      sex:               ['"male"','"female"']
+    };
+
+    // Mutate preset metadata
+    const MUTATE_PRESETS = {
+      mass_kg:    { newCol:'body_mass_kg',  hint:'Divides body_mass_g by 1000. Creates a new numeric column in kg.' },
+      bill_ratio: { newCol:'bill_ratio',    hint:'bill_length_mm ÷ flipper_length_mm. A dimensionless shape ratio.' },
+      is_large:   { newCol:'is_large',      hint:'Creates a TRUE/FALSE column — TRUE when body_mass_g > 4500.' },
+      size_cat:   { newCol:'size_cat',      hint:'Uses case_when(): "large" if body_mass_g > 4500, otherwise "small".' }
+    };
+
+    function fmt(col, val) {
+      if (typeof val === 'boolean') return String(val);
+      if (typeof val === 'number' && col === 'bill_length_mm') return val.toFixed(1);
+      return String(val);
+    }
+
+    // === STATE ===
+    const DEFAULTS = { pipeline: [], changed: 'welcome' };
+    let S = { pipeline: [], changed: 'welcome' };
+
+    // Configurator UI state (does not affect the rendered table/code)
+    const Cfg = { editIdx: null, verb: null, dir: 'asc' };
+
+    // === PIPELINE ENGINE ===
+
+    function rawToRows() {
+      return DATA.map(r => Object.fromEntries(COLS.map((c, i) => [c, r[i]])));
+    }
+
+    function evalCond(row, col, op, val) {
+      const rv = row[col];
+      const cv = NUMERIC_COLS.has(col) ? parseFloat(val) : val.replace(/^"|"$/g, '');
+      switch (op) {
+        case '==': return rv == cv;
+        case '!=': return rv != cv;
+        case '>':  return rv  > cv;
+        case '>=': return rv >= cv;
+        case '<':  return rv  < cv;
+        case '<=': return rv <= cv;
+        default:   return true;
+      }
+    }
+
+    function applyFilter(rows, step) {
+      return rows.filter(row => {
+        const c1 = evalCond(row, step.col1, step.op1, step.val1);
+        if (!step.hasSecond) return c1;
+        const c2 = evalCond(row, step.col2, step.op2, step.val2);
+        return step.join === '&' ? (c1 && c2) : (c1 || c2);
+      });
+    }
+
+    function applySelect(rows, step) {
+      return rows.map(row => Object.fromEntries(step.cols.filter(c => c in row).map(c => [c, row[c]])));
+    }
+
+    function applyMutate(rows, step) {
+      return rows.map(row => {
+        const r = Object.assign({}, row);
+        switch (step.expr) {
+          case 'mass_kg':    r.body_mass_kg  = +(r.body_mass_g / 1000).toFixed(3); break;
+          case 'bill_ratio': r.bill_ratio    = r.flipper_length_mm
+                               ? +(r.bill_length_mm / r.flipper_length_mm).toFixed(3) : null; break;
+          case 'is_large':   r.is_large      = r.body_mass_g > 4500; break;
+          case 'size_cat':   r.size_cat      = r.body_mass_g > 4500 ? 'large' : 'small'; break;
+        }
+        return r;
+      });
+    }
+
+    function applySummarize(rows, step) {
+      const groups = {}, order = [];
+      rows.forEach(row => {
+        const key = String(row[step.group] ?? '');
+        if (!(key in groups)) { groups[key] = []; order.push(key); }
+        groups[key].push(row);
+      });
+      const outRows = order.map(key => {
+        const g = groups[key];
+        const out = { [step.group]: g[0][step.group] };
+        if (step.fn === 'n') {
+          out.n = g.length;
+        } else {
+          const vals = g.map(r => r[step.col]).filter(v => typeof v === 'number');
+          const outCol = `${step.fn}_${step.col}`;
+          if (step.fn === 'mean')   out[outCol] = +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+          if (step.fn === 'sum')    out[outCol] = vals.reduce((a,b)=>a+b,0);
+          if (step.fn === 'min')    out[outCol] = Math.min(...vals);
+          if (step.fn === 'max')    out[outCol] = Math.max(...vals);
+          if (step.fn === 'median') {
+            const s = [...vals].sort((a,b)=>a-b), m = Math.floor(s.length/2);
+            out[outCol] = s.length % 2 ? s[m] : +((s[m-1]+s[m])/2).toFixed(2);
+          }
+        }
+        return out;
+      });
+      const outCols = step.fn === 'n' ? [step.group, 'n'] : [step.group, `${step.fn}_${step.col}`];
+      return { rows: outRows, cols: outCols };
+    }
+
+    function applyArrange(rows, step) {
+      return [...rows].sort((a, b) => {
+        const av = a[step.col], bv = b[step.col];
+        const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+        return step.dir === 'asc' ? cmp : -cmp;
+      });
+    }
+
+    function applySeparate(rows, step) {
+      return rows.map(row => {
+        const out = {};
+        for (const k of Object.keys(row)) {
+          if (k === step.col) {
+            const parts = String(row[k]).split(step.sep);
+            out[step.into1] = parts[0] ?? '';
+            out[step.into2] = parts[1] ?? '';
+          } else {
+            out[k] = row[k];
+          }
+        }
+        return out;
+      });
+    }
+
+    function applyUnite(rows, step) {
+      return rows.map(row => {
+        const out = {};
+        for (const k of Object.keys(row)) {
+          if (k === step.col1 || k === step.col2) continue;
+          out[k] = row[k];
+        }
+        out[step.name] = `${row[step.col1] ?? ''}${step.sep}${row[step.col2] ?? ''}`;
+        return out;
+      });
+    }
+
+    // Run the full pipeline (or a supplied slice) and return {rows, cols}
+    function applyPipeline(pipeline = S.pipeline) {
+      let rows = rawToRows();
+      let cols = [...COLS];
+      for (const step of pipeline) {
+        if (step.verb === 'filter') {
+          rows = applyFilter(rows, step);
+        } else if (step.verb === 'select') {
+          rows = applySelect(rows, step);
+          cols = step.cols.filter(c => cols.includes(c));
+        } else if (step.verb === 'mutate') {
+          rows = applyMutate(rows, step);
+          const nc = MUTATE_PRESETS[step.expr].newCol;
+          if (!cols.includes(nc)) cols = [...cols, nc];
+        } else if (step.verb === 'summarize') {
+          const res = applySummarize(rows, step);
+          rows = res.rows; cols = res.cols;
+        } else if (step.verb === 'arrange') {
+          rows = applyArrange(rows, step);
+        } else if (step.verb === 'separate') {
+          rows = applySeparate(rows, step);
+          const ci = cols.indexOf(step.col);
+          cols = ci >= 0
+            ? [...cols.slice(0,ci), step.into1, step.into2, ...cols.slice(ci+1)]
+            : [...cols, step.into1, step.into2];
+        } else if (step.verb === 'unite') {
+          rows = applyUnite(rows, step);
+          const ci = Math.min(...[step.col1,step.col2].map(c=>cols.indexOf(c)).filter(i=>i>=0));
+          cols = cols.filter(c => c!==step.col1 && c!==step.col2);
+          cols = [...cols.slice(0,ci), step.name, ...cols.slice(ci)];
+        }
+      }
+      return { rows, cols };
+    }
+
+    // Columns available after the first N steps (used to populate configurator selects)
+    function colsUpTo(n) {
+      return applyPipeline(S.pipeline.slice(0, n)).cols;
+    }
+
+    // === PLAIN-ENGLISH HELPERS ===
+
+    function plainEnglishCond(col, op, val) {
+      const words = {'==':'is exactly','!=':'is not','>':'is greater than','>=':'is at least','<':'is less than','<=':'is at most'};
+      const cleanVal = NUMERIC_COLS.has(col) ? val : val.replace(/^"|"$/g, '');
+      return `<em>${col}</em> ${words[op]} <em>${cleanVal}</em>`;
+    }
+
+    function plainEnglishStep(step) {
+      switch (step.verb) {
+        case 'filter': {
+          const c1 = plainEnglishCond(step.col1, step.op1, step.val1);
+          if (!step.hasSecond) return `keep rows where ${c1}`;
+          const c2   = plainEnglishCond(step.col2, step.op2, step.val2);
+          const join = step.join === '&' ? '<b>AND</b>' : '<b>OR</b>';
+          return `keep rows where ${c1} ${join} ${c2}`;
+        }
+        case 'select':    return `keep only columns: <em>${step.cols.join(', ')}</em>`;
+        case 'mutate':    return `add column <em>${MUTATE_PRESETS[step.expr].newCol}</em>`;
+        case 'summarize': {
+          const sumDesc = step.fn === 'n' ? 'count rows' : `compute ${step.fn} of <em>${step.col}</em>`;
+          return `group by <em>${step.group}</em> and ${sumDesc}`;
+        }
+        case 'arrange':   return `sort by <em>${step.col}</em> (${step.dir === 'asc' ? 'smallest first' : 'largest first'})`;
+        case 'separate':  return `split <em>${step.col}</em> into <em>${step.into1}</em> and <em>${step.into2}</em>`;
+        case 'unite':     return `combine <em>${step.col1}</em> and <em>${step.col2}</em> into <em>${step.name}</em>`;
+        default: return '';
+      }
+    }
+
+    function plainEnglishPipeline() {
+      if (!S.pipeline.length) return '';
+      const parts = S.pipeline.map(step => plainEnglishStep(step));
+      if (parts.length === 1) return `Start with penguins, then ${parts[0]}.`;
+      const last = parts.pop();
+      return `Start with penguins, then ${parts.join(', then ')}, then ${last}.`;
+    }
+
+    // === RENDER FUNCTIONS ===
+
+    function h(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function verbColor(verb) {
+      return {filter:'filter',select:'select',mutate:'mutate',
+              summarize:'summarize',arrange:'arrange',
+              separate:'sepunite',unite:'sepunite'}[verb] || 'filter';
+    }
+    function stepClass(verb) { return (verb==='separate'||verb==='unite') ? 'sepunite' : verb; }
+
+    function stepDesc(step) {
+      switch (step.verb) {
+        case 'filter': {
+          let d = `${step.col1} ${step.op1} ${step.val1}`;
+          if (step.hasSecond) d += ` ${step.join} ${step.col2} ${step.op2} ${step.val2}`;
+          return d;
+        }
+        case 'select':    return step.cols.join(', ');
+        case 'mutate':    return MUTATE_PRESETS[step.expr].newCol;
+        case 'summarize': return `${step.group}: ${step.fn==='n'?'n()':step.fn+'('+step.col+')'}`;
+        case 'arrange':   return `${step.col} ${step.dir}`;
+        case 'separate':  return `${step.col} into ${step.into1}, ${step.into2}`;
+        case 'unite':     return `${step.col1} + ${step.col2} into ${step.name}`;
+        default: return '';
+      }
+    }
+
+    function populateColSelect(id, cols) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const cur = el.value;
+      el.innerHTML = '';
+      cols.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        if (c === cur) opt.selected = true;
+        el.appendChild(opt);
+      });
+    }
+
+    function populateFilterVals(id, col) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const vals = F_VALS[col] || Object.values(F_VALS)[0];
+      el.innerHTML = '';
+      vals.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        el.appendChild(opt);
+      });
+    }
+
+    function buildSelectChecks(cols) {
+      const container = document.getElementById('select-checks');
+      container.innerHTML = '';
+      cols.forEach(c => {
+        const lbl = document.createElement('label');
+        lbl.className = 'col-check-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.value = c; cb.checked = true;
+        const sp = document.createElement('span'); sp.textContent = c;
+        lbl.appendChild(cb); lbl.appendChild(sp);
+        container.appendChild(lbl);
+      });
+    }
+
+    function renderPipelineSteps() {
+      const el = document.getElementById('pipeline-steps');
+      if (!S.pipeline.length) {
+        el.innerHTML = '<div class="sub" style="text-align:center;padding:6px 0">No steps yet</div>';
+        return;
+      }
+      el.innerHTML = S.pipeline.map((step, i) => {
+        const active = Cfg.editIdx === i ? ' active' : '';
+        const badge  = `<span class="pstep-verb" style="background:var(--c-${verbColor(step.verb)})">${step.verb}</span>`;
+        const desc   = `<span class="pstep-desc">${h(stepDesc(step))}</span>`;
+        const del    = `<button class="pstep-del" onclick="deleteStep(event,${i})">&#x2715;</button>`;
+        const arrow  = i < S.pipeline.length - 1 ? '<div class="pipe-arrow">%&gt;%</div>' : '';
+        return `<div class="pstep${active}" onclick="editStep(${i})">${badge}${desc}${del}</div>${arrow}`;
+      }).join('');
+    }
+
+    function renderMain() {
+      const {rows, cols} = applyPipeline();
+      const lastStep     = S.pipeline[S.pipeline.length - 1];
+      const isSummarized = lastStep && lastStep.verb === 'summarize';
+      const newCol       = lastStep && lastStep.verb === 'mutate' ? MUTATE_PRESETS[lastStep.expr].newCol : null;
+
+      document.getElementById('main-thead').innerHTML =
+        `<tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
+
+      const empty = document.getElementById('empty-state');
+      const table = document.getElementById('main-table');
+
+      if (!rows.length) {
+        document.getElementById('main-tbody').innerHTML = '';
+        empty.style.display = ''; table.style.display = 'none';
+      } else {
+        empty.style.display = 'none'; table.style.display = '';
+
+        // Assign group index for shading when last step is summarize
+        let groupIdx = null;
+        if (isSummarized && rows[0] && lastStep.group in rows[0]) {
+          const seen = {}; let gi = 0;
+          groupIdx = rows.map(r => {
+            const k = String(r[lastStep.group]);
+            if (!(k in seen)) seen[k] = gi++ % 3;
+            return seen[k];
+          });
+        }
+
+        document.getElementById('main-tbody').innerHTML = rows.map((row, ri) => {
+          const trCls = groupIdx ? ` class="grp-${groupIdx[ri]}"` : '';
+          const cells = cols.map(c => {
+            const tdCls = c === newCol ? ' class="new-col"' : '';
+            return `<td${tdCls}>${h(fmt(c, row[c] ?? ''))}</td>`;
+          }).join('');
+          return `<tr${trCls}>${cells}</tr>`;
+        }).join('');
+      }
+
+      const n = rows.length, nc = cols.length;
+      document.getElementById('row-meta').innerHTML =
+        `<strong>${n}</strong> row${n!==1?'s':''} &times; <strong>${nc}</strong> col${nc!==1?'s':''}`;
+
+      const pe = document.getElementById('plain-english');
+      const peText = plainEnglishPipeline();
+      if (peText) { pe.innerHTML = peText; pe.style.display = ''; }
+      else        { pe.style.display = 'none'; }
+    }
+
+    // === CODE BUILDER ===
+
+    function buildCode() {
+      const lines = [];
+      lines.push(`<code class="cl cl-setup"><span class="sc">library(dplyr)</span></code>`);
+      lines.push(`<code class="cl cl-setup"> </code>`);
+
+      if (!S.pipeline.length) {
+        lines.push(`<code class="cl cl-setup"><span class="sv">penguins</span></code>`);
+        return lines.join('\n');
+      }
+
+      lines.push(`<code class="cl cl-setup"><span class="sv">penguins</span> <span class="so">%&gt;%</span></code>`);
+
+      S.pipeline.forEach((step, i) => {
+        const last = i === S.pipeline.length - 1;
+        const pipe = last ? '' : ` <span class="so">%&gt;%</span>`;
+        const cls  = `cl cl-${stepClass(step.verb)}`;
+        const vsp  = (col, val) => NUMERIC_COLS.has(col)
+          ? `<span class="sn">${h(val)}</span>` : `<span class="ss">${h(val)}</span>`;
+
+        if (step.verb === 'filter') {
+          const side = (col, op, val) =>
+            `<span class="sv">${col}</span> <span class="sb">${h(op)}</span> ${vsp(col,val)}`;
+          if (!step.hasSecond) {
+            lines.push(`<code class="${cls}">  <span class="sf">filter</span>(${side(step.col1,step.op1,step.val1)})${pipe}</code>`);
+          } else {
+            lines.push(`<code class="${cls}">  <span class="sf">filter</span>(${side(step.col1,step.op1,step.val1)} <span class="sb">${h(step.join)}</span></code>`);
+            lines.push(`<code class="${cls}">         ${side(step.col2,step.op2,step.val2)})${pipe}</code>`);
+          }
+        } else if (step.verb === 'select') {
+          const list = step.cols.map(c=>`<span class="sv">${c}</span>`).join(', ');
+          lines.push(`<code class="${cls}">  <span class="sf">select</span>(${list})${pipe}</code>`);
+        } else if (step.verb === 'mutate') {
+          if (step.expr === 'size_cat') {
+            lines.push(`<code class="${cls}">  <span class="sf">mutate</span>(<span class="sv">size_cat</span> = <span class="sf">case_when</span>(</code>`);
+            lines.push(`<code class="${cls}">    <span class="sv">body_mass_g</span> <span class="sb">&gt;</span> <span class="sn">4500</span> <span class="so">~</span> <span class="ss">"large"</span>,</code>`);
+            lines.push(`<code class="${cls}">    <span class="sb">TRUE</span> <span class="so">~</span> <span class="ss">"small"</span></code>`);
+            lines.push(`<code class="${cls}">  ))${pipe}</code>`);
+          } else {
+            const expr = {
+              mass_kg:    `<span class="sv">body_mass_kg</span> = <span class="sv">body_mass_g</span> / <span class="sn">1000</span>`,
+              bill_ratio: `<span class="sv">bill_ratio</span> = <span class="sv">bill_length_mm</span> / <span class="sv">flipper_length_mm</span>`,
+              is_large:   `<span class="sv">is_large</span> = <span class="sv">body_mass_g</span> <span class="sb">&gt;</span> <span class="sn">4500</span>`
+            }[step.expr];
+            lines.push(`<code class="${cls}">  <span class="sf">mutate</span>(${expr})${pipe}</code>`);
+          }
+        } else if (step.verb === 'summarize') {
+          const sumExpr = step.fn === 'n'
+            ? `<span class="sv">n</span> = <span class="sf">n</span>()`
+            : `<span class="sv">${step.fn}_${step.col}</span> = <span class="sf">${step.fn}</span>(<span class="sv">${step.col}</span>)`;
+          lines.push(`<code class="${cls}">  <span class="sf">group_by</span>(<span class="sv">${step.group}</span>) <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="${cls}">  <span class="sf">summarize</span>(${sumExpr})${pipe}</code>`);
+        } else if (step.verb === 'arrange') {
+          const inner = step.dir === 'desc'
+            ? `<span class="sf">desc</span>(<span class="sv">${step.col}</span>)`
+            : `<span class="sv">${step.col}</span>`;
+          lines.push(`<code class="${cls}">  <span class="sf">arrange</span>(${inner})${pipe}</code>`);
+        } else if (step.verb === 'separate') {
+          const into = `<span class="sf">c</span>(<span class="ss">"${step.into1}"</span>, <span class="ss">"${step.into2}"</span>)`;
+          lines.push(`<code class="${cls}">  <span class="sf">separate</span>(<span class="sv">${step.col}</span>, <span class="sk">into</span> = ${into}, <span class="sk">sep</span> = <span class="ss">"${h(step.sep)}"</span>)${pipe}</code>`);
+        } else if (step.verb === 'unite') {
+          lines.push(`<code class="${cls}">  <span class="sf">unite</span>(<span class="sv">${step.name}</span>, <span class="sv">${step.col1}</span>, <span class="sv">${step.col2}</span>, <span class="sk">sep</span> = <span class="ss">"${h(step.sep)}"</span>)${pipe}</code>`);
+        }
+      });
+
+      return lines.join('\n');
+    }
+
+    // === ANNOTATION ===
+
+    function getAnn() {
+      if (!S.pipeline.length || S.changed === 'welcome') {
+        return {cls:'ann-welcome', html:`
+          Here's how this works.<br><br>
+          The code panel shows real R code you can copy into R. The colored stripe on the left of each line marks which verb it belongs to: blue for <code>filter()</code>, green for <code>select()</code>, orange for <code>mutate()</code>, purple for <code>group_by()+summarize()</code>, teal for <code>arrange()</code>, and salmon for <code>separate()</code>/<code>unite()</code>.<br><br>
+          Use <b>+ Add a step</b> to build up a pipeline one verb at a time. The table updates after each step so you can see exactly what each verb does to the data. The code panel builds the <code>%&gt;%</code> chain as you go.`};
+      }
+
+      const step = S.pipeline[S.pipeline.length - 1];
+      switch (step.verb) {
+        case 'filter': {
+          if (step.hasSecond) {
+            if (step.join === '&')
+              return {cls:'ann-filter', html:`<code>&amp;</code> keeps rows where <b>both</b> conditions are TRUE at the same time. This is AND logic: the result is a subset of what either condition alone would return.`};
+            return {cls:'ann-filter', html:`<code>|</code> keeps rows where <b>at least one</b> condition is TRUE. This is OR logic: the result is a union, typically more rows than either condition alone.`};
+          }
+          const {rows} = applyPipeline();
+          const pct = Math.round(rows.length / DATA.length * 100);
+          return {cls:'ann-filter', html:`<code>filter()</code> evaluates the condition for every row and keeps only rows where it is TRUE. Here ${rows.length} of ${DATA.length} rows pass (${pct}%). Rows that fail are dropped entirely, not set to NA.`};
+        }
+        case 'select':
+          return {cls:'ann-select', html:`<code>select()</code> keeps only the columns you choose. The rows are unchanged; only the column set narrows. In R, <code>select()</code> can also rename columns, drop columns with <code>-colname</code>, or use helpers like <code>starts_with()</code>.`};
+        case 'mutate': {
+          const p = MUTATE_PRESETS[step.expr];
+          const cw = step.expr === 'size_cat'
+            ? '<br><br><code>case_when()</code> evaluates conditions top to bottom. The first TRUE condition wins, similar to a chain of if/else statements.' : '';
+          return {cls:'ann-mutate', html:`<code>mutate()</code> adds a new column (or overwrites an existing one) without removing any rows or other columns. ${p.hint}${cw}`};
+        }
+        case 'summarize': {
+          const preRows = applyPipeline(S.pipeline.slice(0, -1)).rows.length;
+          const {rows}  = applyPipeline();
+          return {cls:'ann-summarize', html:`<code>group_by()</code> + <code>summarize()</code> collapses groups of rows into single summary rows. ${preRows} rows were grouped by <code>${step.group}</code>, producing ${rows.length} group${rows.length!==1?'s':''}. All columns except the grouping variable and the summary are dropped.`};
+        }
+        case 'arrange':
+          return {cls:'ann-arrange', html:`<code>arrange()</code> reorders rows by a column's values without adding, removing, or modifying any data. Only the row order changes. <code>arrange(desc(col))</code> reverses the sort.`};
+        case 'separate':
+          return {cls:'ann-sepunite', html:`<code>separate()</code> splits one column into two by finding a separator character inside each value. The original column is removed and replaced by the two new columns. If the separator isn't found in a value, the second new column will be empty.`};
+        case 'unite':
+          return {cls:'ann-sepunite', html:`<code>unite()</code> is the inverse of <code>separate()</code>: it combines two columns into one by pasting their values together with a separator. The original two columns are removed from the result.`};
+        default:
+          return {cls:'ann-welcome', html:''};
+      }
+    }
+
+    // === RENDER ===
+
+    function render() {
+      renderMain();
+      renderPipelineSteps();
+      document.getElementById('code-scroll').innerHTML = buildCode();
+      const {cls, html} = getAnn();
+      const ann = document.getElementById('ann-box');
+      ann.className = 'ann show ' + cls;
+      ann.innerHTML = html;
+    }
+
+    // === EVENT HANDLERS ===
+
+    function showVerbConfig(show) {
+      document.getElementById('verb-config').style.display   = show ? '' : 'none';
+      document.getElementById('add-step-btn').style.display  = show ? 'none' : '';
+    }
+
+    function startAddStep() {
+      Cfg.editIdx = null; Cfg.verb = null; Cfg.dir = 'asc';
+      showVerbConfig(true);
+      document.getElementById('vcfg-title').textContent = 'Choose a verb';
+      document.getElementById('add-btn').textContent    = 'Add';
+      document.querySelectorAll('#verb-picker .mbtn').forEach(b => b.classList.remove('on'));
+      ['filter','select','mutate','summarize','arrange','separate','unite'].forEach(v =>
+        document.getElementById('cfg-'+v).style.display = 'none');
+    }
+
+    function selectVerb(btn) {
+      Cfg.verb = btn.dataset.verb;
+      document.querySelectorAll('#verb-picker .mbtn').forEach(b => b.classList.toggle('on', b===btn));
+      ['filter','select','mutate','summarize','arrange','separate','unite'].forEach(v =>
+        document.getElementById('cfg-'+v).style.display = v===Cfg.verb ? '' : 'none');
+
+      const availCols = colsUpTo(Cfg.editIdx === null ? S.pipeline.length : Cfg.editIdx);
+      const numCols   = availCols.filter(c => NUMERIC_COLS.has(c));
+
+      if (Cfg.verb === 'filter') {
+        populateColSelect('f-col', availCols);  onFilterColChange();
+        populateColSelect('f2-col', availCols); onFilter2ColChange();
+        document.getElementById('f2-block').style.display   = 'none';
+        document.getElementById('f2-add-btn').style.display = '';
+      } else if (Cfg.verb === 'select') {
+        buildSelectChecks(availCols);
+      } else if (Cfg.verb === 'mutate') {
+        onMutateExprChange();
+      } else if (Cfg.verb === 'summarize') {
+        populateColSelect('s-group', availCols);
+        populateColSelect('s-col', numCols.length ? numCols : availCols);
+        onSfnChange();
+      } else if (Cfg.verb === 'arrange') {
+        populateColSelect('a-col', availCols);
+        Cfg.dir = 'asc';
+        document.querySelectorAll('#cfg-arrange .tog2 .btn').forEach(b =>
+          b.classList.toggle('on', b.dataset.dir === 'asc'));
+      } else if (Cfg.verb === 'separate') {
+        populateColSelect('sep-col', availCols);
+      } else if (Cfg.verb === 'unite') {
+        populateColSelect('u-col1', availCols);
+        populateColSelect('u-col2', availCols);
+      }
+    }
+
+    function onFilterColChange()  { populateFilterVals('f-val',  document.getElementById('f-col').value);  }
+    function onFilter2ColChange() { populateFilterVals('f2-val', document.getElementById('f2-col').value); }
+
+    function toggleF2() {
+      const block  = document.getElementById('f2-block');
+      const addBtn = document.getElementById('f2-add-btn');
+      const show   = block.style.display === 'none';
+      block.style.display  = show ? '' : 'none';
+      addBtn.style.display = show ? 'none' : '';
+    }
+
+    function setJoin(btn) {
+      document.querySelectorAll('#f2-block .tog2 .btn').forEach(b => b.classList.toggle('on', b===btn));
+    }
+
+    function setDir(btn) {
+      Cfg.dir = btn.dataset.dir;
+      document.querySelectorAll('#cfg-arrange .tog2 .btn').forEach(b =>
+        b.classList.toggle('on', b===btn));
+    }
+
+    function onSfnChange() {
+      document.getElementById('s-col-row').style.display =
+        document.getElementById('s-fn').value === 'n' ? 'none' : '';
+    }
+
+    function onMutateExprChange() {
+      document.getElementById('m-hint').textContent =
+        MUTATE_PRESETS[document.getElementById('m-expr').value].hint;
+    }
+
+    function addOrUpdateStep() {
+      if (!Cfg.verb) return;
+      let step;
+      if (Cfg.verb === 'filter') {
+        const f2Show  = document.getElementById('f2-block').style.display !== 'none';
+        const joinBtn = document.querySelector('#f2-block .tog2 .btn.on');
+        step = { verb:'filter',
+          col1: document.getElementById('f-col').value,
+          op1:  document.getElementById('f-op').value,
+          val1: document.getElementById('f-val').value,
+          hasSecond: f2Show,
+          join: joinBtn ? joinBtn.dataset.join : '&',
+          col2: document.getElementById('f2-col').value,
+          op2:  document.getElementById('f2-op').value,
+          val2: document.getElementById('f2-val').value };
+      } else if (Cfg.verb === 'select') {
+        const checked = [...document.querySelectorAll('#select-checks input:checked')].map(cb=>cb.value);
+        if (!checked.length) return;
+        step = { verb:'select', cols:checked };
+      } else if (Cfg.verb === 'mutate') {
+        step = { verb:'mutate', expr: document.getElementById('m-expr').value };
+      } else if (Cfg.verb === 'summarize') {
+        step = { verb:'summarize',
+          group: document.getElementById('s-group').value,
+          fn:    document.getElementById('s-fn').value,
+          col:   document.getElementById('s-col').value };
+      } else if (Cfg.verb === 'arrange') {
+        step = { verb:'arrange', col: document.getElementById('a-col').value, dir: Cfg.dir };
+      } else if (Cfg.verb === 'separate') {
+        step = { verb:'separate',
+          col:   document.getElementById('sep-col').value,
+          sep:   document.getElementById('sep-sep').value   || '_',
+          into1: document.getElementById('sep-into1').value || 'part1',
+          into2: document.getElementById('sep-into2').value || 'part2' };
+      } else if (Cfg.verb === 'unite') {
+        step = { verb:'unite',
+          col1: document.getElementById('u-col1').value,
+          col2: document.getElementById('u-col2').value,
+          name: document.getElementById('u-name').value || 'combined',
+          sep:  document.getElementById('u-sep').value };
+      }
+      if (!step) return;
+      if (Cfg.editIdx !== null) S.pipeline[Cfg.editIdx] = step;
+      else                      S.pipeline.push(step);
+      S.changed = Cfg.verb;
+      Cfg.editIdx = null; Cfg.verb = null;
+      showVerbConfig(false);
+      render();
+    }
+
+    function cancelCfg() {
+      Cfg.editIdx = null; Cfg.verb = null;
+      showVerbConfig(false);
+      renderPipelineSteps();
+    }
+
+    function editStep(i) {
+      const step = S.pipeline[i];
+      Cfg.editIdx = i; Cfg.verb = step.verb;
+      showVerbConfig(true);
+      document.getElementById('vcfg-title').textContent = 'Edit step ' + (i + 1);
+      document.getElementById('add-btn').textContent    = 'Update';
+      document.querySelectorAll('#verb-picker .mbtn').forEach(b =>
+        b.classList.toggle('on', b.dataset.verb === step.verb));
+      ['filter','select','mutate','summarize','arrange','separate','unite'].forEach(v =>
+        document.getElementById('cfg-'+v).style.display = v===step.verb ? '' : 'none');
+
+      const availCols = colsUpTo(i);
+      const numCols   = availCols.filter(c => NUMERIC_COLS.has(c));
+
+      if (step.verb === 'filter') {
+        populateColSelect('f-col', availCols);
+        document.getElementById('f-col').value = step.col1;
+        document.getElementById('f-op').value  = step.op1;
+        populateFilterVals('f-val', step.col1);
+        document.getElementById('f-val').value = step.val1;
+        populateColSelect('f2-col', availCols);
+        const f2Block = document.getElementById('f2-block');
+        const f2Btn   = document.getElementById('f2-add-btn');
+        if (step.hasSecond) {
+          f2Block.style.display = ''; f2Btn.style.display = 'none';
+          document.getElementById('f2-col').value = step.col2;
+          document.getElementById('f2-op').value  = step.op2;
+          populateFilterVals('f2-val', step.col2);
+          document.getElementById('f2-val').value = step.val2;
+          document.querySelectorAll('#f2-block .tog2 .btn').forEach(b =>
+            b.classList.toggle('on', b.dataset.join === step.join));
+        } else {
+          f2Block.style.display = 'none'; f2Btn.style.display = '';
+        }
+      } else if (step.verb === 'select') {
+        buildSelectChecks(availCols);
+        document.querySelectorAll('#select-checks input').forEach(cb =>
+          cb.checked = step.cols.includes(cb.value));
+      } else if (step.verb === 'mutate') {
+        document.getElementById('m-expr').value = step.expr; onMutateExprChange();
+      } else if (step.verb === 'summarize') {
+        populateColSelect('s-group', availCols);
+        populateColSelect('s-col', numCols.length ? numCols : availCols);
+        document.getElementById('s-group').value = step.group;
+        document.getElementById('s-fn').value    = step.fn;
+        document.getElementById('s-col').value   = step.col;
+        onSfnChange();
+      } else if (step.verb === 'arrange') {
+        populateColSelect('a-col', availCols);
+        document.getElementById('a-col').value = step.col;
+        Cfg.dir = step.dir;
+        document.querySelectorAll('#cfg-arrange .tog2 .btn').forEach(b =>
+          b.classList.toggle('on', b.dataset.dir === step.dir));
+      } else if (step.verb === 'separate') {
+        populateColSelect('sep-col', availCols);
+        document.getElementById('sep-col').value   = step.col;
+        document.getElementById('sep-sep').value   = step.sep;
+        document.getElementById('sep-into1').value = step.into1;
+        document.getElementById('sep-into2').value = step.into2;
+      } else if (step.verb === 'unite') {
+        populateColSelect('u-col1', availCols); document.getElementById('u-col1').value = step.col1;
+        populateColSelect('u-col2', availCols); document.getElementById('u-col2').value = step.col2;
+        document.getElementById('u-name').value = step.name;
+        document.getElementById('u-sep').value  = step.sep;
+      }
+      renderPipelineSteps();
+    }
+
+    function deleteStep(e, i) {
+      e.stopPropagation();
+      S.pipeline.splice(i, 1);
+      if (Cfg.editIdx !== null) {
+        if      (Cfg.editIdx === i) cancelCfg();
+        else if (Cfg.editIdx  >  i) Cfg.editIdx--;
+      }
+      S.changed = S.pipeline.length
+        ? S.pipeline[Math.min(i, S.pipeline.length - 1)].verb : 'welcome';
+      render();
+    }
+
+    // === RESET ===
+
+    function resetAll() {
+      S = { pipeline: [], changed: 'welcome' };
+      Cfg.editIdx = null; Cfg.verb = null; Cfg.dir = 'asc';
+      showVerbConfig(false);
+      render();
+    }
+
+    // === COPY CODE ===
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // === TOOLTIP ===
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      if (tip.style.display === 'block') {
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+      }
+    });
+
+    // === INIT ===
+
+    function init() {
+      const numColsOrdered = COLS.filter(c => NUMERIC_COLS.has(c));
+      populateColSelect('f-col',  COLS); populateColSelect('f2-col', COLS);
+      populateFilterVals('f-val',  COLS[0]); populateFilterVals('f2-val', COLS[0]);
+      populateColSelect('s-group', COLS);
+      populateColSelect('s-col',   numColsOrdered);
+      populateColSelect('a-col',   COLS);
+      populateColSelect('sep-col', COLS);
+      populateColSelect('u-col1',  COLS); populateColSelect('u-col2', COLS);
+      onMutateExprChange();
+      render();
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

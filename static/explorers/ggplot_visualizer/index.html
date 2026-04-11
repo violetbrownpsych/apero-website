@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ggplot2 Layer Explorer</title>
+<link rel="icon" href="Ggplot2_hex_logo.svg.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #f0ebe1;
+  --panel:    #fdfcf9;
+  --border:   #dbd3c3;
+  --text:     #1c1811;
+  --muted:    #79705f;
+  --accent:   #b85520;
+  --code-bg:  #181826;
+  --c-base:   #f5c540;
+  --c-violin: #4eaaec;
+  --c-point:  #52c97e;
+  --c-stat:   #c89850;
+  --c-theme:  #b87fd4;
+  --c-labs:   #e8a030;
+  --c-alpha:  #e86060;
+  --purple:   #7955a8;
+  --orange:   #d96a2e;
+}
+body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── Header ─────────────────────────────── */
+header {
+  text-align:center; padding:15px 20px 9px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel); margin-bottom:11px;
+}
+header h1 { font-family:'Lora',Georgia,serif; font-size:1.45rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
+.pill {
+  display:inline-block; padding:2px 9px;
+  background:#ece8de; border:1px solid var(--border); border-radius:20px;
+  font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
+}
+
+/* ── Layout ─────────────────────────────── */
+.grid {
+  display:grid; grid-template-columns:244px 1fr 420px;
+  gap:10px; padding:0 11px 15px;
+  max-width:1360px; margin:0 auto;
+}
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.panel-label { font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:11px; }
+
+/* ── Controls ────────────────────────────── */
+.cs { margin-bottom:9px; }
+.cs:last-child { margin-bottom:0; }
+.ch { display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:600; margin-bottom:7px; }
+.ch code { font-family:'Fira Code',monospace; font-size:0.77em; background:#ece8de; padding:1px 4px; border-radius:3px; color:var(--muted); }
+
+.dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+.d-base   { background:var(--c-base);   }
+.d-violin { background:var(--c-violin); }
+.d-point  { background:var(--c-point);  }
+.d-stat   { background:var(--c-stat);   }
+.d-theme  { background:var(--c-theme);  }
+.d-labs   { background:var(--c-labs);   }
+.d-alpha  { background:var(--c-alpha);  }
+
+.br { display:flex; flex-wrap:wrap; gap:5px; }
+
+.btn {
+  padding:5px 11px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:0.79rem; font-weight:500; color:var(--text);
+  transition:border-color .1s,background .1s,color .1s; white-space:nowrap;
+}
+.btn:hover { border-color:var(--accent); color:var(--accent); }
+.btn.on    { background:var(--accent); border-color:var(--accent); color:white; }
+.btn[data-fc="purple"].on { background:var(--purple); border-color:var(--purple); }
+.btn[data-fc="orange"].on { background:var(--orange); border-color:var(--orange); }
+
+/* Geom stack buttons — full width, stacked */
+.geom-stack { display:flex; flex-direction:column; gap:5px; margin-bottom:8px; }
+.gbtn {
+  width:100%; padding:6px 12px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'Fira Code',monospace;
+  font-size:0.76rem; font-weight:500; color:var(--muted); transition:all .12s;
+  display:flex; align-items:center; gap:7px; text-align:left;
+}
+.gbtn:hover { border-color:var(--muted); color:var(--text); }
+.gbtn.on { color:var(--text); background:#fefcf9; }
+.gbtn.on.gv { border-color:var(--c-violin); background:rgba(78,170,236,0.07); }
+.gbtn.on.gp { border-color:var(--c-point);  background:rgba(82,201,126,0.07); }
+.gbtn.on.gs { border-color:var(--c-stat);   background:rgba(200,152,80,0.07); }
+.gbtn:not(.on) { opacity:0.42; }
+
+/* aes() location — stacked, full width */
+.aes-stack { display:flex; flex-direction:column; gap:5px; }
+.aesbtn {
+  width:100%; padding:6px 13px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:0.79rem; font-weight:500; color:var(--text); transition:all .1s; text-align:left;
+}
+.aesbtn:hover { border-color:var(--accent); color:var(--accent); }
+.aesbtn.on    { background:var(--accent); border-color:var(--accent); color:white; }
+
+/* Horizontal color-mode toggle */
+.tog {
+  display:flex; border:1.5px solid var(--border);
+  border-radius:7px; overflow:hidden; margin-bottom:7px;
+}
+.tog .btn { flex:1; border:none; border-radius:0; text-align:center; font-size:0.78rem; padding:5px 6px; border-right:1.5px solid var(--border); }
+.tog .btn:last-child { border-right:none; }
+.tog .btn.on { background:var(--accent); color:white; }
+
+.sub { font-size:0.73rem; color:var(--muted); margin-bottom:5px; margin-top:2px; }
+.hr  { height:1px; background:var(--border); margin:8px 0; }
+
+.ord-row { display:flex; gap:5px; }
+.obtn {
+  flex:1; padding:4px 7px; border:1.5px solid var(--border); border-radius:5px;
+  background:white; cursor:pointer; font-family:'Fira Code',monospace;
+  font-size:0.69rem; color:var(--muted); text-align:center; transition:all .1s;
+}
+.obtn.on { border-color:var(--accent); background:#fff5f0; color:var(--accent); font-weight:600; }
+.obtn:hover:not(.on) { border-color:var(--muted); color:var(--text); }
+
+/* ── Plot panel ──────────────────────────── */
+.plot-panel { display:flex; flex-direction:column; }
+#plot-svg { width:100%; display:block; }
+
+/* ── Code panel ──────────────────────────── */
+.code-panel { display:flex; flex-direction:column; gap:9px; }
+.code-scroll {
+  background:var(--code-bg); border-radius:8px; padding:14px 16px;
+  overflow-x:auto; font-family:'Fira Code',monospace; font-size:0.79rem;
+  line-height:1.9; flex:1;
+  color:#abb2bf;   /* default: fully visible light grey on dark bg */
+}
+.code-scroll code { display:block; white-space:pre; }
+
+.cl { display:block; padding:1px 6px 1px 9px; border-radius:3px; border-left:3px solid transparent; }
+.cl-setup     { color:#6a7a6a; }
+.cl-base      { border-left-color:#f5c540; }
+.cl-violin    { border-left-color:#4eaaec; }
+.cl-point     { border-left-color:#52c97e; }
+.cl-stat      { border-left-color:#c89850; }
+.cl-stat-warn { border-left-color:#e86060; }
+.cl-theme     { border-left-color:#b87fd4; }
+.cl-labs      { border-left-color:#e8a030; }
+
+@keyframes flash {
+  0%   { background-color:rgba(255,255,255,0.22); }
+  100% { background-color:transparent; }
+}
+.cl-flash { animation:flash 0.7s ease-out; }
+
+/* Syntax tokens — all visible on dark bg */
+.sf { color:#c792ea; }    /* function */
+.sv { color:#f78c6c; }    /* data frame */
+.sk { color:#89ddff; }    /* arg keyword */
+.ss { color:#c3e88d; }    /* string */
+.sa { color:#82aaff; }    /* aes keyword */
+.sm { color:#ffd27a; }    /* mapped variable */
+.sn { color:#f0ab70; }    /* numeric */
+.sp { color:#89ddff; font-weight:600; }  /* + operator */
+.sw { color:#e86060; font-style:italic; } /* warning comment */
+/* parens, commas, spaces → inherit #abb2bf */
+
+/* ── Annotation ──────────────────────────── */
+.ann {
+  border-radius:7px; padding:10px 14px; font-size:0.79rem; line-height:1.58;
+  border-left:3px solid var(--border); background:#f5f3ee; display:none;
+}
+.ann.show { display:block; }
+.ann b  { font-weight:700; }
+.ann em { font-style:italic; }
+.ann code { font-family:'Fira Code',monospace; font-size:0.87em; background:rgba(0,0,0,0.07); padding:0 3px; border-radius:2px; }
+
+.ann-geom  { border-color:var(--c-violin); background:#f0f6ff; }
+.ann-order { border-color:var(--c-point);  background:#f0fdf5; }
+.ann-color { border-color:var(--c-point);  background:#f2fdf6; }
+.ann-aes   { border-color:var(--c-base);   background:#fdfbf0; }
+.ann-alpha { border-color:var(--c-alpha);  background:#fff5f5; }
+.ann-theme { border-color:var(--c-theme);  background:#faf0ff; }
+.ann-labs  { border-color:var(--c-labs);   background:#fefaf0; }
+.ann-warn    { border-color:#e86060;         background:#fff2f2; }
+.ann-stat    { border-color:var(--c-stat);   background:#fdf8f0; }
+.ann-welcome { border-color:var(--accent);   background:#fdf6f0; }
+
+.fix-btn {
+  display:inline-block; margin-top:10px; padding:7px 14px;
+  background:var(--accent); color:white; border:none; border-radius:6px;
+  cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600;
+  transition:opacity .1s;
+}
+.fix-btn:hover { opacity:0.85; }
+
+/* ── Code tooltip ───────────────────────── */
+#code-tip {
+  position:fixed; z-index:9999; pointer-events:none; display:none;
+  background:#2d2d42; color:#e0ddd5; border:1px solid #4a4860;
+  padding:5px 10px; border-radius:6px; font-size:0.73rem;
+  font-family:'DM Sans',sans-serif; line-height:1.4;
+  max-width:300px; box-shadow:0 2px 8px rgba(0,0,0,0.45);
+}
+
+/* ── Copy button ─────────────────────────── */
+.copy-btn {
+  padding:4px 11px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:0.72rem; font-weight:600; color:var(--muted); transition:all .15s;
+}
+.copy-btn:hover { border-color:var(--accent); color:var(--accent); }
+.copy-btn.copied { background:var(--accent); border-color:var(--accent); color:white; }
+
+/* ── Geom button sub-label (hover-only) ─────*/
+.gbtn-sub {
+  display:block; font-family:'DM Sans',sans-serif; font-size:0.67rem;
+  font-weight:400; margin-top:0; max-height:0; overflow:hidden; opacity:0;
+  transition:max-height 0.18s ease, opacity 0.18s ease;
+}
+.gbtn:hover .gbtn-sub { max-height:18px; opacity:0.8; }
+
+/* ── Annotation label ────────────────────── */
+.ann-label { display:none; font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-top:2px; margin-bottom:4px; }
+.ann.show + .ann-label, .ann-label.show { display:block; }
+
+/* ── Legend bar ─────────────────────────── */
+.legend-bar { display:flex; flex-wrap:wrap; gap:9px; font-size:0.7rem; color:var(--muted); }
+.li { display:flex; align-items:center; gap:5px; }
+/* override dot shape in the legend to match the code stripe visual */
+.legend-bar .dot { width:3px; height:14px; border-radius:2px; }
+</style>
+</head>
+<body>
+
+<div id="code-tip"></div>
+<header>
+  <h1>ggplot2 Layer Explorer</h1>
+  <p>Toggle layers on and off; each colored block in the code is one layer of the plot</p>
+  <span class="pill">data: palmerpenguins::penguins</span>
+  <span class="pill">n ≈ 60 simulated obs.</span>
+</header>
+
+<div class="grid">
+
+  <!-- ══ CONTROLS ════════════════════════════ -->
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+      <div class="panel-label" style="margin-bottom:0">Build Your Plot</div>
+      <button class="copy-btn" onclick="resetAll()" title="Restore all settings to their defaults">Reset</button>
+    </div>
+
+    <!-- Geom layers — all stacked -->
+    <div class="cs">
+      <div class="ch">Active layers</div>
+      <div class="geom-stack">
+        <button class="gbtn gv on" id="b-violin" onclick="toggleGeom('violin')">
+          <span class="dot d-violin"></span>
+          <span>geom_violin()<span class="gbtn-sub">shows the distribution shape</span></span>
+        </button>
+        <button class="gbtn gp on" id="b-point" onclick="toggleGeom('point')">
+          <span class="dot d-point"></span>
+          <span>geom_point()<span class="gbtn-sub">plots each observation as a dot</span></span>
+        </button>
+        <button class="gbtn gs" id="b-stat" onclick="toggleStat()">
+          <span class="dot d-stat"></span>
+          <span>stat_summary()<span class="gbtn-sub">adds a mean diamond per group</span></span>
+        </button>
+      </div>
+      <!-- layer order — only shown when violin + point both active -->
+      <div id="ord-section">
+        <div class="sub">Layer order (drawn bottom → top):</div>
+        <div class="ord-row">
+          <button class="obtn on" id="b-vp" onclick="setOrder('violin-point')">violin → point</button>
+          <button class="obtn"    id="b-pv" onclick="setOrder('point-violin')">point → violin</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- Color -->
+    <div class="cs">
+      <div class="ch"><span class="dot d-point"></span> Color</div>
+      <div class="tog">
+        <button class="btn on" id="b-fixed"  onclick="setColorMode('fixed')">Fixed</button>
+        <button class="btn"    id="b-mapped" onclick="setColorMode('mapped')">Map to variable</button>
+      </div>
+      <div id="fc-row" class="br">
+        <button class="btn on" data-fc="purple" onclick="pick(this,'fixedColor','purple')">🟣 purple</button>
+        <button class="btn"    data-fc="orange" onclick="pick(this,'fixedColor','orange')">🟠 orange</button>
+      </div>
+      <div id="mv-row" class="br" style="display:none">
+        <button class="btn on" onclick="pick(this,'mappedVar','species')">species</button>
+        <button class="btn"    onclick="pick(this,'mappedVar','sex')">sex</button>
+      </div>
+      <div id="map-apply-row" class="br" style="display:none">
+        <div class="sub" style="width:100%">Color which geoms?</div>
+        <button class="btn on" id="m-both"   onclick="setMapApply('both')">both</button>
+        <button class="btn"    id="m-violin" onclick="setMapApply('violin')">violins only</button>
+        <button class="btn"    id="m-point"  onclick="setMapApply('point')">points only</button>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- Alpha -->
+    <div class="cs">
+      <div class="ch"><span class="dot d-alpha"></span> Transparency (alpha)</div>
+      <div class="br" id="alpha-row">
+        <button class="btn"    onclick="pick(this,'alpha',0.2)">0.2 (faint)</button>
+        <button class="btn on" onclick="pick(this,'alpha',0.6)">0.6 (medium)</button>
+        <button class="btn"    onclick="pick(this,'alpha',1.0)">1.0 (solid)</button>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- aes() location — stacked, full width -->
+    <div class="cs">
+      <div class="ch"><span class="dot d-base"></span> Where does <code>aes()</code> live?</div>
+      <div class="sub"><code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 3px;border-radius:2px">aes()</code> tells ggplot which data columns control what you see (x-axis, y-axis, color…)</div>
+      <div class="aes-stack">
+        <button class="aesbtn on" id="b-global" onclick="setAes('ggplot')"
+          title="Write aes() once inside ggplot(). Every layer inherits x and y automatically">
+          In ggplot() &rarr; global
+        </button>
+        <button class="aesbtn" id="b-local" onclick="setAes('geom')"
+          title="Each layer gets its own aes(). This is more repetitive, but shows what breaks when you forget">
+          In each layer &rarr; local
+        </button>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- Theme + Labels (both cosmetic finishing layers) -->
+    <div class="cs">
+      <div class="ch">Appearance</div>
+      <div class="sub" style="margin-bottom:5px">Theme</div>
+      <div class="br" id="theme-row" style="margin-bottom:9px">
+        <button class="btn on" onclick="pick(this,'theme','none')">default</button>
+        <button class="btn"    onclick="pick(this,'theme','minimal')">minimal</button>
+        <button class="btn"    onclick="pick(this,'theme','classic')">classic</button>
+        <button class="btn"    onclick="pick(this,'theme','bw')">bw</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:500">
+        <input type="checkbox" id="chk-labs" onchange="toggleLabs(this.checked)">
+        Add <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 4px;border-radius:3px">labs()</code> layer
+      </label>
+    </div>
+  </div>
+
+  <!-- ══ PLOT ════════════════════════════════ -->
+  <div class="panel plot-panel">
+    <div class="panel-label">Plot Preview</div>
+    <svg id="plot-svg" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- ══ CODE ════════════════════════════════ -->
+  <div class="panel code-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+      <div class="panel-label" style="margin-bottom:0">ggplot2 Code — paste into RStudio to run</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy code</button>
+    </div>
+    <div class="code-scroll"><code id="code-out"></code></div>
+    <div id="ann-label" class="ann-label">What just changed:</div>
+    <div id="ann" class="ann"></div>
+    <div class="panel-label" style="margin-bottom:6px;margin-top:2px">Code line colors</div>
+    <div class="legend-bar">
+      <span class="li"><span class="dot d-base"></span>   ggplot() base</span>
+      <span class="li"><span class="dot d-violin"></span> geom_violin()</span>
+      <span class="li"><span class="dot d-point"></span>  geom_point()</span>
+      <span class="li"><span class="dot d-stat"></span>   stat_summary()</span>
+      <span class="li"><span class="dot d-theme"></span>  theme</span>
+      <span class="li"><span class="dot d-labs"></span>   labels</span>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+'use strict';
+
+// ─── DATA ──────────────────────────────────────────────────────────
+const penguins = (() => {
+  let _s = 20250410;
+  const rand  = () => { _s = (_s * 1664525 + 1013904223) & 0x7fffffff; return _s / 0x7fffffff; };
+  const randn = () => Math.sqrt(-2 * Math.log(Math.max(rand(), 1e-9))) * Math.cos(2 * Math.PI * rand());
+  const specs = [['Adelie',3700,450,20],['Chinstrap',3730,390,18],['Gentoo',5080,510,22]];
+  const data = [];
+  specs.forEach(([sp, mMu, mSd, n]) => {
+    for (let i = 0; i < n; i++) {
+      const sex = rand() > .5 ? 'male' : 'female';
+      data.push({ species:sp, sex,
+        body_mass_g: Math.round((mMu + randn()*mSd + (sex==='male' ? 185 : -185)) / 50) * 50 });
+    }
+  });
+  data.forEach((d, i) => { d._j = (((Math.sin(i*9301+49297)*43758.5453)%1)+1)%1 - 0.5; });
+  return data;
+})();
+
+const SP = ['Adelie','Chinstrap','Gentoo'];
+
+// Violin fill palette (warm)
+const VF = { Adelie:'#e07040', Chinstrap:'#7060b0', Gentoo:'#25a090',
+             male:'#4278b4', female:'#b84474' };
+// Point open-circle stroke palette (cool — clearly distinct from violin fills)
+const PC = { Adelie:'#1a5f8a', Chinstrap:'#8a3010', Gentoo:'#4a7020',
+             male:'#7a3898', female:'#1a7858' };
+const FC = { purple:'#7955a8', orange:'#d96a2e' };
+
+// ─── STATE ─────────────────────────────────────────────────────────
+const S = {
+  showViolin:  true,
+  showPoint:   true,
+  showStat:    false,
+  layerOrder:  'violin-point',
+  colorMode:   'fixed',
+  fixedColor:  'purple',
+  mappedVar:   'species',
+  alpha:       0.6,
+  aesLoc:      'ggplot',
+  mapApply:    'both',     // where mapping is applied when using local aes(): 'both'|'violin'|'point'
+  statHasAes:  false,   // only matters when aesLoc='geom' && showStat
+  theme:       'none',
+  addLabs:     false,
+  changed:     'init',
+};
+
+function getViolinCol(d) {
+  if (S.colorMode === 'fixed') return FC[S.fixedColor];
+  // If aes is global, mapping applies to both geoms. If aes is local, mapping only applies
+  // to the violin when mapApply is 'both' or 'violin'. Otherwise use fixedColor.
+  if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin')
+    return VF[S.mappedVar === 'species' ? d.species : d.sex];
+  return FC[S.fixedColor];
+}
+function getPointCol(d) {
+  if (S.colorMode === 'fixed') return FC[S.fixedColor];
+  if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'point')
+    return PC[S.mappedVar === 'species' ? d.species : d.sex];
+  return FC[S.fixedColor];
+}
+
+// ─── UI HANDLERS ───────────────────────────────────────────────────
+function pick(btn, key, val) {
+  S[key] = val; S.changed = key;
+  btn.closest('.br,.tog,.ord-row').querySelectorAll('.btn,.obtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function toggleGeom(which) {
+  const key   = which === 'violin' ? 'showViolin' : 'showPoint';
+  const other = which === 'violin' ? S.showPoint  : S.showViolin;
+  if (S[key] && !other) return; // keep at least one of violin/point active
+  S[key] = !S[key]; S.changed = 'geom';
+  document.getElementById('b-' + which).classList.toggle('on', S[key]);
+  document.getElementById('ord-section').style.display = (S.showViolin && S.showPoint) ? '' : 'none';
+  render();
+}
+
+function toggleStat() {
+  S.showStat = !S.showStat;
+  if (!S.showStat) S.statHasAes = false; // reset when turning off
+  S.changed = 'geom';
+  document.getElementById('b-stat').classList.toggle('on', S.showStat);
+  render();
+}
+
+function setOrder(ord) {
+  S.layerOrder = ord; S.changed = 'order';
+  document.getElementById('b-vp').classList.toggle('on', ord === 'violin-point');
+  document.getElementById('b-pv').classList.toggle('on', ord === 'point-violin');
+  render();
+}
+
+function setColorMode(mode) {
+  S.colorMode = mode; S.changed = 'colorMode';
+  document.getElementById('b-fixed').classList.toggle('on',  mode === 'fixed');
+  document.getElementById('b-mapped').classList.toggle('on', mode === 'mapped');
+  document.getElementById('fc-row').style.display = mode === 'fixed'  ? 'flex' : 'none';
+  document.getElementById('mv-row').style.display = mode === 'mapped' ? 'flex' : 'none';
+  document.getElementById('map-apply-row').style.display = mode === 'mapped' && S.aesLoc === 'geom' ? 'flex' : 'none';
+  render();
+}
+
+function setMapApply(v) {
+  S.mapApply = v; S.changed = 'colorMode';
+  document.getElementById('m-both').classList.toggle('on', v === 'both');
+  document.getElementById('m-violin').classList.toggle('on', v === 'violin');
+  document.getElementById('m-point').classList.toggle('on', v === 'point');
+  render();
+}
+
+function setAes(loc) {
+  if (loc === 'geom') S.statHasAes = false; // always reset when going local
+  S.aesLoc = loc; S.changed = 'aesLoc';
+  document.getElementById('b-global').classList.toggle('on', loc === 'ggplot');
+  document.getElementById('b-local').classList.toggle('on',  loc === 'geom');
+  document.getElementById('map-apply-row').style.display = S.colorMode === 'mapped' && loc === 'geom' ? 'flex' : 'none';
+  render();
+}
+
+function fixStatAes() {
+  S.statHasAes = true; S.changed = 'statFix';
+  render();
+}
+
+function toggleLabs(v) { S.addLabs = v; S.changed = 'addLabs'; render(); }
+
+function resetAll() {
+  Object.assign(S, {
+    showViolin:true, showPoint:true, showStat:false,
+    layerOrder:'violin-point', colorMode:'fixed', fixedColor:'purple',
+    mappedVar:'species', alpha:0.6, aesLoc:'ggplot', mapApply:'both',
+    statHasAes:false, theme:'none', addLabs:false, changed:'init'
+  });
+  // geom buttons
+  document.getElementById('b-violin').classList.add('on');
+  document.getElementById('b-point').classList.add('on');
+  document.getElementById('b-stat').classList.remove('on');
+  document.getElementById('ord-section').style.display = '';
+  // layer order
+  document.getElementById('b-vp').classList.add('on');
+  document.getElementById('b-pv').classList.remove('on');
+  // color mode
+  document.getElementById('b-fixed').classList.add('on');
+  document.getElementById('b-mapped').classList.remove('on');
+  document.getElementById('fc-row').style.display = 'flex';
+  document.getElementById('mv-row').style.display = 'none';
+  document.getElementById('map-apply-row').style.display = 'none';
+  // fixed color buttons
+  document.querySelectorAll('#fc-row .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.fc === 'purple'));
+  // mapped var buttons
+  document.querySelectorAll('#mv-row .btn').forEach((b,i) =>
+    b.classList.toggle('on', i === 0));
+  // map apply buttons
+  document.getElementById('m-both').classList.add('on');
+  document.getElementById('m-violin').classList.remove('on');
+  document.getElementById('m-point').classList.remove('on');
+  // alpha buttons
+  document.querySelectorAll('#alpha-row .btn').forEach(b =>
+    b.classList.toggle('on', b.textContent.startsWith('0.6')));
+  // aes location
+  document.getElementById('b-global').classList.add('on');
+  document.getElementById('b-local').classList.remove('on');
+  // theme buttons
+  document.querySelectorAll('#theme-row .btn').forEach(b =>
+    b.classList.toggle('on', b.textContent === 'default'));
+  // labs checkbox
+  document.getElementById('chk-labs').checked = false;
+  render();
+}
+
+function copyCode() {
+  const text = document.getElementById('code-out').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy code'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ─── CODE GENERATION ───────────────────────────────────────────────
+const FN_TIPS = {
+  library:       'loads an R package so its functions are available to use',
+  ggplot:        'sets up the plot canvas: takes the data and optional default aesthetics',
+  aes:           'maps data columns to visual properties: x-axis, y-axis, color, fill…',
+  geom_violin:   'draws a mirrored density curve showing the distribution shape per group',
+  geom_point:    'draws one dot per observation (scatter/jitter plot)',
+  stat_summary:  'computes a summary statistic per group (here: mean) and draws it as a shape',
+  theme_minimal: 'removes the grey background and most gridlines: clean, modern look',
+  theme_classic: 'white background with axis lines only: traditional journal style',
+  theme_bw:      'white background with grey gridlines and a border',
+  labs:          'sets the plot title and axis labels: purely cosmetic, no effect on the data',
+};
+const fn = s => {
+  const tip = FN_TIPS[s];
+  return tip
+    ? `<span class="sf" data-tip="${tip}" style="cursor:help">${s}</span>`
+    : `<span class="sf">${s}</span>`;
+};
+const DV_TIPS = {
+  penguins: 'the dataset: 344 penguin observations loaded by library(palmerpenguins)',
+};
+const dv = s => {
+  const tip = DV_TIPS[s];
+  return tip
+    ? `<span class="sv" data-tip="${tip}" style="cursor:help">${s}</span>`
+    : `<span class="sv">${s}</span>`;
+};
+const KW_TIPS = {
+  x:     'the data column mapped to the x-axis (horizontal position)',
+  y:     'the data column mapped to the y-axis (vertical position)',
+  fill:  'controls the inside fill color of a shape: goes inside aes() when mapped to data, outside when fixed',
+  color: 'controls the outline/stroke color: goes inside aes() when mapped to data, outside when fixed',
+  alpha: 'transparency: 0 = fully invisible, 1 = fully solid',
+  shape: 'the point shape to draw: 18 is a filled diamond ◆',
+  size:  'the size of the drawn shape',
+  fun:   'the summary function to compute per group (here: mean)',
+  geom:  'what shape to use when drawing the computed summary',
+  title: 'the main title displayed above the plot',
+};
+const kw = s => {
+  const tip = KW_TIPS[s];
+  return tip
+    ? `<span class="sk" data-tip="${tip}" style="cursor:help">${s}</span>`
+    : `<span class="sk">${s}</span>`;
+};
+const ss = s => `<span class="ss">"${s}"</span>`;
+const ae = s => s === 'aes'
+  ? `<span class="sa" data-tip="short for 'aesthetics': maps data columns to visual properties like position, color, and size" style="cursor:help">${s}</span>`
+  : `<span class="sa">${s}</span>`;
+const MV_TIPS = {
+  species:      'which penguin species: Adelie, Chinstrap, or Gentoo',
+  body_mass_g:  'body mass measured in grams: this is the y-axis variable',
+  sex:          'sex of the individual penguin: male or female',
+};
+const mv = s => {
+  const tip = MV_TIPS[s];
+  return tip
+    ? `<span class="sm" data-tip="${tip}" style="cursor:help">${s}</span>`
+    : `<span class="sm">${s}</span>`;
+};
+const nu = s => `<span class="sn">${s}</span>`;
+const pl = () => `<span class="sp" data-tip="+ chains the next layer onto the plot" style="cursor:help"> +</span>`;
+
+// Build the canonical aes() with x, y, and optional extra
+function mkAes(extra = '') {
+  return `${ae('aes')}(${kw('x')} = ${mv('species')}, ${kw('y')} = ${mv('body_mass_g')}${extra})`;
+}
+
+function buildCode() {
+  const { showViolin, showPoint, showStat, layerOrder, colorMode,
+      fixedColor, mappedVar, mapApply, alpha, aesLoc, statHasAes, theme, addLabs } = S;
+
+  const a = nu(alpha.toFixed(1));
+  const hasMore = theme !== 'none' || addLabs;
+
+  // Draw order for violin/point; stat always last
+  const gBase = (showViolin && showPoint)
+    ? (layerOrder === 'violin-point' ? ['violin','point'] : ['point','violin'])
+    : showViolin ? ['violin'] : showPoint ? ['point'] : [];
+  const geoms = showStat ? [...gBase, 'stat'] : gBase;
+
+  // Build global aes (x, y, and color parts when mapped)
+  let gColor = '';
+  if (aesLoc === 'ggplot' && colorMode === 'mapped') {
+    if (showViolin) gColor += `, ${kw('fill')}  = ${mv(mappedVar)}`;
+    if (showPoint)  gColor += `, ${kw('color')} = ${mv(mappedVar)}`;
+  }
+  const globalAes = mkAes(gColor);
+
+  const lines = [];
+
+  // ── setup lines (library + comment) ──
+  lines.push({ id:'lib1', layer:'setup', t:`${fn('library')}(tidyverse)` });
+  lines.push({ id:'lib2', layer:'setup', t:`${fn('library')}(palmerpenguins)` });
+  lines.push({ id:'cmt1', layer:'setup', t:`# ${SP.join(', ')} penguins: body mass (g) by species` });
+  lines.push({ id:'cmt2', layer:'setup', t:`# Source: Gorman et al. 2020 — note: preview uses ~60 simulated points, your output will show all 344` });
+  lines.push({ id:'blank',layer:'setup', t:`` });
+
+  // ── ggplot() base ──
+  const hasG = geoms.length > 0;
+  if (aesLoc === 'ggplot') {
+    lines.push({ id:'gg', layer:'base', t:`${fn('ggplot')}(${dv('penguins')}, ${globalAes})${hasG ? pl() : ''}` });
+  } else {
+    lines.push({ id:'gg', layer:'base', t:`${fn('ggplot')}(${dv('penguins')})${hasG ? pl() : ''}` });
+  }
+
+  // ── geom layers ──
+  geoms.forEach((geom, i) => {
+    const isLast = i === geoms.length - 1;
+    const trail  = (!isLast || hasMore) ? pl() : '';
+
+    // ── geom_violin ──
+    if (geom === 'violin') {
+      if (aesLoc === 'ggplot') {
+        // aes inherited; only style args needed
+        const fp = colorMode === 'fixed' ? `${kw('fill')} = ${ss(fixedColor)}, ` : '';
+        lines.push({ id:'violin', layer:'violin', t:`  ${fn('geom_violin')}(${fp}${kw('alpha')} = ${a})${trail}` });
+      } else {
+        // local: full aes() inside the geom — only include fill mapping for violin when mapApply allows it
+        const includeVMap = colorMode === 'mapped' && (mapApply === 'both' || mapApply === 'violin');
+        const cPart = includeVMap ? `, ${kw('fill')}  = ${mv(mappedVar)}` : '';
+        const fp    = colorMode === 'fixed'  ? `    ${kw('fill')} = ${ss(fixedColor)}, ` : '    ';
+        lines.push({ id:'v1', layer:'violin', t:`  ${fn('geom_violin')}(` });
+        lines.push({ id:'v2', layer:'violin', t:`    ${mkAes(cPart)},` });
+        lines.push({ id:'v3', layer:'violin', t:`    ${colorMode === 'fixed' ? kw('fill') + ' = ' + ss(fixedColor) + ', ' : ''}${kw('alpha')} = ${a})${trail}` });
+      }
+    }
+
+    // ── geom_point ──
+    else if (geom === 'point') {
+      if (aesLoc === 'ggplot') {
+        const cp = colorMode === 'fixed' ? `${kw('color')} = ${ss(fixedColor)}, ` : '';
+        lines.push({ id:'point', layer:'point', t:`  ${fn('geom_point')}(${cp}${kw('alpha')} = ${a})${trail}` });
+      } else {
+        const includePMap = colorMode === 'mapped' && (mapApply === 'both' || mapApply === 'point');
+        const cPart = includePMap ? `, ${kw('color')} = ${mv(mappedVar)}` : '';
+        lines.push({ id:'p1', layer:'point', t:`  ${fn('geom_point')}(` });
+        lines.push({ id:'p2', layer:'point', t:`    ${mkAes(cPart)},` });
+        lines.push({ id:'p3', layer:'point', t:`    ${colorMode === 'fixed' ? kw('color') + ' = ' + ss(fixedColor) + ', ' : ''}${kw('alpha')} = ${a})${trail}` });
+      }
+    }
+
+    // ── stat_summary ──
+    else if (geom === 'stat') {
+      const statOk = aesLoc === 'ggplot' || statHasAes;
+
+      if (aesLoc === 'ggplot') {
+        // global: stat inherits aes, just needs its own args
+        lines.push({ id:'s1', layer:'stat', t:`  ${fn('stat_summary')}(${kw('fun')} = mean, ${kw('geom')} = ${ss('point')},` });
+        lines.push({ id:'s2', layer:'stat', t:`    ${kw('shape')} = ${nu('18')}, ${kw('size')} = ${nu('5')}, ${kw('color')} = ${ss('black')})${trail}` });
+      } else if (statHasAes) {
+        // local + fixed: stat has its own aes
+        lines.push({ id:'s1', layer:'stat', t:`  ${fn('stat_summary')}(` });
+        lines.push({ id:'s2', layer:'stat', t:`    ${mkAes()},` });
+        lines.push({ id:'s3', layer:'stat', t:`    ${kw('fun')} = mean, ${kw('geom')} = ${ss('point')},` });
+        lines.push({ id:'s4', layer:'stat', t:`    ${kw('shape')} = ${nu('18')}, ${kw('size')} = ${nu('5')}, ${kw('color')} = ${ss('black')})${trail}` });
+      } else {
+        // local + no fix: BROKEN — show warning comment
+        lines.push({ id:'s1', layer:'stat-warn', t:`  ${fn('stat_summary')}(${kw('fun')} = mean, ${kw('geom')} = ${ss('point')}, <span class="sw"># ⚠ no aes()!</span>` });
+        lines.push({ id:'s2', layer:'stat-warn', t:`    ${kw('shape')} = ${nu('18')}, ${kw('size')} = ${nu('5')}, ${kw('color')} = ${ss('black')})${trail}` });
+      }
+    }
+  });
+
+  // ── theme ──
+  if (theme !== 'none') {
+    lines.push({ id:'theme', layer:'theme', t:`  ${fn('theme_'+theme)}()${addLabs ? pl() : ''}` });
+  }
+
+  // ── labs ──
+  if (addLabs) {
+    lines.push({ id:'l1', layer:'labs', t:`  ${fn('labs')}(` });
+    lines.push({ id:'l2', layer:'labs', t:`    ${kw('title')} = ${ss('Body Mass by Species')},` });
+    lines.push({ id:'l3', layer:'labs', t:`    ${kw('x')} = ${ss('Species')},` });
+    lines.push({ id:'l4', layer:'labs', t:`    ${kw('y')} = ${ss('Body Mass (g)')}` });
+    lines.push({ id:'l5', layer:'labs', t:`  )` });
+  }
+
+  return lines;
+}
+
+// ─── ANNOTATIONS ───────────────────────────────────────────────────
+function getAnn() {
+  const { changed, showViolin, showPoint, showStat, layerOrder,
+          colorMode, aesLoc, theme, addLabs, fixedColor, mappedVar, alpha, statHasAes } = S;
+
+  // Priority: stat warning always shown when condition is met
+  if (showStat && aesLoc === 'geom' && !statHasAes) {
+    return { cls:'ann-warn', html:`<b>⚠ The diamonds vanished; stat_summary() has no aes().</b><br><br>
+      When you use local aes(), each layer must provide its own mappings. The geoms above have <code>aes(x = species, y = body_mass_g)</code> inside them, but you never gave <code>stat_summary()</code> the same. It has no idea which column is x and which is y. In R, this would throw an error.<br><br>
+      <button class="fix-btn" onclick="fixStatAes()">Give stat_summary() its own aes() &rarr;</button>` };
+  }
+
+  if (changed === 'statFix') {
+    return { cls:'ann-stat', html:`<b>There they are.</b> Now that <code>stat_summary()</code> has <code>aes(x = species, y = body_mass_g)</code>, it knows where to put the diamonds.<br><br>
+      Notice: you just wrote those same two mappings a third time. This is exactly why putting shared aesthetics in <code>ggplot()</code> exists: Write it once, every layer inherits it.` };
+  }
+
+  if (changed === 'geom') {
+    if (showStat && aesLoc === 'ggplot')
+      return { cls:'ann-stat', html:`<b>stat_summary() just works.</b> With global <code>aes()</code>, <code>stat_summary()</code> inherits <code>x = species</code> and <code>y = body_mass_g</code> automatically—no extra work needed. Try switching to <em>In each layer → local</em> to see what breaks.` };
+    if (showViolin && showPoint)
+      return { cls:'ann-geom', html:`<b>Two geoms, one base.</b> Both inherit <code>x = species</code> and <code>y = body_mass_g</code> from <code>ggplot()</code>. Notice also that violin and point are <em>different colors</em> for the same species:violin uses <code>fill</code>, point uses <code>color</code>, each geom picks up what it needs.` };
+    const g = showViolin ? 'violin' : 'point';
+    return { cls:'ann-geom', html:`<b>Geom = how to draw the data.</b> <code>geom_${g}()</code> is stacked onto the base layer with <code>+</code>. The geom draws; <code>ggplot()</code> sets up the axes.` };
+  }
+
+  if (changed === 'order')
+    return { cls:'ann-order', html:`<b>Layer order = draw order.</b> ggplot2 draws layers exactly as written. <em>${layerOrder === 'violin-point' ? 'violin → point' : 'point → violin'}</em>: the ${layerOrder === 'violin-point' ? 'hollow points sit on top of the filled violins' : 'violins are drawn on top, obscuring the points beneath'}. Code order has visual consequences.` };
+
+  if (changed === 'fixedColor' || (changed === 'colorMode' && colorMode === 'fixed'))
+    return { cls:'ann-color', html:`<b>Fixed color: <em>outside</em> aes().</b> <code>fill = "${fixedColor}"</code> and <code>color = "${fixedColor}"</code> are style instructions. They go <em>outside</em> <code>aes()</code> because no data is being inspected, ggplot applies them uniformly.` };
+
+  if (changed === 'mappedVar' || (changed === 'colorMode' && colorMode === 'mapped'))
+    return { cls:'ann-color', html:`<b>Mapped color: <em>inside</em> aes().</b> <code>fill = ${mappedVar}</code> and <code>color = ${mappedVar}</code> go <em>inside</em> <code>aes()</code> because ggplot needs to read the <b>${mappedVar}</b> column to assign colors. The palette is chosen automatically.<br><br>
+      Also notice: violin uses <code>fill</code>, point uses <code>color</code>; same variable, different aesthetics, different geoms.` };
+
+  if (changed === 'aesLoc') {
+    if (aesLoc === 'ggplot')
+      return { cls:'ann-aes', html:`<b>Global aes() in ggplot().</b> Every layer inherits <code>x = species</code> and <code>y = body_mass_g</code> automatically. Write it once; all layers use it, including any <code>stat_summary()</code> you add.` };
+    return { cls:'ann-aes', html:`<b>Local aes() in each layer.</b> Now every geom carries its own <code>aes(x = species, y = body_mass_g)</code>. This is repetitive, and it has a consequence: any layer you add must also get its own aes() or it won't know what to plot. Try adding <code>stat_summary()</code> to see this happen.` };
+  }
+
+  if (changed === 'alpha')
+    return { cls:'ann-alpha', html:`<b>alpha = ${alpha}: outside aes().</b> A uniform style setting, not a data mapping. It goes <em>outside</em> <code>aes()</code>. With both geoms overlapping, lower alpha lets you see the violin shape through the scattered points.` };
+
+  if (changed === 'theme' && theme !== 'none')
+    return { cls:'ann-theme', html:`<b>theme_${theme}(): cosmetic only.</b> Background, grid, borders all changed without touching the data or aesthetics at all. Just another <code>+</code> layer.` };
+
+  if (changed === 'addLabs' && addLabs)
+    return { cls:'ann-labs', html:`<b>labs(): another + layer.</b> Purely cosmetic. Title and axis labels sit at the end of the chain; removing them changes nothing about how data is drawn.` };
+
+  if (changed === 'init')
+    return { cls:'ann-welcome', html:`<b>Here's how this works.</b><br><br>
+      The code panel above shows real ggplot2 R code you can paste into R. Each <b>colored stripe</b> on the left of a line marks which layer it belongs to; ggplot2 builds plots by stacking layers together with <code>+</code>.<br><br>
+      Use the <b>controls on the left</b> to add, remove, or tweak layers. The code and plot update instantly. An explanation of <em>what just changed and why it matters</em> will appear here each time you click something.` };
+
+  return null;
+}
+
+// ─── RENDER: CODE ──────────────────────────────────────────────────
+let _prev = [];
+function renderCode() {
+  const lines = buildCode();
+  const el = document.getElementById('code-out');
+  el.innerHTML = lines.map((l, i) => {
+    const p = _prev[i];
+    const didChange = !p || p.id !== l.id || p.t !== l.t;
+    const flash = didChange && S.changed !== 'init' ? ' cl-flash' : '';
+    return `<span class="cl cl-${l.layer}${flash}">${l.t}</span>`;
+  }).join('\n');
+  _prev = lines.map(l => ({...l}));
+
+  const ann = getAnn();
+  const el2 = document.getElementById('ann');
+  const lbl = document.getElementById('ann-label');
+  if (ann) {
+    el2.innerHTML = ann.html;
+    el2.className = 'ann show ' + ann.cls;
+    lbl.textContent = S.changed === 'init' ? 'How to use:' : 'What just changed:';
+    lbl.classList.add('show');
+  } else { el2.className = 'ann'; lbl.classList.remove('show'); }
+}
+
+// ─── RENDER: PLOT ──────────────────────────────────────────────────
+const VW=480, VH=360, ML=58, MR=24, MT=18, MB=52;
+const PW=VW-ML-MR, PH=VH-MT-MB;
+
+function scl([d0,d1],[r0,r1]) { return v => r0+(v-d0)/(d1-d0)*(r1-r0); }
+
+function niceTicks(lo,hi,n=5) {
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const step=[1,2,5,10].map(f=>f*mag).find(s=>s>=raw)||mag*10;
+  const out=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+step*.01; v+=step) out.push(v);
+  return out;
+}
+
+function padExt(vals) {
+  const lo=Math.min(...vals), hi=Math.max(...vals), span=hi-lo;
+  // KDE tails extend ~3×bandwidth (185g) below/above data min/max;
+  // top padding must be at least 3×bandwidth (555g) beyond the data max
+  return [lo - span*0.17, hi + Math.max(span*0.22, 580)];
+}
+
+function themeCfg() {
+  switch(S.theme){
+    case 'minimal': return {bg:'#ffffff',grid:'#ebebeb',gw:0.8,box:false};
+    case 'classic': return {bg:'#ffffff',grid:null,      gw:0,  box:true };
+    case 'bw':      return {bg:'#ffffff',grid:'#cccccc', gw:0.8,box:true };
+    default:        return {bg:'#e8e8e8',grid:'#ffffff', gw:1.2,box:false};
+  }
+}
+
+// KDE for violin
+function kde(vals,h=185) {
+  const lo=Math.min(...vals)-h*3, hi=Math.max(...vals)+h*3;
+  return Array.from({length:55},(_,i)=>{
+    const y=lo+(hi-lo)*i/54;
+    const d=vals.reduce((s,v)=>s+Math.exp(-0.5*((y-v)/h)**2),0)
+             /(vals.length*h*Math.sqrt(2*Math.PI));
+    return {y,d};
+  });
+}
+
+function drawViolins(sy,cx) {
+  const allV=penguins.map(d=>d.body_mass_g);
+  const kdes=SP.map(sp=>kde(penguins.filter(d=>d.species===sp).map(d=>d.body_mass_g)));
+  const maxD=Math.max(...kdes.flat().map(p=>p.d));
+  const hw=PW*0.18;
+
+  return SP.map((sp,i)=>{
+    const pts=kdes[i], x=cx(i);
+    let c;
+    if (S.colorMode === 'fixed') c = FC[S.fixedColor];
+    else if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin')
+      c = VF[S.mappedVar === 'species' ? sp : (penguins.find(d=>d.species===sp)?.sex||'male')];
+    else c = FC[S.fixedColor];
+    const dw=d=>hw*d/maxD;
+    const right=pts.map(p=>`${x+dw(p.d)},${sy(p.y)}`).join(' ');
+    const left=[...pts].reverse().map(p=>`${x-dw(p.d)},${sy(p.y)}`).join(' ');
+    return `<polygon points="${right} ${left}" fill="${c}" opacity="${S.alpha}" stroke="${c}" stroke-width="1.3"/>`;
+  }).join('');
+}
+
+function drawPoints(sy,cx) {
+  const jitW=PW*0.065;
+  const bothGeoms=S.showViolin; // open circles when violin also showing
+  return penguins.map(d=>{
+    const x=cx(SP.indexOf(d.species))+d._j*jitW;
+    const y=sy(d.body_mass_g);
+    let col;
+    if (S.colorMode === 'fixed') col = FC[S.fixedColor];
+    else if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'point')
+      col = PC[S.mappedVar === 'species' ? d.species : d.sex];
+    else col = FC[S.fixedColor];
+    if (bothGeoms) {
+      // open circle: white fill + colored stroke — distinct from filled violin
+      return `<circle cx="${x}" cy="${y}" r="5" fill="white" opacity="${Math.max(S.alpha, 0.5)}" stroke="${col}" stroke-width="2"/>`;
+    } else {
+      // solid circle when standing alone
+      return `<circle cx="${x}" cy="${y}" r="5" fill="${col}" opacity="${S.alpha}" stroke="white" stroke-width="0.7"/>`;
+    }
+  }).join('');
+}
+
+function drawStat(sy,cx) {
+  if (!S.showStat) return '';
+  if (S.aesLoc === 'geom' && !S.statHasAes) return ''; // broken — no diamonds
+  const r=8;
+  return SP.map((sp,i)=>{
+    const x=cx(i);
+    const vals=penguins.filter(d=>d.species===sp).map(d=>d.body_mass_g);
+    const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const y=sy(mean);
+    return `<polygon points="${x},${y-r} ${x+r},${y} ${x},${y+r} ${x-r},${y}" fill="#111" opacity="0.88"/>`;
+  }).join('');
+}
+
+function drawLegend(cx) {
+  if (S.colorMode !== 'mapped') return '';
+  const isSpecies = S.mappedVar === 'species';
+  const vEntries = isSpecies
+    ? SP.map(sp => [sp, VF[sp]])
+    : [['male', VF.male], ['female', VF.female]];
+  const pEntries = isSpecies
+    ? SP.map(sp => [sp, PC[sp]])
+    : [['male', PC.male], ['female', PC.female]];
+
+  // Determine whether mapping actually applies to violin/point in the current config
+  const showV = S.showViolin && (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin');
+  const showP = S.showPoint  && (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'point');
+  if (!showV && !showP) return '';
+
+  const lx = 4, ly = 2;
+  const pad = 8;
+
+  if (showV && showP) {
+    // Side-by-side two-column layout: violin on left, points on right
+    const colW = 76;
+    const totalW = pad + colW + colW + pad;
+    const rows = vEntries.length;
+
+    let items = `<text x="${lx+pad}" y="${ly+14}" font-size="9" fill="#7a6e5f" font-weight="700">${S.mappedVar}</text>`;
+    let y = ly + 22;
+
+    // Column subheaders
+    items += `<text x="${lx+pad}" y="${y}" font-size="8.5" fill="#7a6e5f" font-style="italic">fill (violin)</text>`;
+    items += `<text x="${lx+pad+colW}" y="${y}" font-size="8.5" fill="#7a6e5f" font-style="italic">color (point)</text>`;
+    y += 13;
+
+    vEntries.forEach(([k, vc], idx) => {
+      const pc = pEntries[idx][1];
+      const ry = y + idx * 15;
+      items += `<rect x="${lx+pad}" y="${ry}" width="11" height="11" fill="${vc}" rx="2" opacity="0.85"/>`;
+      items += `<text x="${lx+pad+15}" y="${ry+9}" font-size="9.5" fill="#1c1811">${k}</text>`;
+      items += `<circle cx="${lx+pad+colW+6}" cy="${ry+5}" r="5" fill="white" stroke="${pc}" stroke-width="2"/>`;
+      items += `<text x="${lx+pad+colW+16}" y="${ry+9}" font-size="9.5" fill="#1c1811">${k}</text>`;
+    });
+    y += rows * 15;
+
+    return `<rect x="${lx}" y="${ly}" width="${totalW}" height="${y-ly+8}" fill="white" stroke="#ccc5b5" rx="5" opacity="0.82"/>
+            ${items}`;
+  } else {
+    // Single column layout
+    const entries = showV ? vEntries : pEntries;
+    let items = `<text x="${lx+pad}" y="${ly+14}" font-size="9" fill="#7a6e5f" font-weight="700">${S.mappedVar}</text>`;
+    let y = ly + 22;
+    entries.forEach(([k, c]) => {
+      if (showV) {
+        items += `<rect x="${lx+pad}" y="${y}" width="11" height="11" fill="${c}" rx="2" opacity="0.85"/>
+                  <text x="${lx+pad+15}" y="${y+9}" font-size="9.5" fill="#1c1811">${k}</text>`;
+      } else {
+        items += `<circle cx="${lx+pad+6}" cy="${y+5}" r="5" fill="white" stroke="${c}" stroke-width="2"/>
+                  <text x="${lx+pad+16}" y="${y+9}" font-size="9.5" fill="#1c1811">${k}</text>`;
+      }
+      y += 15;
+    });
+    return `<rect x="${lx}" y="${ly}" width="100" height="${y-ly+8}" fill="white" stroke="#ccc5b5" rx="5" opacity="0.82"/>
+            ${items}`;
+  }
+}
+
+function renderPlot() {
+  const allV=penguins.map(d=>d.body_mass_g);
+  const yd=padExt(allV);
+  const sy=scl(yd,[PH,0]);
+  const ticks=niceTicks(...yd);
+  const cx=scl([0,SP.length-1],[PW*0.18,PW*0.82]);
+  const cfg=themeCfg();
+
+  // Build draw order
+  const gBase=(S.showViolin&&S.showPoint)
+    ?(S.layerOrder==='violin-point'?['violin','point']:['point','violin'])
+    :S.showViolin?['violin']:S.showPoint?['point']:[];
+
+  let layerSvg='';
+  for(const g of gBase) layerSvg += g==='violin' ? drawViolins(sy,cx) : drawPoints(sy,cx);
+  layerSvg += drawStat(sy,cx); // stat always on top
+
+  // Grid
+  const gridSvg=cfg.grid
+    ?ticks.map(v=>`<line x1="0" y1="${sy(v)}" x2="${PW}" y2="${sy(v)}" stroke="${cfg.grid}" stroke-width="${cfg.gw}"/>`).join('')
+    :'';
+
+  // y-axis ticks
+  const yAxis=ticks.map(v=>`
+    <line x1="-4" y1="${sy(v)}" x2="0" y2="${sy(v)}" stroke="#8a7e6f" stroke-width="1"/>
+    <text x="-7" y="${sy(v)+4}" text-anchor="end" font-size="9.5" fill="#6a6055">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>
+  `).join('');
+
+  // x-axis species labels
+  const xLabels=SP.map((sp,i)=>
+    `<text x="${cx(i)}" y="15" text-anchor="middle" font-size="10.5" fill="#3c3428">${sp}</text>`
+  ).join('');
+
+  // Stat legend (small note)
+  const statNote = S.showStat && (S.aesLoc==='ggplot'||S.statHasAes)
+    ? `<text x="${PW-8}" y="${PH-4}" text-anchor="end" font-size="8.5" fill="#555">◆ mean (stat_summary)</text>`
+    : '';
+
+  const box=cfg.box?`<rect width="${PW}" height="${PH}" fill="none" stroke="#8a7e6f" stroke-width="1.2"/>`:'';
+
+  document.getElementById('plot-svg').innerHTML=`
+    <rect width="${VW}" height="${VH}" fill="#f8f5ee" rx="8"/>
+    <g transform="translate(${ML},${MT})">
+      <rect width="${PW}" height="${PH}" fill="${cfg.bg}"/>
+      ${gridSvg}
+      ${layerSvg}
+      ${box}
+      <line x1="0" y1="${PH}" x2="${PW}" y2="${PH}" stroke="#8a7e6f" stroke-width="1.5"/>
+      <line x1="0" y1="0"    x2="0"    y2="${PH}" stroke="#8a7e6f" stroke-width="1.5"/>
+      <g transform="translate(0,${PH+5})">${xLabels}</g>
+      <g>${yAxis}</g>
+      <text x="${PW/2}" y="${PH+46}" text-anchor="middle" font-size="11.5" fill="#1c1811" font-weight="600">${S.addLabs ? 'Species' : 'species'}</text>
+      <text transform="rotate(-90)" x="${-PH/2}" y="-46" text-anchor="middle" font-size="11.5" fill="#1c1811" font-weight="600">${S.addLabs ? 'Body Mass (g)' : 'body_mass_g'}</text>
+      ${drawLegend(cx)}
+      ${statNote}
+    </g>
+  `;
+}
+
+// ─── MAIN ──────────────────────────────────────────────────────────
+function render() { renderCode(); renderPlot(); }
+render();
+
+// ─── INSTANT TOOLTIPS ──────────────────────────────────────────────
+const _tip = document.getElementById('code-tip');
+document.getElementById('code-out').addEventListener('mouseover', e => {
+  const el = e.target.closest('[data-tip]');
+  if (!el) { _tip.style.display = 'none'; return; }
+  _tip.textContent = el.dataset.tip;
+  _tip.style.display = 'block';
+  const r = el.getBoundingClientRect();
+  const tw = _tip.offsetWidth, th = _tip.offsetHeight;
+  const left = Math.max(4, Math.min(r.left, window.innerWidth - tw - 8));
+  const top  = r.top > th + 10 ? r.top - th - 6 : r.bottom + 4;
+  _tip.style.left = left + 'px';
+  _tip.style.top  = top  + 'px';
+});
+document.getElementById('code-out').addEventListener('mouseleave', () => {
+  _tip.style.display = 'none';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R Indexing Explorer</title>
+<link rel="icon" href="brackets_icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #f0ebe1;
+  --panel:   #fdfcf9;
+  --border:  #dbd3c3;
+  --text:    #1c1811;
+  --muted:   #79705f;
+  --accent:  #b85520;
+  --code-bg: #181826;
+  --c-dollar:  #4eaaec;
+  --c-bracket: #52c97e;
+  --c-filter:  #c89850;
+  --purple:  #7955a8;
+  --orange:  #d96a2e;
+}
+body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* Header */
+header {
+  text-align:center; padding:15px 20px 9px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel); margin-bottom:11px;
+}
+header h1 { font-family:'Lora',Georgia,serif; font-size:1.45rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
+.pill {
+  display:inline-block; padding:2px 9px;
+  background:#ece8de; border:1px solid var(--border); border-radius:20px;
+  font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
+}
+
+/* Layout */
+.grid {
+  display:grid; grid-template-columns:244px 1fr 420px;
+  gap:10px; padding:0 11px 15px;
+  max-width:1360px; margin:0 auto;
+}
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.panel-label { font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:11px; }
+
+/* Controls */
+.cs { margin-bottom:9px; }
+.cs:last-child { margin-bottom:0; }
+.ch { display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:600; margin-bottom:7px; }
+.ch code { font-family:'Fira Code',monospace; font-size:0.77em; background:#ece8de; padding:1px 4px; border-radius:3px; color:var(--muted); }
+.sub { font-size:0.73rem; color:var(--muted); margin-bottom:5px; margin-top:2px; }
+.hr  { height:1px; background:var(--border); margin:8px 0; }
+.br  { display:flex; flex-wrap:wrap; gap:5px; }
+
+.btn {
+  padding:5px 11px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:0.79rem; font-weight:500; color:var(--text);
+  transition:border-color .1s,background .1s,color .1s; white-space:nowrap;
+}
+.btn:hover { border-color:var(--accent); color:var(--accent); }
+.btn.on    { background:var(--accent); border-color:var(--accent); color:white; }
+
+/* Mode selector — vertical stack */
+.mode-stack { display:flex; flex-direction:column; gap:5px; margin-bottom:11px; }
+.mbtn {
+  width:100%; padding:6px 12px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:0.79rem; font-weight:500; color:var(--text); text-align:left; transition:all .1s;
+}
+.mbtn code { font-family:'Fira Code',monospace; font-size:0.84em; }
+.mbtn:hover { border-color:var(--accent); color:var(--accent); }
+.mbtn.on { background:var(--accent); border-color:var(--accent); color:white; }
+.mbtn.on code { color:white; }
+
+/* 2-option segmented toggle */
+.tog2 { display:flex; border:1.5px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:6px; }
+.tog2 .btn { flex:1; border:none; border-radius:0; text-align:center; font-size:0.78rem; padding:5px 4px; border-right:1.5px solid var(--border); }
+.tog2 .btn:last-child { border-right:none; }
+.tog2 .btn.on { background:var(--accent); color:white; }
+
+/* Join toggle colors */
+.tog2.join .btn.on { background:#5a8a6a; border-color:#5a8a6a; }
+
+/* Column buttons stacked */
+.col-stack { display:flex; flex-direction:column; gap:4px; }
+.cbtn {
+  width:100%; padding:5px 10px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'Fira Code',monospace;
+  font-size:0.76rem; font-weight:500; color:var(--muted); transition:all .12s;
+  text-align:left;
+}
+.cbtn:hover { border-color:var(--muted); color:var(--text); }
+.cbtn.on { border-color:var(--accent); background:rgba(184,85,32,0.07); color:var(--text); font-weight:600; }
+
+/* Index selector buttons */
+.idx-row { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; }
+.ibtn {
+  padding:4px 8px; border:1.5px solid var(--border); border-radius:5px;
+  background:white; cursor:pointer; font-family:'Fira Code',monospace;
+  font-size:0.71rem; color:var(--muted); transition:all .1s;
+}
+.ibtn:hover { border-color:var(--muted); color:var(--text); }
+.ibtn.on { border-color:var(--c-bracket); background:rgba(82,201,126,0.10); color:var(--text); font-weight:600; }
+.ibtn-blank { font-style:italic; }
+
+/* Add condition button */
+.add-cond-btn {
+  background:none; border:1.5px dashed var(--border); border-radius:6px;
+  color:var(--muted); font-size:0.77rem; font-family:'DM Sans',sans-serif;
+  padding:5px 10px; cursor:pointer; width:100%; text-align:center;
+  transition:border-color .1s, color .1s;
+}
+.add-cond-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* Second condition block */
+#cond2-block { margin-top:7px; }
+.cond2-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.remove-btn {
+  background:none; border:none; color:var(--muted); cursor:pointer;
+  font-size:0.73rem; padding:0; transition:color .1s;
+}
+.remove-btn:hover { color:var(--accent); }
+
+/* Copy / Reset buttons */
+.copy-btn {
+  padding:4px 11px; border:1.5px solid var(--border); border-radius:6px;
+  background:white; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:0.72rem; font-weight:600; color:var(--muted); transition:all .15s;
+}
+.copy-btn:hover { border-color:var(--accent); color:var(--accent); }
+.copy-btn.copied { background:var(--accent); border-color:var(--accent); color:white; }
+
+/* ── Table panel ─────────────────────────── */
+.table-panel { display:flex; flex-direction:column; overflow:hidden; }
+.table-wrap { overflow-x:auto; flex:1; }
+
+table.dt {
+  border-collapse:collapse; width:100%; font-size:0.77rem;
+  font-family:'DM Sans',sans-serif;
+}
+table.dt th {
+  background:#f0ebe1; padding:5px 8px; text-align:left;
+  font-family:'Fira Code',monospace; font-size:0.7rem; font-weight:500;
+  color:var(--muted); border-bottom:2px solid var(--border);
+  white-space:nowrap; position:sticky; top:0; z-index:2;
+  transition:background .15s, color .15s, opacity .15s;
+}
+table.dt th.row-hd { color:#bbb; font-weight:400; font-size:0.65rem; }
+table.dt td {
+  padding:4px 8px; border-bottom:1px solid #ede8df;
+  white-space:nowrap; transition:background .15s, opacity .15s;
+  color:var(--text);
+}
+table.dt td.rn { color:#bbb; font-size:0.7rem; font-family:'Fira Code',monospace; text-align:right; padding-right:10px; }
+table.dt tr:last-child td { border-bottom:none; }
+
+/* Highlight states */
+table.dt th.hl-col { background:var(--accent); color:white !important; opacity:1 !important; }
+table.dt td.hl-col { background:rgba(184,85,32,0.09); opacity:1 !important; }
+table.dt th.dim    { opacity:0.28; }
+table.dt td.dim    { opacity:0.28; }
+
+/* Bracket highlights */
+table.dt th.hl-bk  { background:rgba(82,201,126,0.25); color:var(--text) !important; opacity:1 !important; }
+table.dt td.hl-bk-row { background:rgba(82,201,126,0.08); opacity:1 !important; }
+table.dt td.hl-bk-cell { background:rgba(82,201,126,0.22); opacity:1 !important; font-weight:600; }
+table.dt td.rn.hl-bk-rn { background:rgba(82,201,126,0.15); color:var(--text); font-weight:600; opacity:1 !important; }
+
+/* Filter highlights */
+table.dt tr.hl-pass td   { background:rgba(200,152,80,0.11); opacity:1 !important; }
+table.dt tr.hl-fail td   { opacity:0.28; }
+table.dt th.hl-fcol { border-bottom:2px solid var(--c-filter); color:var(--text) !important; opacity:1 !important; }
+
+/* Full-table selection border */
+table.dt.all-selected { outline:2px solid var(--c-bracket); outline-offset:2px; border-radius:4px; }
+
+/* Result badge */
+.result-badge {
+  margin-top:9px; padding:7px 12px; border-radius:7px;
+  background:#f5f3ee; border:1px solid var(--border);
+  font-size:0.76rem; color:var(--muted); line-height:1.55;
+}
+.result-badge b { color:var(--text); font-weight:700; }
+.plain-english {
+  margin-top:5px; padding-top:5px; border-top:1px solid var(--border);
+  font-size:0.74rem; color:var(--text); line-height:1.5;
+}
+.plain-english em { font-style:normal; color:var(--accent); font-weight:600; }
+
+/* Vector readout */
+.vec-readout {
+  margin-top:9px; background:var(--code-bg); border-radius:7px;
+  padding:9px 13px; font-family:'Fira Code',monospace; font-size:0.72rem;
+  color:#abb2bf; max-height:72px; overflow-y:auto; line-height:1.7;
+}
+.vec-readout .vr-label { color:#6a7a6a; margin-bottom:2px; display:block; font-size:0.68rem; }
+
+/* ── Code panel ──────────────────────────── */
+.code-panel { display:flex; flex-direction:column; gap:9px; }
+.code-scroll {
+  background:var(--code-bg); border-radius:8px; padding:14px 16px;
+  overflow-x:auto; font-family:'Fira Code',monospace; font-size:0.79rem;
+  line-height:1.9; flex:1; color:#abb2bf;
+}
+.code-scroll code { display:block; white-space:pre; }
+
+.cl { display:block; padding:1px 6px 1px 9px; border-radius:3px; border-left:3px solid transparent; }
+.cl-setup   { color:#6a7a6a; border-left-color:transparent; }
+.cl-dollar  { border-left-color:var(--c-dollar);  }
+.cl-bracket { border-left-color:var(--c-bracket); }
+.cl-filter  { border-left-color:var(--c-filter);  }
+
+@keyframes flash {
+  0%   { background-color:rgba(255,255,255,0.22); }
+  100% { background-color:transparent; }
+}
+.cl-flash { animation:flash 0.7s ease-out; }
+
+/* Syntax tokens */
+.sf { color:#c792ea; }   /* function */
+.sv { color:#f78c6c; }   /* data frame */
+.sk { color:#89ddff; }   /* keyword / punctuation */
+.ss { color:#c3e88d; }   /* string */
+.sn { color:#f0ab70; }   /* numeric */
+.so { color:#89ddff; }   /* $ and [] operators */
+.sb { color:#c3e88d; }   /* boolean ops == != > & | */
+.sc { color:#6a7a6a; font-style:italic; } /* comments */
+
+/* Annotation */
+.ann {
+  border-radius:7px; padding:10px 14px; font-size:0.79rem; line-height:1.58;
+  border-left:3px solid var(--border); background:#f5f3ee; display:none;
+}
+.ann.show { display:block; }
+.ann b  { font-weight:700; }
+.ann em { font-style:italic; }
+.ann code { font-family:'Fira Code',monospace; font-size:0.87em; background:rgba(0,0,0,0.07); padding:0 3px; border-radius:2px; }
+
+.ann-dollar  { border-color:var(--c-dollar);  background:#f0f6ff; }
+.ann-bracket { border-color:var(--c-bracket); background:#f0fdf5; }
+.ann-filter  { border-color:var(--c-filter);  background:#fdf8f0; }
+.ann-welcome { border-color:var(--accent);    background:#fdf6f0; }
+
+/* Code tooltip */
+#code-tip {
+  position:fixed; z-index:9999; pointer-events:none; display:none;
+  background:#2d2d42; color:#e0ddd5; border:1px solid #4a4860;
+  padding:5px 10px; border-radius:6px; font-size:0.73rem;
+  font-family:'DM Sans',sans-serif; line-height:1.4;
+  max-width:300px; box-shadow:0 2px 8px rgba(0,0,0,0.45);
+}
+
+/* Legend bar */
+.legend-bar { display:flex; flex-wrap:wrap; gap:9px; font-size:0.7rem; color:var(--muted); }
+.li { display:flex; align-items:center; gap:5px; }
+.dot { width:3px; height:14px; border-radius:2px; flex-shrink:0; }
+.d-dollar  { background:var(--c-dollar);  }
+.d-bracket { background:var(--c-bracket); }
+.d-filter  { background:var(--c-filter);  }
+
+/* code panel top row */
+.code-top { display:flex; align-items:center; justify-content:space-between; }
+</style>
+</head>
+<body>
+<div id="code-tip"></div>
+<header>
+  <h1>R Indexing Explorer</h1>
+  <p>Select rows, columns, and cells three different ways</p>
+  <span class="pill">data: palmerpenguins::penguins</span>
+  <span class="pill">n = 15 rows shown</span>
+</header>
+<div class="grid">
+  <!-- ══ CONTROLS ════════════════════════════ -->
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+      <div class="panel-label" style="margin-bottom:0">Indexing Method</div>
+      <button class="copy-btn" onclick="resetAll()">Reset</button>
+    </div>
+
+    <!-- Mode selector -->
+    <div class="mode-stack">
+      <button class="mbtn" id="m-dollar"  onclick="setMode('dollar')"><code>$</code> operator</button>
+      <button class="mbtn" id="m-bracket" onclick="setMode('bracket')"><code>[ , ]</code> brackets</button>
+      <button class="mbtn" id="m-filter"  onclick="setMode('filter')">Boolean subsetting</button>
+    </div>
+
+    <!-- ── Dollar sub-panel ── -->
+    <div id="panel-dollar">
+      <div class="ch">Which column?</div>
+      <div class="col-stack" id="dollar-cols">
+        <button class="cbtn on" data-col="species"          onclick="pickDollarCol(this)">$species</button>
+        <button class="cbtn"    data-col="island"           onclick="pickDollarCol(this)">$island</button>
+        <button class="cbtn"    data-col="bill_length_mm"   onclick="pickDollarCol(this)">$bill_length_mm</button>
+        <button class="cbtn"    data-col="flipper_length_mm" onclick="pickDollarCol(this)">$flipper_length_mm</button>
+        <button class="cbtn"    data-col="body_mass_g"      onclick="pickDollarCol(this)">$body_mass_g</button>
+        <button class="cbtn"    data-col="sex"              onclick="pickDollarCol(this)">$sex</button>
+      </div>
+      <div class="sub" style="margin-top:8px">The <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 3px;border-radius:2px">$</code> operator always returns all rows as a vector.</div>
+    </div>
+
+    <!-- ── Bracket sub-panel ── -->
+    <div id="panel-bracket" style="display:none">
+      <div class="ch">Row index <span style="font-weight:400;color:var(--muted)">(left of comma)</span></div>
+      <div class="idx-row" id="bracket-rows">
+        <button class="ibtn on" data-val="all" onclick="pickBracket(this,'rows')">all</button>
+        <button class="ibtn"              data-val="1"          onclick="pickBracket(this,'rows')">1</button>
+        <button class="ibtn"              data-val="1:5"        onclick="pickBracket(this,'rows')">1:5</button>
+        <button class="ibtn"              data-val="c(1,3,10)"  onclick="pickBracket(this,'rows')">c(1,3,10)</button>
+      </div>
+      <div class="ch" style="margin-top:6px">Column index <span style="font-weight:400;color:var(--muted)">(right of comma)</span></div>
+      <div class="idx-row" id="bracket-cols">
+        <button class="ibtn on" data-val="all"                                     onclick="pickBracket(this,'cols')">all</button>
+        <button class="ibtn"   data-val="1"                                        onclick="pickBracket(this,'cols')">1</button>
+        <button class="ibtn"   data-val="1:3"                                      onclick="pickBracket(this,'cols')">1:3</button>
+        <button class="ibtn"   data-val="&quot;species&quot;"                      onclick="pickBracket(this,'cols')">"species"</button>
+        <button class="ibtn"   data-val="c(1,3)"                                   onclick="pickBracket(this,'cols')">c(1,3)</button>
+        <button class="ibtn"   data-val="c(&quot;species&quot;,&quot;bill_length_mm&quot;)" onclick="pickBracket(this,'cols')">c("species","bill…")</button>
+      </div>
+    </div>
+
+    <!-- ── Filter sub-panel ── -->
+    <div id="panel-filter" style="display:none">
+      <div class="ch">Subsetting rows <span style="font-weight:400;color:var(--muted)">(base R filter)</span></div>
+      <div class="sub" style="margin-bottom:8px">Equivalent to dplyr's <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 3px;border-radius:2px">filter()</code>; it keeps rows where a condition is TRUE</div>
+
+      <div class="sub">Column:</div>
+      <div class="br" id="f1-col-row" style="margin-bottom:6px">
+        <button class="btn on" data-col="species"           onclick="pickF1Col(this)">species</button>
+        <button class="btn"    data-col="island"            onclick="pickF1Col(this)">island</button>
+        <button class="btn"    data-col="bill_length_mm"    onclick="pickF1Col(this)">bill_length_mm</button>
+        <button class="btn"    data-col="flipper_length_mm" onclick="pickF1Col(this)">flipper_length_mm</button>
+        <button class="btn"    data-col="body_mass_g"       onclick="pickF1Col(this)">body_mass_g</button>
+        <button class="btn"    data-col="sex"               onclick="pickF1Col(this)">sex</button>
+      </div>
+
+      <div class="sub">Operator:</div>
+      <div class="br" id="f1-op-row" style="margin-bottom:6px"></div>
+
+      <div class="sub">Value:</div>
+      <div class="br" id="f1-val-row" style="margin-bottom:10px"></div>
+
+      <!-- Logical operators — always visible -->
+      <div class="sub">Add a second condition using:</div>
+      <div class="tog2" id="join-tog" style="margin-bottom:0">
+        <button class="btn" id="j-and" onclick="pickJoin('&amp;')">&amp; (AND)</button>
+        <button class="btn" id="j-or"  onclick="pickJoin('|')">| (OR)</button>
+      </div>
+
+      <!-- 2nd condition block -->
+      <div id="cond2-block" style="display:none;margin-top:8px">
+        <div class="cond2-header">
+          <div class="sub" style="margin:0">Condition 2:</div>
+          <button class="remove-btn" onclick="hideCond2()">× Remove</button>
+        </div>
+
+        <div class="sub">Column:</div>
+        <div class="br" id="f2-col-row" style="margin-bottom:6px">
+          <button class="btn"    data-col="species"           onclick="pickF2Col(this)">species</button>
+          <button class="btn"    data-col="island"            onclick="pickF2Col(this)">island</button>
+          <button class="btn"    data-col="bill_length_mm"    onclick="pickF2Col(this)">bill_length_mm</button>
+          <button class="btn"    data-col="flipper_length_mm" onclick="pickF2Col(this)">flipper_length_mm</button>
+          <button class="btn on" data-col="body_mass_g"       onclick="pickF2Col(this)">body_mass_g</button>
+          <button class="btn"    data-col="sex"               onclick="pickF2Col(this)">sex</button>
+        </div>
+
+        <div class="sub">Operator:</div>
+        <div class="br" id="f2-op-row" style="margin-bottom:6px"></div>
+
+        <div class="sub">Value:</div>
+        <div class="br" id="f2-val-row"></div>
+      </div>
+    </div>
+  </div>
+  <!-- ══ TABLE PANEL ════════════════════════ -->
+  <div class="panel table-panel">
+    <div class="panel-label">Data Table</div>
+    <div class="table-wrap">
+      <table class="dt" id="dt">
+        <thead>
+          <tr>
+            <th class="row-hd">#</th>
+            <th data-col="species">species</th>
+            <th data-col="island">island</th>
+            <th data-col="bill_length_mm">bill_length_mm</th>
+            <th data-col="flipper_length_mm">flipper_length_mm</th>
+            <th data-col="body_mass_g">body_mass_g</th>
+            <th data-col="sex">sex</th>
+          </tr>
+        </thead>
+        <tbody id="dt-body"></tbody>
+      </table>
+    </div>
+    <div id="result-badge" class="result-badge" style="display:none"></div>
+    <div id="vec-readout" class="vec-readout" style="display:none"></div>
+  </div>
+  <!-- ══ CODE PANEL ══════════════════════════ -->
+  <div class="panel code-panel">
+    <div class="code-top">
+      <div class="panel-label" style="margin-bottom:0">R Code</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+    </div>
+    <div class="code-scroll" id="code-block"></div>
+    <div class="legend-bar">
+      <div class="li"><div class="dot d-dollar"></div> $ operator</div>
+      <div class="li"><div class="dot d-bracket"></div> [ , ] brackets</div>
+      <div class="li"><div class="dot d-filter"></div> Boolean filter</div>
+    </div>
+    <div class="ann ann-welcome show" id="ann-box">
+      Here's how this works.<br><br>
+      The code panel above shows real R code you can paste into R. The colored stripe on the left of each line marks which indexing concept it belongs to: blue for <code>$</code>, green for <code>[ , ]</code>, amber for Boolean subsetting.<br><br>
+      The data table in the middle highlights exactly what gets selected: which rows, which columns, or which cells. Use the controls on the left to change the method and options. The code, the table, and this explanation all update instantly each time you click something.
+    </div>
+  </div>
+</div>
+<script>
+/* ── Data ───────────────────────────────────── */
+const COLS = ['species','island','bill_length_mm','flipper_length_mm','body_mass_g','sex'];
+const COL_IDX = {species:0,island:1,bill_length_mm:2,flipper_length_mm:3,body_mass_g:4,sex:5};
+const NUMERIC_COLS = new Set(['bill_length_mm','flipper_length_mm','body_mass_g']);
+const DATA = [
+  ['Adelie',   'Torgersen', 39.1, 181, 3750, 'male'],
+  ['Adelie',   'Torgersen', 39.5, 186, 3800, 'female'],
+  ['Adelie',   'Dream',     40.3, 195, 3250, 'female'],
+  ['Adelie',   'Dream',     36.7, 193, 3450, 'female'],
+  ['Adelie',   'Biscoe',    39.3, 190, 3650, 'male'],
+  ['Chinstrap','Dream',     46.5, 192, 3500, 'female'],
+  ['Chinstrap','Dream',     50.0, 196, 3900, 'male'],
+  ['Chinstrap','Dream',     51.3, 197, 3750, 'male'],
+  ['Chinstrap','Dream',     45.4, 188, 3525, 'female'],
+  ['Gentoo',   'Biscoe',    46.1, 211, 4500, 'female'],
+  ['Gentoo',   'Biscoe',    50.0, 230, 5700, 'male'],
+  ['Gentoo',   'Biscoe',    48.7, 222, 5350, 'female'],
+  ['Gentoo',   'Biscoe',    50.2, 218, 5550, 'male'],
+  ['Gentoo',   'Biscoe',    45.1, 215, 5100, 'female'],
+  ['Adelie',   'Torgersen', 38.9, 187, 3625, 'male']
+];
+
+/* Column display formatters */
+function fmt(col, val) {
+  if (col === 'species' || col === 'island' || col === 'sex') return val;
+  if (col === 'bill_length_mm') return val.toFixed(1);
+  return String(val);
+}
+
+/* Filter value options per column */
+const F_VALS = {
+  species: ['"Adelie"','"Chinstrap"','"Gentoo"'],
+  island:  ['"Biscoe"','"Dream"','"Torgersen"'],
+  bill_length_mm: ['40','45','50'],
+  flipper_length_mm: ['185','200','215'],
+  body_mass_g: ['3500','4000','5000'],
+  sex: ['"male"','"female"']
+};
+const F_OPS = ['==','!=','>','>=','<','<='];
+
+/* ── State ──────────────────────────────────── */
+const DEFAULTS = {
+  mode: null,
+  dollarCol: 'species',
+  bRows: 'all',
+  bCols: 'all',
+  f1Col: 'species', f1Op: '==', f1Val: '"Gentoo"',
+  f2active: false,
+  f2Col: 'body_mass_g', f2Op: '>', f2Val: '5000',
+  fJoin: '&',
+  changed: 'welcome'
+};
+let S = Object.assign({}, DEFAULTS);
+
+function resetAll() {
+  S = Object.assign({}, DEFAULTS);
+  S.changed = 'welcome';
+  // reset mode toggle UI — no mode selected
+  document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('panel-dollar').style.display  = 'none';
+  document.getElementById('panel-bracket').style.display = 'none';
+  document.getElementById('panel-filter').style.display  = 'none';
+  // reset dollar cols
+  document.querySelectorAll('#dollar-cols .cbtn').forEach(b=>b.classList.toggle('on', b.dataset.col==='species'));
+  // reset bracket btns
+  document.querySelectorAll('#bracket-rows .ibtn').forEach(b=>b.classList.toggle('on', b.dataset.val==='all'));
+  document.querySelectorAll('#bracket-cols .ibtn').forEach(b=>b.classList.toggle('on', b.dataset.val==='all'));
+  // reset filter col 1
+  document.querySelectorAll('#f1-col-row .btn').forEach(b=>b.classList.toggle('on', b.dataset.col==='species'));
+  // reset join — neither selected until user clicks
+  document.getElementById('j-and').classList.remove('on');
+  document.getElementById('j-or').classList.remove('on');
+  // reset f2 col
+  document.querySelectorAll('#f2-col-row .btn').forEach(b=>b.classList.toggle('on', b.dataset.col==='body_mass_g'));
+  // hide cond2
+  hideCond2(true);
+  buildFilterUI('f1', S.f1Col, S.f1Op, S.f1Val);
+  buildFilterUI('f2', S.f2Col, S.f2Op, S.f2Val);
+  render();
+}
+
+/* ── Filter UI builder ──────────────────────── */
+function buildFilterUI(prefix, col, selOp, selVal) {
+  const ops = F_OPS;
+  const vals = F_VALS[col];
+  const opRow = document.getElementById(prefix+'-op-row');
+  const valRow = document.getElementById(prefix+'-val-row');
+
+  opRow.innerHTML = ops.map(op =>
+    `<button class="btn${op===selOp?' on':''}" data-op="${op}" onclick="pickOp(this,'${prefix}')">${op}</button>`
+  ).join('');
+  valRow.innerHTML = vals.map(v => {
+    const attrVal = v.replace(/"/g, '&quot;');
+    return `<button class="btn${v===selVal?' on':''}" data-val="${attrVal}" onclick="pickVal(this,'${prefix}')">${v}</button>`;
+  }).join('');
+}
+
+/* ── Control handlers ───────────────────────── */
+function setMode(m) {
+  S.mode = m; S.changed = 'mode';
+  document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('m-'+m).classList.add('on');
+  document.getElementById('panel-dollar').style.display  = m==='dollar'  ? '' : 'none';
+  document.getElementById('panel-bracket').style.display = m==='bracket' ? '' : 'none';
+  document.getElementById('panel-filter').style.display  = m==='filter'  ? '' : 'none';
+  render();
+}
+
+function pickDollarCol(btn) {
+  document.querySelectorAll('#dollar-cols .cbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  S.dollarCol = btn.dataset.col; S.changed = 'dollar-col';
+  render();
+}
+
+function pickBracket(btn, which) {
+  const group = which==='rows' ? '#bracket-rows' : '#bracket-cols';
+  document.querySelectorAll(group+' .ibtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if (which==='rows') S.bRows = btn.dataset.val; else S.bCols = btn.dataset.val;
+  S.changed = 'bracket-'+which;
+  render();
+}
+
+function pickF1Col(btn) {
+  document.querySelectorAll('#f1-col-row .btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  S.f1Col = btn.dataset.col;
+  S.f1Op = '==';
+  S.f1Val = F_VALS[S.f1Col][0];
+  S.changed = 'filter-col';
+  buildFilterUI('f1', S.f1Col, S.f1Op, S.f1Val);
+  render();
+}
+
+function pickF2Col(btn) {
+  document.querySelectorAll('#f2-col-row .btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  S.f2Col = btn.dataset.col;
+  S.f2Op = '==';
+  S.f2Val = F_VALS[S.f2Col][0];
+  S.changed = 'filter-col2';
+  buildFilterUI('f2', S.f2Col, S.f2Op, S.f2Val);
+  render();
+}
+
+function pickOp(btn, prefix) {
+  btn.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if (prefix==='f1') { S.f1Op = btn.dataset.op; S.changed='filter-op'; }
+  else               { S.f2Op = btn.dataset.op; S.changed='filter-op2'; }
+  render();
+}
+
+function pickVal(btn, prefix) {
+  btn.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if (prefix==='f1') { S.f1Val = btn.dataset.val; S.changed='filter-val'; }
+  else               { S.f2Val = btn.dataset.val; S.changed='filter-val2'; }
+  render();
+}
+
+function pickJoin(j) {
+  S.fJoin = j; S.changed = 'filter-join';
+  document.getElementById('j-and').classList.toggle('on', j==='&');
+  document.getElementById('j-or').classList.toggle('on',  j==='|');
+  if (!S.f2active) {
+    S.f2active = true;
+    document.getElementById('cond2-block').style.display = '';
+    buildFilterUI('f2', S.f2Col, S.f2Op, S.f2Val);
+  }
+  render();
+}
+
+function hideCond2(silent) {
+  S.f2active = false;
+  document.getElementById('cond2-block').style.display = 'none';
+  document.getElementById('j-and').classList.remove('on');
+  document.getElementById('j-or').classList.remove('on');
+  if (!silent) { S.changed='filter-remove2'; render(); }
+}
+
+/* ── Filter evaluator ───────────────────────── */
+function evalCond(row, col, op, rawVal) {
+  const ci = COL_IDX[col];
+  const cell = row[ci];
+  const isNum = NUMERIC_COLS.has(col);
+  const val = isNum ? parseFloat(rawVal) : rawVal.replace(/^"|"$/g,'');
+  switch(op) {
+    case '==': return cell == val;
+    case '!=': return cell != val;
+    case '>':  return cell > val;
+    case '<':  return cell < val;
+    case '>=': return cell >= val;
+    case '<=': return cell <= val;
+  }
+  return false;
+}
+
+function filterMask() {
+  return DATA.map(row => {
+    const c1 = evalCond(row, S.f1Col, S.f1Op, S.f1Val);
+    if (!S.f2active) return c1;
+    const c2 = evalCond(row, S.f2Col, S.f2Op, S.f2Val);
+    return S.fJoin === '&' ? (c1 && c2) : (c1 || c2);
+  });
+}
+
+/* ── Bracket index helpers ──────────────────── */
+function rowsFromBRows(bRows) {
+  if (bRows==='all')        return null; // null = all
+  if (bRows==='1')          return [0];
+  if (bRows==='1:5')        return [0,1,2,3,4];
+  if (bRows==='c(1,3,10)')  return [0,2,9];
+  return null;
+}
+function colsFromBCols(bCols) {
+  if (bCols==='all')                                        return null;
+  if (bCols==='1')                                          return [0];
+  if (bCols==='1:3')                                        return [0,1,2];
+  if (bCols==='"species"')                                  return [0];
+  if (bCols==='c(1,3)')                                     return [0,2];
+  if (bCols==='c("species","bill_length_mm")')              return [0,2];
+  return null;
+}
+function rowCount(bRows) {
+  if (bRows==='all')        return 15;
+  if (bRows==='1')          return 1;
+  if (bRows==='1:5')        return 5;
+  if (bRows==='c(1,3,10)')  return 3;
+  return 15;
+}
+function colCount(bCols) {
+  if (bCols==='all')                               return 6;
+  if (bCols==='1')                                 return 1;
+  if (bCols==='1:3')                               return 3;
+  if (bCols==='"species"')                         return 1;
+  if (bCols==='c(1,3)')                            return 2;
+  if (bCols==='c("species","bill_length_mm")')     return 2;
+  return 6;
+}
+
+/* ── Plain-English filter summary ──────────── */
+function plainEnglishCond(col, op, val) {
+  const words = {'==':'is exactly','!=':'is not','>':`is greater than`,'>=':'is at least','<':'is less than','<=':'is at most'};
+  const cleanVal = NUMERIC_COLS.has(col) ? val : `"${val.replace(/^"|"$/g,'')}"`;
+  return `<em>${col}</em> ${words[op]} ${cleanVal}`;
+}
+function plainEnglishFilter() {
+  const c1 = plainEnglishCond(S.f1Col, S.f1Op, S.f1Val);
+  if (!S.f2active) return c1;
+  const c2 = plainEnglishCond(S.f2Col, S.f2Op, S.f2Val);
+  const joinWord = S.fJoin === '&' ? '<b>AND</b>' : '<b>OR</b>';
+  return `${c1} ${joinWord} ${c2}`;
+}
+
+/* ── Table renderer ─────────────────────────── */
+function renderTable() {
+  const tbody = document.getElementById('dt-body');
+  // Build rows once if empty
+  if (!tbody.children.length) {
+    tbody.innerHTML = DATA.map((row,i) =>
+      `<tr id="tr-${i}"><td class="rn" id="rn-${i}">${i+1}</td>` +
+      row.map((v,ci) => `<td id="c${i}-${ci}">${fmt(COLS[ci],v)}</td>`).join('') +
+      `</tr>`
+    ).join('');
+  }
+
+  const ths = document.querySelectorAll('#dt thead th');
+  const tbl = document.getElementById('dt');
+
+  // clear all classes
+  document.querySelectorAll('#dt td, #dt th').forEach(el => {
+    el.className = el.tagName==='TH' && el.classList.contains('row-hd') ? 'row-hd' : '';
+  });
+  tbl.className = 'dt';
+  document.getElementById('result-badge').style.display = 'none';
+  document.getElementById('vec-readout').style.display = 'none';
+
+  if (S.mode === null) {
+    // no mode selected — show full table, no highlights
+    return;
+  }
+
+  if (S.mode === 'dollar') {
+    const ci = COL_IDX[S.dollarCol];
+    // header highlighting
+    ths.forEach((th,i) => {
+      if (i===0) return;
+      th.classList.add(i-1===ci ? 'hl-col' : 'dim');
+    });
+    // cell highlighting
+    DATA.forEach((_,ri) => {
+      COLS.forEach((col,ci2) => {
+        document.getElementById(`c${ri}-${ci2}`).classList.add(ci2===ci ? 'hl-col' : 'dim');
+      });
+      document.getElementById(`rn-${ri}`).classList.add('dim');
+    });
+    // vector readout
+    const vals = DATA.map(r => {
+      const v = r[ci];
+      return NUMERIC_COLS.has(S.dollarCol) ? String(v) : `"${v}"`;
+    });
+    const lines = [];
+    for (let i=0; i<vals.length; i+=5) {
+      const prefix = `[${i+1}]`;
+      lines.push(prefix.padEnd(5) + vals.slice(i,i+5).join('  '));
+    }
+    const vr = document.getElementById('vec-readout');
+    vr.style.display = '';
+    vr.innerHTML = `<span class="vr-label">Result: vector of length ${DATA.length}</span>` + lines.join('\n');
+
+  } else if (S.mode === 'bracket') {
+    const selRows = rowsFromBRows(S.bRows);
+    const selCols = colsFromBCols(S.bCols);
+    const allRows = selRows === null;
+    const allCols = selCols === null;
+
+    if (allRows && allCols) {
+      tbl.classList.add('all-selected');
+    } else {
+      // dim / highlight cols in header
+      ths.forEach((th,i) => {
+        if (i===0) return;
+        const ci = i-1;
+        if (!allCols && !selCols.includes(ci)) th.classList.add('dim');
+        else if (!allCols) th.classList.add('hl-bk');
+      });
+      DATA.forEach((_,ri) => {
+        const rowPass = allRows || selRows.includes(ri);
+        // row number cell
+        const rnEl = document.getElementById(`rn-${ri}`);
+        if (rowPass && !allRows) rnEl.classList.add('hl-bk-rn');
+        else if (!rowPass) rnEl.classList.add('dim');
+        COLS.forEach((col,ci) => {
+          const colPass = allCols || selCols.includes(ci);
+          const el = document.getElementById(`c${ri}-${ci}`);
+          if (rowPass && colPass) {
+            if (!allRows || !allCols) el.classList.add('hl-bk-cell');
+          } else if (rowPass && !colPass) {
+            el.classList.add('dim');
+          } else if (!rowPass && colPass) {
+            el.classList.add('dim');
+          } else {
+            el.classList.add('dim');
+          }
+        });
+      });
+    }
+    const badge = document.getElementById('result-badge');
+    badge.style.display = '';
+    const rc = rowCount(S.bRows), cc = colCount(S.bCols);
+    if (allRows && allCols) {
+      badge.innerHTML = `Result: <b>15 rows × 6 cols</b> (entire data frame)`;
+    } else if (S.bRows==='1' && cc===1) {
+      badge.innerHTML = `Result: <b>1 row × 1 col</b>: still a data frame, not a scalar`;
+    } else if (S.bRows==='1') {
+      badge.innerHTML = `Result: <b>1 row × ${cc} col${cc>1?'s':''}</b>: a 1-row data frame`;
+    } else {
+      badge.innerHTML = `Result: <b>${rc} row${rc>1?'s':''} × ${cc} col${cc>1?'s':''}</b>`;
+    }
+
+  } else { // filter
+    const mask = filterMask();
+    const passCount = mask.filter(Boolean).length;
+    // highlight filter columns in header
+    const f1ci = COL_IDX[S.f1Col];
+    ths[f1ci+1].classList.add('hl-fcol');
+    if (S.f2active) {
+      const f2ci = COL_IDX[S.f2Col];
+      ths[f2ci+1].classList.add('hl-fcol');
+    }
+    DATA.forEach((_,ri) => {
+      document.getElementById(`tr-${ri}`).className = mask[ri] ? 'hl-pass' : 'hl-fail';
+    });
+    const badge = document.getElementById('result-badge');
+    badge.style.display = '';
+    const pe = plainEnglishFilter();
+    let countLine = `<b>${passCount} of 15</b> rows pass the filter`;
+    if (S.f2active) {
+      const c1count = DATA.filter(r=>evalCond(r,S.f1Col,S.f1Op,S.f1Val)).length;
+      countLine += ` &nbsp;·&nbsp; condition 1 alone: ${c1count} rows`;
+    }
+    badge.innerHTML = `${countLine}<div class="plain-english">In plain English: keep all columns, but only rows where ${pe}</div>`;
+  }
+}
+
+/* ── Code renderer ──────────────────────────── */
+function h(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tip(content, tip_text) {
+  return `<span class="tip-target" data-tip="${tip_text}">${content}</span>`;
+}
+
+function buildCode() {
+  const setup = `<code class="cl cl-setup"><span class="sf">library</span>(palmerpenguins)</code>\n<code class="cl cl-setup"> </code>\n`;
+
+  if (S.mode === null) {
+    return setup + `<code class="cl cl-setup"><span class="sc"># Choose an indexing method above to see R code</span></code>`;
+  }
+
+  if (S.mode === 'dollar') {
+    const col = S.dollarCol;
+    const expr = `<span class="sv">penguins</span><span class="so">$</span>${tip(`<span class="so">${col}</span>`,
+      `$ pulls out the column named "${col}" and returns it as a vector—all rows, one dimension`)}`;
+    return setup +
+      `<code class="cl cl-setup"><span class="sc"># Extract one column as a vector</span></code>\n` +
+      `<code class="cl cl-dollar">${expr}</code>`;
+  }
+
+  if (S.mode === 'bracket') {
+    const rStr = S.bRows==='all' ? '' : S.bRows;
+    const cStr = S.bCols==='all' ? '' : S.bCols;
+    const rTip = S.bRows==='all' ? 'blank = all rows'
+               : S.bRows==='1' ? 'row index: row 1 only—result is still a data frame'
+               : S.bRows==='1:5' ? 'row index: rows 1 through 5 (integer sequence)'
+               : 'row index: specific rows 1, 3, and 10';
+    const cTip = S.bCols==='all' ? 'blank = all columns'
+               : S.bCols==='1' ? 'column index: first column by position'
+               : S.bCols==='1:3' ? 'column index: columns 1 through 3 (species, island, bill_length_mm)—colon makes a sequence'
+               : S.bCols==='"species"' ? 'column index: column named "species" (quotes required)'
+               : S.bCols==='c(1,3)' ? 'column index: columns 1 and 3 by position'
+               : 'column index: columns named "species" and "bill_length_mm"';
+    const rPart = tip(`<span class="sn">${h(rStr)}</span>`, rTip);
+    const cPart = tip(`<span class="ss">${h(cStr)}</span>`, cTip);
+    const expr = `<span class="sv">penguins</span><span class="so">[</span>${rPart}<span class="so">,</span> ${cPart}<span class="so">]</span>`;
+    let extra = '';
+    if (S.bRows==='1') {
+      extra = `\n<code class="cl cl-setup"><span class="sc"># returns a 1-row data frame, not a vector</span></code>`;
+    }
+    if (S.bCols==='1' || S.bCols==='"species"') {
+      extra += `\n<code class="cl cl-setup"><span class="sc"># tip: column names are safer than positions if columns ever reorder</span></code>`;
+    }
+    if (S.bRows==='all' && S.bCols==='all') {
+      extra = `\n<code class="cl cl-setup"><span class="sc"># blank on both sides = return the entire data frame</span></code>`;
+    }
+    return setup + `<code class="cl cl-bracket">${expr}</code>${extra}`;
+  }
+
+  // filter mode
+  const col1 = S.f1Col, op1 = S.f1Op, val1 = S.f1Val;
+  const lv1_inner = `<span class="sv">penguins</span><span class="so">$</span><span class="sv">${col1}</span> <span class="sb">${h(op1)}</span> <span class="ss">${h(val1)}</span>`;
+  const lv1_tip = `This produces a TRUE/FALSE vector with one value per row. Only TRUE rows are kept.`;
+
+  if (!S.f2active) {
+    const comment = `<span class="sc"># keep rows where ${col1} ${h(op1)} ${h(val1)}</span>`;
+    return setup +
+      `<code class="cl cl-setup">${comment}</code>\n` +
+      `<code class="cl cl-filter"><span class="sv">penguins</span><span class="so">[</span>${tip(lv1_inner, lv1_tip)}<span class="so">, ]</span></code>\n` +
+      `<code class="cl cl-setup"><span class="sc">#         ${'─'.repeat(col1.length+val1.length+op1.length+7)}^ blank = all columns</span></code>`;
+  }
+
+  const col2 = S.f2Col, op2 = S.f2Op, val2 = S.f2Val;
+  const joinSym = S.fJoin;
+  const lv2_inner = `<span class="sv">penguins</span><span class="so">$</span><span class="sv">${col2}</span> <span class="sb">${h(op2)}</span> <span class="ss">${h(val2)}</span>`;
+  const lv2_tip = `This produces a second TRUE/FALSE vector. The ${joinSym === '&' ? '& combines them: both must be TRUE' : '| combines them: either can be TRUE'}.`;
+  const joinTip = joinSym==='&'
+    ? 'Both conditions must be TRUE: AND logic.'
+    : 'Either condition can be TRUE: OR logic.';
+  const comment2 = `<span class="sc"># keep rows where: ${col1} ${h(op1)} ${h(val1)} ${h(joinSym)} ${col2} ${h(op2)} ${h(val2)}</span>`;
+  return setup +
+    `<code class="cl cl-setup">${comment2}</code>\n` +
+    `<code class="cl cl-filter"><span class="sv">penguins</span><span class="so">[</span>${tip(lv1_inner, lv1_tip)} <span class="sb">${tip(h(joinSym), joinTip)}</span></code>\n` +
+    `<code class="cl cl-filter">           ${tip(lv2_inner, lv2_tip)}<span class="so">, ]</span></code>`;
+}
+
+/* ── Annotation ─────────────────────────────── */
+function getAnn() {
+  if (S.mode===null || S.changed==='welcome') return {cls:'ann-welcome', html:`Here's how this works.<br><br>The code panel above shows real R code you can paste into R. The colored stripe on the left of each line marks which indexing concept it belongs to — blue for <code>$</code>, green for <code>[ , ]</code>, amber for Boolean subsetting.<br><br>The data table in the middle highlights exactly what gets selected: which rows, which columns, or which cells. Use the controls on the left to change the method and options. The code, the table, and this explanation all update instantly each time you click something.`};
+  if (S.mode==='dollar') {
+    return {cls:'ann-dollar', html:`The <code>$</code> operator <b>always returns a vector</b>—one dimension, all rows. Think of pulling the <code>${S.dollarCol}</code> column out of the data frame and laying it flat. You cannot select a subset of rows this way.`};
+  }
+  if (S.mode==='bracket') {
+    if (S.bRows==='all' && S.bCols==='all') {
+      return {cls:'ann-bracket', html:`Both indices are blank—this returns <b>the entire data frame</b>. An empty left index means "all rows"; empty right means "all columns". You'll see this blank-column pattern a lot in filter code: <code>penguins[filter, ]</code>.`};
+    }
+    if (S.bRows==='1') {
+      return {cls:'ann-bracket', html:`Selecting a single row still returns a <b>data frame</b> (1 row × ${colCount(S.bCols)} col${colCount(S.bCols)>1?'s':''}), not a vector. R preserves structure by default. To force a vector, add <code>drop = TRUE</code> as a third argument.`};
+    }
+    if (S.bCols==='1' || S.bCols==='1:3' || S.bCols==='c(1,3)') {
+      return {cls:'ann-bracket', html:`Columns can be selected by <b>position</b> (like <code>1</code>, <code>1:3</code>, or <code>c(1,3)</code>) or by <b>name</b>. They return the same result — but names are safer if columns ever get reordered. The colon <code>:</code> makes a consecutive range; <code>c()</code> picks specific positions.`};
+    }
+    return {cls:'ann-bracket', html:`The comma inside <code>[ ]</code> separates the <b>row index</b> (left) from the <b>column index</b> (right). Leaving either blank means "select all." Both indices can be integers, character names, or logical vectors.`};
+  }
+  // filter
+  if (S.changed==='filter-join' && S.fJoin==='|') {
+    return {cls:'ann-filter', html:`<code>|</code> keeps rows where <b>at least one</b> condition is TRUE. This typically selects more rows than <code>&amp;</code>. Think of it as a union.`};
+  }
+  if (S.changed==='filter-join' && S.fJoin==='&') {
+    return {cls:'ann-filter', html:`<code>&amp;</code> requires <b>both</b> conditions to be TRUE. If you want rows where either condition holds, use <code>|</code> instead.`};
+  }
+  if (S.f2active) {
+    return {cls:'ann-filter', html:`The expression inside <code>[...]</code> is evaluated first: it produces a <b>logical vector</b> of TRUE and FALSE. Putting that vector in the row slot keeps only the TRUE rows. With two conditions joined by <code>${h(S.fJoin)}</code>, R evaluates both sides element-by-element.`};
+  }
+  return {cls:'ann-filter', html:`The expression inside <code>[...]</code> is evaluated first: <code>penguins$${S.f1Col} ${h(S.f1Op)} ${h(S.f1Val)}</code> produces a TRUE/FALSE vector with one value per row. Only rows where that vector is TRUE are kept. This is why students sometimes say it feels like "the row index is a filter."`};
+}
+
+/* ── Main render ────────────────────────────── */
+function render() {
+  renderTable();
+  const cb = document.getElementById('code-block');
+  cb.innerHTML = buildCode();
+  attachTips();
+  const {cls, html} = getAnn();
+  const ann = document.getElementById('ann-box');
+  ann.className = 'ann show ' + cls;
+  ann.innerHTML = html;
+}
+
+/* ── Tooltip ─────────────────────────────────── */
+function attachTips() {
+  const tip_el = document.getElementById('code-tip');
+  document.querySelectorAll('.tip-target').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      tip_el.textContent = el.dataset.tip;
+      tip_el.style.display = 'block';
+      moveTip(e);
+    });
+    el.addEventListener('mousemove', moveTip);
+    el.addEventListener('mouseleave', () => { tip_el.style.display='none'; });
+  });
+  function moveTip(e) {
+    tip_el.style.left = (e.clientX+14)+'px';
+    tip_el.style.top  = (e.clientY-6)+'px';
+  }
+}
+
+/* ── Copy ───────────────────────────────────── */
+function copyCode() {
+  const raw = document.getElementById('code-block').innerText;
+  navigator.clipboard.writeText(raw).then(() => {
+    const b = document.getElementById('copy-btn');
+    b.textContent = 'Copied!'; b.classList.add('copied');
+    setTimeout(()=>{ b.textContent='Copy'; b.classList.remove('copied'); }, 1800);
+  });
+}
+
+/* ── Init ───────────────────────────────────── */
+buildFilterUI('f1', S.f1Col, S.f1Op, S.f1Val);
+buildFilterUI('f2', S.f2Col, S.f2Op, S.f2Val);
+render();
+</script>
+</body>
+</html>

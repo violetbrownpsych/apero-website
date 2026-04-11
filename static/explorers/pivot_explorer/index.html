@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pivot_longer / pivot_wider Explorer</title>
+  <link rel="icon" href="pivot_icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:       #f0ebe1;
+      --panel:    #fdfcf9;
+      --border:   #dbd3c3;
+      --text:     #1c1811;
+      --muted:    #79705f;
+      --accent:   #b85520;
+      --code-bg:  #181826;
+
+      /* pivot-specific color tokens */
+      --c-cols:   #4eaaec;   /* cols argument / pivoted columns */
+      --c-names:  #c89850;   /* names_to / names_from */
+      --c-values: #52c97e;   /* values_to / values_from */
+      --c-id:     #b87fd4;   /* id columns (not pivoted) */
+      --c-adv:    #e8a030;   /* advanced options */
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Vertical mode stack */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Text input for names_to / values_to */
+    .ctrl-input {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+      background: white;
+      margin-top: 2px;
+      transition: border-color .1s;
+    }
+    .ctrl-input:focus { outline: none; border-color: var(--accent); }
+
+    /* Advanced options collapsible */
+    .adv-toggle {
+      width: 100%; padding: 5px 8px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; font-size: 0.75rem; font-weight: 600;
+      color: var(--muted); text-align: left; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: all .1s;
+    }
+    .adv-toggle:hover { border-color: var(--c-adv); color: var(--c-adv); }
+    .adv-toggle.open { border-color: var(--c-adv); color: var(--c-adv); }
+    .adv-body { display: none; margin-top: 7px; }
+    .adv-body.open { display: block; }
+
+    /* Color swatches for column pills in controls */
+    .col-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 20px;
+      font-family: 'Fira Code', monospace; font-size: 0.72rem;
+      border: 1.5px solid transparent; cursor: pointer;
+      font-weight: 500; transition: all .1s;
+    }
+    .col-pill.role-id     { background: #f3eeff; border-color: var(--c-id);     color: var(--c-id); }
+    .col-pill.role-pivot  { background: #edf6ff; border-color: var(--c-cols);   color: var(--c-cols); }
+    .col-pill.role-id.selectable:hover    { filter: brightness(0.93); }
+    .col-pill.role-pivot.selectable:hover { filter: brightness(0.93); }
+
+    /* === TABLE STYLES === */
+    .table-wrap {
+      overflow-x: auto;
+      margin-bottom: 10px;
+    }
+    .table-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); margin-bottom: 5px;
+    }
+    table {
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      width: 100%;
+      font-family: 'Fira Code', monospace;
+    }
+    th {
+      background: #ece8de;
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      font-weight: 600;
+      text-align: left;
+      white-space: nowrap;
+    }
+    td {
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      white-space: nowrap;
+      background: white;
+      transition: background 0.3s;
+    }
+    /* Column header color stripes */
+    th.h-id     { border-top: 3px solid var(--c-id); }
+    th.h-cols   { border-top: 3px solid var(--c-cols); }
+    th.h-names  { border-top: 3px solid var(--c-names); }
+    th.h-values { border-top: 3px solid var(--c-values); }
+
+    /* Cell highlight colors for tracing values */
+    td.hi-1  { background: #fff0d4; }
+    td.hi-2  { background: #d4f0e8; }
+    td.hi-3  { background: #d4e8ff; }
+    td.hi-4  { background: #f0d4ff; }
+    td.hi-5  { background: #ffd4d4; }
+    td.hi-6  { background: #d4ffee; }
+    td.hi-id { background: #f3eeff; }
+
+    .arrow-row {
+      display: flex; align-items: center; justify-content: center;
+      padding: 8px 0; gap: 8px; color: var(--muted); font-size: 0.8rem;
+    }
+    .arrow-row svg { flex-shrink: 0; }
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 2;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 1px 6px 1px 9px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup  { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+    .cl-cols   { border-left-color: var(--c-cols); }
+    .cl-names  { border-left-color: var(--c-names); }
+    .cl-values { border-left-color: var(--c-values); }
+    .cl-id     { border-left-color: var(--c-id); }
+    .cl-adv    { border-left-color: var(--c-adv); }
+    .cl-fn     { border-left-color: var(--accent); }
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }   /* function names */
+    .sv { color: #f78c6c; }   /* variable / data frame names */
+    .sk { color: #89ddff; }   /* argument keywords */
+    .ss { color: #c3e88d; }   /* strings */
+    .sn { color: #f0ab70; }   /* numeric literals */
+    .so { color: #89ddff; }   /* operators */
+    .sb { color: #c3e88d; }   /* boolean / logical operators */
+    .sc { color: #6a7a6a; font-style: italic; }  /* comments */
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      max-width: 1360px; margin: 0 auto 18px;
+      padding: 13px 18px;
+      border-radius: 9px; border: 1.5px solid var(--border);
+      font-size: 0.84rem; line-height: 1.65;
+      background: var(--panel);
+    }
+    .ann.show { display: block; }
+    .ann-welcome  { border-color: var(--accent);  background: #fdf6f0; }
+    .ann-cols     { border-color: var(--c-cols);  background: #edf6ff; }
+    .ann-names    { border-color: var(--c-names); background: #fdf5e4; }
+    .ann-values   { border-color: var(--c-values);background: #edfaf3; }
+    .ann-id       { border-color: var(--c-id);    background: #f3eeff; }
+    .ann-mode     { border-color: var(--accent);  background: #fdf6f0; }
+    .ann-adv      { border-color: var(--c-adv);   background: #fdf8ee; }
+
+    /* inline code in annotations */
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+
+    @keyframes cell-flash {
+      0%   { filter: brightness(0.8); }
+      100% { filter: brightness(1); }
+    }
+    .cell-flash { animation: cell-flash 0.5s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>pivot_longer &amp; pivot_wider</h1>
+    <p>See exactly where each value goes when you reshape a data frame</p>
+    <span class="pill">tidyr</span>
+    <span class="pill">pivot_longer()</span>
+    <span class="pill">pivot_wider()</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Controls</div>
+        <button class="copy-btn" onclick="resetAll()">&#8635; Reset</button>
+      </div>
+
+      <!-- Mode toggle -->
+      <div class="cs">
+        <div class="ch">Function</div>
+        <div class="tog2">
+          <button class="btn on" id="btn-longer" onclick="setMode('longer')">pivot_longer</button>
+          <button class="btn"    id="btn-wider"  onclick="setMode('wider')">pivot_wider</button>
+        </div>
+        <div class="sub" id="mode-sub">Collapse wide columns into rows</div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- pivot_longer controls -->
+      <div id="ctrl-longer">
+
+        <div class="cs">
+          <div class="ch">Which columns to pivot?</div>
+          <div class="sub" style="margin-bottom:6px">
+            <span style="color:var(--c-cols);font-weight:600">Blue</span> columns will be collapsed into rows: Their names become values in a new column, and their numbers move to another new column. Click a blue column to exclude it.<br><br>
+            <span style="color:var(--c-id);font-weight:600">Purple</span> columns stay as-is. <span style="color:var(--c-id)">child_id</span> and <span style="color:var(--c-id)">name</span> can't be pivoted; they identify each child, so R needs them to repeat on every row. Measurement columns you exclude turn purple and stay as their own column in the result.
+          </div>
+          <div class="br" id="col-pills">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="cs">
+          <div class="ch" style="color:var(--c-names)">names_to</div>
+          <div class="sub">What should the new column <em>containing</em> old column names be called?</div>
+          <input class="ctrl-input" id="input-names-to" type="text" value="age"
+                 oninput="onNameTo(this.value)" style="border-color:var(--c-names)">
+        </div>
+
+        <div class="cs">
+          <div class="ch" style="color:var(--c-values)">values_to</div>
+          <div class="sub">What should the new column of <em>values</em> be called?</div>
+          <input class="ctrl-input" id="input-values-to" type="text" value="reading_score"
+                 oninput="onValueTo(this.value)" style="border-color:var(--c-values)">
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- Advanced options (collapsible) -->
+        <button class="adv-toggle" id="adv-toggle-btn" onclick="toggleAdv()">
+          <span>Advanced options</span>
+          <span id="adv-arrow">&#9660;</span>
+        </button>
+        <div class="adv-body" id="adv-body">
+
+          <div class="cs" style="margin-top:8px">
+            <div class="ch" style="color:var(--c-adv)">names_prefix</div>
+            <div class="sub">Strip a repeated prefix from column names before putting them in <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">names_to</code></div>
+            <input class="ctrl-input" id="input-names-prefix" type="text" value=""
+                   placeholder="e.g. reading_age" oninput="onNamesPrefix(this.value)"
+                   style="border-color:var(--c-adv)">
+          </div>
+
+          <div class="cs">
+            <div class="ch" style="color:var(--c-adv)">values_drop_na</div>
+            <div class="sub">Drop rows where the value is <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">NA</code>?</div>
+            <div class="tog2" style="margin-top:4px">
+              <button class="btn on" id="btn-dropna-false" onclick="onDropNA(false)">FALSE</button>
+              <button class="btn"    id="btn-dropna-true"  onclick="onDropNA(true)">TRUE</button>
+            </div>
+          </div>
+
+        </div><!-- /adv-body -->
+
+      </div><!-- /ctrl-longer -->
+
+      <!-- pivot_wider controls -->
+      <div id="ctrl-wider" style="display:none">
+
+        <div class="cs">
+          <div class="ch" style="color:var(--c-names)">names_from</div>
+          <div class="sub">Which column's <em>values</em> should become new column headers?</div>
+          <div class="mode-stack" id="names-from-stack">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="cs">
+          <div class="ch" style="color:var(--c-values)">values_from</div>
+          <div class="sub">Which column holds the <em>values</em> to fill those new columns?</div>
+          <div class="mode-stack" id="values-from-stack">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="cs">
+          <div class="ch" style="color:var(--c-adv)">names_prefix</div>
+          <div class="sub">Add a prefix to the new column names. Bare numbers (like <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">6</code>, <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">7</code>, <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">8</code>) make awkward column names in R; a prefix fixes that.</div>
+          <input class="ctrl-input" id="input-wider-names-prefix" type="text" value="reading_age"
+                 oninput="onWiderNamesPrefix(this.value)" style="border-color:var(--c-adv)">
+          <div class="sub" id="wider-prefix-warn" style="color:#b85520;display:none;margin-top:4px">
+            &#9888; Without a prefix, column names will be bare numbers. In R, you'd need backticks to use them: <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">df$`6`</code>
+          </div>
+        </div>
+
+      </div><!-- /ctrl-wider -->
+
+    </div><!-- /controls-panel -->
+
+
+    <!-- MIDDLE: MAIN VISUAL PANEL -->
+    <div class="panel" id="main-panel">
+      <!-- BEFORE table -->
+      <div class="table-label" id="before-label">Wide format (before)</div>
+      <div class="table-wrap">
+        <table id="tbl-before"></table>
+      </div>
+
+      <!-- Arrow -->
+      <div class="arrow-row" id="arrow-row">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 2v14M3 10l6 6 6-6" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="arrow-label">pivot_longer()</span>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 2v14M3 10l6 6 6-6" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- AFTER table -->
+      <div class="table-label" id="after-label">Long format (after)</div>
+      <div class="table-wrap">
+        <table id="tbl-after"></table>
+      </div>
+    </div><!-- /main-panel -->
+
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="panel-label" style="margin-bottom:6px">Color key</div>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem">
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--c-cols);flex-shrink:0"></div>
+            <span><strong>cols</strong> — columns being pivoted</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--c-names);flex-shrink:0"></div>
+            <span><strong>names_to / names_from</strong> — column name destination</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--c-values);flex-shrink:0"></div>
+            <span><strong>values_to / values_from</strong> — value destination</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--c-id);flex-shrink:0"></div>
+            <span><strong>id columns</strong> — not pivoted, just repeated</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:10px;height:10px;border-radius:2px;background:var(--c-adv);flex-shrink:0"></div>
+            <span><strong>advanced options</strong></span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /code-panel -->
+
+  </div><!-- /grid -->
+
+  <!-- ANNOTATION BOX (below grid) -->
+  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // === DATA & COLUMN DEFINITIONS ===
+
+    // Wide-format dataset: longitudinal reading study, 8 kids, ages 6/7/8
+    const WIDE_DATA = [
+      { child_id: 1, name: 'Amara',   reading_age6: 42, reading_age7: 51, reading_age8: 63 },
+      { child_id: 2, name: 'Ben',     reading_age6: 38, reading_age7: 45, reading_age8: 54 },
+      { child_id: 3, name: 'Cora',    reading_age6: 55, reading_age7: 62, reading_age8: 70 },
+      { child_id: 4, name: 'Darius',  reading_age6: 31, reading_age7: 40, reading_age8: 49 },
+      { child_id: 5, name: 'Elena',   reading_age6: 47, reading_age7: 58, reading_age8: 65 },
+      { child_id: 6, name: 'Finn',    reading_age6: 36, reading_age7: 44, reading_age8: 52 },
+      { child_id: 7, name: 'Gia',     reading_age6: 60, reading_age7: 68, reading_age8: 75 },
+      { child_id: 8, name: 'Hector',  reading_age6: 29, reading_age7: 38, reading_age8: 47 },
+      { child_id: 9, name: 'Isla',    reading_age6: 44, reading_age7: null, reading_age8: 58 },
+      { child_id: 10, name: 'Jonas',  reading_age6: null, reading_age7: 35, reading_age8: null },
+    ];
+
+    // All columns in wide format
+    const ALL_COLS    = ['child_id', 'name', 'reading_age6', 'reading_age7', 'reading_age8'];
+    // Columns that can be pivoted (measurement columns)
+    const PIVOT_COLS  = ['reading_age6', 'reading_age7', 'reading_age8'];
+    // Columns in long format (for pivot_wider source)
+    const LONG_COLS   = ['child_id', 'name', 'age', 'reading_score'];
+
+    // Cell color classes — one per pivoted column (cycles if more columns added)
+    const CELL_COLORS = ['hi-1', 'hi-2', 'hi-3', 'hi-4', 'hi-5', 'hi-6'];
+
+    // Display null as R-style NA
+    function fmt(v) { return (v === null || v === undefined) ? '<em style="color:#a07070">NA</em>' : v; }
+
+    // === STATE ===
+
+    const DEFAULTS = {
+      mode:         'longer',   // 'longer' | 'wider'
+      pivotCols:    ['reading_age6', 'reading_age7', 'reading_age8'], // which cols are pivoted
+      namesTo:      'age',
+      valuesTo:     'reading_score',
+      namesPrefix:  '',
+      valuesDropNA: false,
+      namesFrom:         'age',            // for pivot_wider
+      valuesFrom:        'reading_score',
+      widerNamesPrefix:  'reading_age',
+      advOpen:      false,
+      changed:      'welcome',
+    };
+
+    let S = Object.assign({}, DEFAULTS);
+
+    // === RENDER FUNCTIONS ===
+
+    function render() {
+      renderTables();
+      renderCode();
+      renderWiderControls();
+      const {cls, html} = getAnn();
+      const ann = document.getElementById('ann-box');
+      ann.className = 'ann show ' + cls;
+      ann.innerHTML = html;
+    }
+
+    // Build the wide (before) table
+    function renderBeforeTable() {
+      const tbl = document.getElementById('tbl-before');
+      const idCols  = ALL_COLS.filter(c => !PIVOT_COLS.includes(c));
+      const pivCols = S.mode === 'longer' ? S.pivotCols : ALL_COLS.filter(c => !PIVOT_COLS.includes(c));
+
+      // In wider mode the "before" is the long table
+      if (S.mode === 'wider') {
+        renderLongAsBeforeTable(tbl);
+        return;
+      }
+
+      // Header row
+      let html = '<thead><tr>';
+      ALL_COLS.forEach(col => {
+        const isPivot = S.pivotCols.includes(col);
+        const cls = isPivot ? 'h-cols' : 'h-id';
+        html += `<th class="${cls}">${col}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      // Data rows
+      WIDE_DATA.forEach(row => {
+        html += '<tr>';
+        ALL_COLS.forEach(col => {
+          const pivIdx = S.pivotCols.indexOf(col);
+          const cellCls = pivIdx >= 0 ? CELL_COLORS[pivIdx] : 'hi-id';
+          html += `<td class="${cellCls}">${fmt(row[col])}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      tbl.innerHTML = html;
+    }
+
+    // Build the long (after) table for pivot_longer
+    function renderAfterTable() {
+      const tbl = document.getElementById('tbl-after');
+
+      if (S.mode === 'wider') {
+        renderWideAsAfterTable(tbl);
+        return;
+      }
+
+      // Derive long rows
+      const idCols       = ALL_COLS.filter(c => !PIVOT_COLS.includes(c));          // child_id, name
+      const keptCols     = PIVOT_COLS.filter(c => !S.pivotCols.includes(c));       // excluded measure cols — stay as-is
+      const namesCol     = S.namesTo   || 'age';
+      const valuesCol    = S.valuesTo  || 'reading_score';
+
+      let longRows = [];
+      WIDE_DATA.forEach(row => {
+        S.pivotCols.forEach((pc, idx) => {
+          const val = row[pc];
+          if (S.valuesDropNA && (val === null || val === undefined)) return;
+          let nameVal = pc;
+          if (S.namesPrefix && pc.startsWith(S.namesPrefix)) {
+            nameVal = pc.slice(S.namesPrefix.length);
+          }
+          const longRow = {};
+          idCols.forEach(ic  => { longRow[ic]  = row[ic]; });
+          keptCols.forEach(kc => { longRow[kc] = row[kc]; }); // repeat kept cols on every row
+          longRow[namesCol]  = nameVal;
+          longRow[valuesCol] = val;
+          longRow._pivotIdx  = idx;
+          longRows.push(longRow);
+        });
+      });
+
+      const longColNames = [...idCols, ...keptCols, namesCol, valuesCol];
+
+      // Header
+      let html = '<thead><tr>';
+      longColNames.forEach(col => {
+        let cls = 'h-id';
+        if (col === namesCol)  cls = 'h-names';
+        if (col === valuesCol) cls = 'h-values';
+        html += `<th class="${cls}">${col}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      // Data rows
+      longRows.forEach(row => {
+        html += '<tr>';
+        longColNames.forEach(col => {
+          let cellCls = 'hi-id';
+          if (col === namesCol || col === valuesCol) {
+            cellCls = CELL_COLORS[row._pivotIdx];
+          }
+          html += `<td class="${cellCls}">${fmt(row[col])}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      tbl.innerHTML = html;
+    }
+
+    // Long table shown as "before" in pivot_wider mode
+    function renderLongAsBeforeTable(tbl) {
+      const idCols    = ['child_id', 'name'];
+      const namesCol  = S.namesFrom;
+      const valuesCol = S.valuesFrom;
+
+      // Reconstruct long rows from wide data
+      let longRows = [];
+      WIDE_DATA.forEach(row => {
+        PIVOT_COLS.forEach((pc, idx) => {
+          const longRow = { child_id: row.child_id, name: row.name };
+          longRow[namesCol]  = pc.replace('reading_age', '');
+          longRow[valuesCol] = row[pc];
+          longRow._pivotIdx  = idx;
+          longRows.push(longRow);
+        });
+      });
+
+      const cols = ['child_id', 'name', namesCol, valuesCol];
+      let html = '<thead><tr>';
+      cols.forEach(col => {
+        let cls = 'h-id';
+        if (col === namesCol)  cls = 'h-names';
+        if (col === valuesCol) cls = 'h-values';
+        html += `<th class="${cls}">${col}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      longRows.forEach(row => {
+        html += '<tr>';
+        cols.forEach(col => {
+          let cellCls = 'hi-id';
+          if (col === namesCol || col === valuesCol) cellCls = CELL_COLORS[row._pivotIdx];
+          html += `<td class="${cellCls}">${fmt(row[col])}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      tbl.innerHTML = html;
+    }
+
+    // Wide table shown as "after" in pivot_wider mode
+    function renderWideAsAfterTable(tbl) {
+      const pfx = S.widerNamesPrefix || '';
+      // Map original pivot col names → display names (prefix + stripped age value)
+      const displayName = col => {
+        if (!PIVOT_COLS.includes(col)) return col;
+        const ageVal = col.replace('reading_age', ''); // "6", "7", "8"
+        return pfx + ageVal;
+      };
+
+      // Show/hide bare-number warning
+      const warn = document.getElementById('wider-prefix-warn');
+      if (warn) warn.style.display = pfx === '' ? 'block' : 'none';
+
+      let html = '<thead><tr>';
+      ALL_COLS.forEach(col => {
+        const isPivot = PIVOT_COLS.includes(col);
+        html += `<th class="${isPivot ? 'h-cols' : 'h-id'}">${displayName(col)}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      WIDE_DATA.forEach(row => {
+        html += '<tr>';
+        ALL_COLS.forEach(col => {
+          const pivIdx = PIVOT_COLS.indexOf(col);
+          const cellCls = pivIdx >= 0 ? CELL_COLORS[pivIdx] : 'hi-id';
+          html += `<td class="${cellCls}">${fmt(row[col])}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      tbl.innerHTML = html;
+    }
+
+    function renderTables() {
+      // Update labels and arrow
+      const beforeLabel = document.getElementById('before-label');
+      const afterLabel  = document.getElementById('after-label');
+      const arrowLabel  = document.getElementById('arrow-label');
+
+      if (S.mode === 'longer') {
+        beforeLabel.textContent = 'Wide format (before)';
+        afterLabel.textContent  = 'Long format (after)';
+        arrowLabel.textContent  = 'pivot_longer()';
+      } else {
+        beforeLabel.textContent = 'Long format (before)';
+        afterLabel.textContent  = 'Wide format (after)';
+        arrowLabel.textContent  = 'pivot_wider()';
+      }
+
+      renderBeforeTable();
+      renderAfterTable();
+    }
+
+    // Populate pivot_wider controls (names_from / values_from stacks)
+    function renderWiderControls() {
+      const longCols = ['child_id', 'name', 'age', 'reading_score'];
+      ['names-from-stack', 'values-from-stack'].forEach(id => {
+        const stack = document.getElementById(id);
+        if (!stack) return;
+        const key = id === 'names-from-stack' ? 'namesFrom' : 'valuesFrom';
+        stack.innerHTML = longCols.map(col => {
+          const on = S[key] === col ? 'on' : '';
+          return `<button class="mbtn ${on}" onclick="onWiderCol('${key}','${col}')">${col}</button>`;
+        }).join('');
+      });
+    }
+
+    // Populate the column pills in the controls panel
+    function renderColPills() {
+      const container = document.getElementById('col-pills');
+      if (!container) return;
+      container.innerHTML = ALL_COLS.map(col => {
+        const isPivot = S.pivotCols.includes(col);
+        const isFixed = !PIVOT_COLS.includes(col); // id cols can't be toggled
+        if (isFixed) {
+          return `<span class="col-pill role-id">${col}</span>`;
+        }
+        const roleClass = isPivot ? 'role-pivot' : 'role-id';
+        return `<span class="col-pill ${roleClass} selectable" onclick="togglePivotCol('${col}')">${col}</span>`;
+      }).join('');
+    }
+
+    // === CODE BUILDER ===
+
+    function renderCode() {
+      const el = document.getElementById('code-scroll');
+      el.innerHTML = buildCode();
+    }
+
+    function cl(cls, html) {
+      return `<code class="cl ${cls}">${html}</code>`;
+    }
+    function tip(content, label) {
+      return `<span data-tip="${content}" onmouseenter="showTip(this)" onmouseleave="hideTip()" style="cursor:help">${label}</span>`;
+    }
+
+    function buildCode() {
+      const df   = `<span class="sv">reading_study</span>`;
+      const pipe = `<span class="so"> |&gt;</span>`;
+      let lines = [];
+
+      lines.push(cl('cl-setup', `<span class="sc"># Load the tidyverse (includes tidyr)</span>`));
+      lines.push(cl('cl-setup', `<span class="sf">library</span>(<span class="sv">tidyverse</span>)`));
+      lines.push(cl('cl-setup', ``));
+
+      if (S.mode === 'longer') {
+        const colsArg = S.pivotCols.map(c => `<span class="sv">${c}</span>`).join(', ');
+        const namesTo  = `<span class="ss">"${S.namesTo || 'age'}"</span>`;
+        const valuesTo = `<span class="ss">"${S.valuesTo || 'reading_score'}"</span>`;
+
+        lines.push(cl('cl-fn',     `${df} ${pipe}`));
+        lines.push(cl('cl-fn',     `  <span class="sf">pivot_longer</span>(`));
+        lines.push(cl('cl-cols',   `    <span class="sk">cols</span> = ${tip('Which columns to collapse into rows. These column names become values in names_to.', `c(${colsArg})`)},`));
+        lines.push(cl('cl-names',  `    <span class="sk">names_to</span> = ${tip('The name of the new column that will hold what used to be column names.', namesTo)},`));
+        lines.push(cl('cl-values', `    <span class="sk">values_to</span> = ${tip('The name of the new column that will hold the actual data values.', valuesTo)}`));
+
+        if (S.namesPrefix || S.valuesDropNA) {
+          // add comma to values_to line and add advanced lines
+          lines[lines.length - 1] = cl('cl-values',
+            `    <span class="sk">values_to</span> = ${tip('The name of the new column that will hold the actual data values.', valuesTo)},`);
+          if (S.namesPrefix) {
+            const pfx = `<span class="ss">"${S.namesPrefix}"</span>`;
+            lines.push(cl('cl-adv', `    <span class="sk">names_prefix</span> = ${tip('Strip this text from the start of each column name before putting it in names_to.', pfx)}`
+              + (S.valuesDropNA ? ',' : '')));
+          }
+          if (S.valuesDropNA) {
+            lines.push(cl('cl-adv', `    <span class="sk">values_drop_na</span> = <span class="sb">TRUE</span>`
+              + tip('When TRUE, rows where the value is NA are dropped from the result.', '')));
+          }
+        }
+
+        lines.push(cl('cl-fn', `  )`));
+
+      } else {
+        // pivot_wider
+        const namesFrom  = `<span class="sv">${S.namesFrom}</span>`;
+        const valuesFrom = `<span class="sv">${S.valuesFrom}</span>`;
+        const hasPfx     = S.widerNamesPrefix !== '';
+        const pfxStr     = `<span class="ss">"${S.widerNamesPrefix}"</span>`;
+
+        lines.push(cl('cl-fn',     `${df} ${pipe}`));
+        lines.push(cl('cl-fn',     `  <span class="sf">pivot_wider</span>(`));
+        lines.push(cl('cl-names',  `    <span class="sk">names_from</span>  = ${tip('The column whose values will become new column headers.', namesFrom)},`));
+        lines.push(cl('cl-values', `    <span class="sk">values_from</span> = ${tip('The column whose values will fill in those new columns.', valuesFrom)}` + (hasPfx ? ',' : '')));
+        if (hasPfx) {
+          lines.push(cl('cl-adv',  `    <span class="sk">names_prefix</span> = ${tip('Add this prefix to every new column name. Prevents bare numbers as column names.', pfxStr)}`));
+        }
+        lines.push(cl('cl-fn',     `  )`));
+      }
+
+      return lines.join('\n');
+    }
+
+    function showTip(el) {
+      const t = document.getElementById('code-tip');
+      t.textContent = el.dataset.tip;
+      t.style.display = 'block';
+    }
+    function hideTip() {
+      document.getElementById('code-tip').style.display = 'none';
+    }
+    document.addEventListener('mousemove', e => {
+      const t = document.getElementById('code-tip');
+      if (t.style.display === 'block') {
+        t.style.left = (e.clientX + 14) + 'px';
+        t.style.top  = (e.clientY - 10) + 'px';
+      }
+    });
+
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // === ANNOTATION ===
+
+    function getAnn() {
+      if (S.changed === 'welcome') return { cls: 'ann-welcome', html: `
+        <strong>Here's how this tool works.</strong><br><br>
+        The data table in the middle shows a <em>wide-format</em> reading study — each row is one child,
+        and their reading scores at ages 6, 7, and 8 are spread across three separate columns.
+        R often needs this in <em>long format</em> instead—one row per child <em>per age</em>.<br><br>
+        <strong>pivot_longer()</strong> collapses those three columns into two: one for the age label
+        (called <code>names_to</code>) and one for the score (called <code>values_to</code>).
+        <strong>Color-coded cells</strong> let you trace exactly where each value goes.<br><br>
+        Use the controls on the left to choose which columns to pivot and what to name the new columns.
+        Toggle to <strong>pivot_wider()</strong> to see the reverse. The R code panel updates live;
+        everything shown is real code you can paste directly into R.`
+      };
+
+      if (S.changed === 'mode-longer') return { cls: 'ann-mode', html: `
+        <strong>pivot_longer()</strong> takes a <em>wide</em> data frame and makes it <em>longer</em> —
+        more rows, fewer columns.<br><br>
+        Each measurement column you select (shown in <span style="color:var(--c-cols);font-weight:600">blue</span>)
+        gets collapsed. Its column <em>name</em> becomes a value in the
+        <span style="color:var(--c-names);font-weight:600">names_to</span> column, and its
+        <em>value</em> goes into the <span style="color:var(--c-values);font-weight:600">values_to</span> column.
+        The <span style="color:var(--c-id);font-weight:600">id columns</span> (child_id, name) just repeat
+        for every new row.`
+      };
+
+      if (S.changed === 'mode-wider') return { cls: 'ann-mode', html: `
+        <strong>pivot_wider()</strong> is the reverse: It takes a <em>long</em> data frame and spreads it
+        out into <em>wide</em> format.<br><br>
+        The column you choose for <span style="color:var(--c-names);font-weight:600">names_from</span>
+        contains the values that will become <em>new column headers</em>. The column you choose for
+        <span style="color:var(--c-values);font-weight:600">values_from</span> contains the scores that
+        will fill in those new columns. This is the exact reverse of pivot_longer().`
+      };
+
+      if (S.changed === 'cols') return { cls: 'ann-cols', html: `
+        <strong>cols</strong> tells R which columns to pivot; that is, which ones should stop being their own columns
+        and instead become <em>values</em> in a single column.<br><br>
+        In the tables, <span style="color:var(--c-cols);font-weight:600">blue cells</span> are the ones being
+        pivoted. <span style="color:var(--c-id);font-weight:600">Purple cells</span> are the id columns;
+        they stay in place and simply repeat for each new row. Try toggling columns on and off to see how
+        the long table changes.`
+      };
+
+      if (S.changed === 'namesTo') return { cls: 'ann-names', html: `
+        <strong>names_to</strong> is the name you give to the brand-new column that will hold what used to be
+        <em>column names</em>.<br><br>
+        In this dataset the column names are <code>reading_age6</code>, <code>reading_age7</code>,
+        <code>reading_age8</code>, so after pivoting, each of those names becomes a <em>value</em>
+        in whatever column you name here. "age" is a sensible choice because that's what the column names
+        actually represent.`
+      };
+
+      if (S.changed === 'valuesTo') return { cls: 'ann-values', html: `
+        <strong>values_to</strong> is the name you give to the brand-new column that will hold the actual
+        <em>numbers</em> from the original cells.<br><br>
+        Every score that was sitting inside a wide cell (like 42, 51, 63…) gets moved into this single
+        column. "reading_score" is a good name because that's what those numbers measure.`
+      };
+
+      if (S.changed === 'namesPrefix') return { cls: 'ann-adv', html: `
+        <strong>names_prefix</strong> strips a repeated prefix from the column names <em>before</em>
+        putting them into the <code>names_to</code> column.<br><br>
+        For example, the column names here are <code>reading_age6</code>, <code>reading_age7</code>,
+        <code>reading_age8</code>. If you set <code>names_prefix = "reading_age"</code>, R strips that
+        part off and you get just <code>6</code>, <code>7</code>, <code>8</code> in the new column, which
+        is much cleaner, especially if you want to do math with those age values later.`
+      };
+
+      if (S.changed === 'dropNA') return { cls: 'ann-adv', html: `
+        <strong>values_drop_na</strong> controls what happens when a cell in the wide table is empty (<code>NA</code>).<br><br>
+        By default (<code>FALSE</code>), pivot_longer keeps those rows: You get an <code>NA</code> in the
+        values column. If you set it to <code>TRUE</code>, those rows are simply dropped. This dataset has
+        no missing values, so the result looks the same either way. But in a real study where some kids
+        missed a measurement, this argument becomes important.`
+      };
+
+      if (S.changed === 'widerNamesPrefix') {
+        const pfx = S.widerNamesPrefix;
+        return { cls: 'ann-adv', html: pfx === '' ? `
+          <strong>names_prefix</strong> is currently empty, so the new column names will just be the bare values from the <code>${S.namesFrom}</code> column: <code>6</code>, <code>7</code>, <code>8</code>.<br><br>
+          In R, column names that start with a number are legal but awkward; you have to wrap them in backticks every time you use them: <code>df\`6\`</code>, <code>df\`7\`</code>, <code>df\`8\`</code>. A prefix like <code>"reading_age"</code> gives you <code>reading_age6</code>, <code>reading_age7</code>, <code>reading_age8</code> — clean, self-describing, no backticks needed.`
+        : `
+          <strong>names_prefix</strong> adds <code>"${pfx}"</code> to the front of every new column name.<br><br>
+          The <code>${S.namesFrom}</code> column contains <code>6</code>, <code>7</code>, <code>8</code>—those become the new column headers. With the prefix applied, they become <code>${pfx}6</code>, <code>${pfx}7</code>, <code>${pfx}8</code>. This makes the column names self-describing and avoids the awkwardness of bare numbers as variable names in R.`
+        };
+      }
+
+      if (S.changed === 'widerCol') return { cls: 'ann-mode', html: `
+        <strong>names_from</strong> and <strong>values_from</strong> are pivot_wider's counterparts to
+        names_to and values_to.<br><br>
+        <code>names_from</code>: which column contains the labels that should become <em>new column headers</em>?<br>
+        <code>values_from</code>: which column contains the <em>numbers</em> to fill those new columns?<br><br>
+        Together they reverse what pivot_longer did—collapsing many rows per child back into one row
+        with multiple score columns.`
+      };
+
+      return { cls: 'ann-welcome', html: '' };
+    }
+
+    // === EVENT HANDLERS ===
+
+    function setMode(mode) {
+      S.mode    = mode;
+      S.changed = mode === 'longer' ? 'mode-longer' : 'mode-wider';
+
+      document.getElementById('btn-longer').classList.toggle('on', mode === 'longer');
+      document.getElementById('btn-wider').classList.toggle('on', mode === 'wider');
+      document.getElementById('ctrl-longer').style.display = mode === 'longer' ? '' : 'none';
+      document.getElementById('ctrl-wider').style.display  = mode === 'wider'  ? '' : 'none';
+      document.getElementById('mode-sub').textContent =
+        mode === 'longer' ? 'Collapse wide columns into rows' : 'Spread long rows into wide columns';
+
+      render();
+    }
+
+    function togglePivotCol(col) {
+      const idx = S.pivotCols.indexOf(col);
+      if (idx >= 0) {
+        if (S.pivotCols.length === 1) return; // must keep at least one
+        S.pivotCols = S.pivotCols.filter(c => c !== col);
+      } else {
+        // Re-insert in original order
+        S.pivotCols = PIVOT_COLS.filter(c => S.pivotCols.includes(c) || c === col);
+      }
+      S.changed = 'cols';
+      renderColPills();
+      render();
+    }
+
+    function onNameTo(val) {
+      S.namesTo  = val;
+      S.changed  = 'namesTo';
+      render();
+    }
+
+    function onValueTo(val) {
+      S.valuesTo = val;
+      S.changed  = 'valuesTo';
+      render();
+    }
+
+    function onNamesPrefix(val) {
+      S.namesPrefix = val;
+      S.changed     = 'namesPrefix';
+      render();
+    }
+
+    function onDropNA(val) {
+      S.valuesDropNA = val;
+      S.changed      = 'dropNA';
+      document.getElementById('btn-dropna-false').classList.toggle('on', !val);
+      document.getElementById('btn-dropna-true').classList.toggle('on',  val);
+      render();
+    }
+
+    function onWiderCol(key, val) {
+      S[key]    = val;
+      S.changed = 'widerCol';
+      renderWiderControls();
+      render();
+    }
+
+    function onWiderNamesPrefix(val) {
+      S.widerNamesPrefix = val;
+      S.changed = 'widerNamesPrefix';
+      render();
+    }
+
+    function toggleAdv() {
+      S.advOpen = !S.advOpen;
+      const btn  = document.getElementById('adv-toggle-btn');
+      const body = document.getElementById('adv-body');
+      const arr  = document.getElementById('adv-arrow');
+      btn.classList.toggle('open', S.advOpen);
+      body.classList.toggle('open', S.advOpen);
+      arr.innerHTML = S.advOpen ? '&#9650;' : '&#9660;';
+    }
+
+    // === RESET ===
+
+    function resetAll() {
+      S = Object.assign({}, DEFAULTS);
+      S.pivotCols = [...DEFAULTS.pivotCols];
+      S.changed   = 'welcome';
+
+      // Sync controls
+      document.getElementById('btn-longer').classList.add('on');
+      document.getElementById('btn-wider').classList.remove('on');
+      document.getElementById('ctrl-longer').style.display = '';
+      document.getElementById('ctrl-wider').style.display  = 'none';
+      document.getElementById('mode-sub').textContent = 'Collapse wide columns into rows';
+      document.getElementById('input-names-to').value    = DEFAULTS.namesTo;
+      document.getElementById('input-values-to').value   = DEFAULTS.valuesTo;
+      document.getElementById('input-names-prefix').value = '';
+      document.getElementById('input-wider-names-prefix').value = DEFAULTS.widerNamesPrefix;
+      document.getElementById('btn-dropna-false').classList.add('on');
+      document.getElementById('btn-dropna-true').classList.remove('on');
+
+      // Close advanced panel
+      S.advOpen = false;
+      document.getElementById('adv-toggle-btn').classList.remove('open');
+      document.getElementById('adv-body').classList.remove('open');
+      document.getElementById('adv-arrow').innerHTML = '&#9660;';
+
+      renderColPills();
+      renderWiderControls();
+      render();
+    }
+
+    // === INIT ===
+
+    renderColPills();
+    render();
+  </script>
+
+</body>
+</html>

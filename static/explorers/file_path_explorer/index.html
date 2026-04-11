@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Path Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="folder-tree.png">
+  <style>
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      --c-tree:  #4eaaec;
+      --c-code:  #52c97e;
+      --c-error: #e86060;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; }
+    body {
+      background:var(--bg); color:var(--text);
+      font-family:'DM Sans', system-ui, sans-serif;
+      font-size:0.95rem;
+    }
+
+    h1 { font-family:'Lora', Georgia, serif; font-size:1.45rem; font-weight:600; }
+
+    header {
+      text-align:center; padding:15px 20px 9px;
+      border-bottom:1px solid var(--border);
+      background:var(--panel); margin-bottom:11px;
+    }
+    header p { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
+    .pill {
+      display:inline-block; padding:2px 9px;
+      background:#ece8de; border:1px solid var(--border); border-radius:20px;
+      font-family:'Fira Code', monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap:10px; padding:0 11px 15px;
+      max-width:1360px; margin:0 auto;
+    }
+
+    .panel {
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:10px; padding:14px;
+    }
+
+    .panel-label {
+      font-size:0.66rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.12em; color:var(--muted); margin-bottom:11px;
+    }
+
+    .btn {
+      padding:6px 12px; border:1.5px solid var(--border); border-radius:6px;
+      background:white; cursor:pointer; font-size:0.79rem; font-weight:500;
+      color:var(--text); transition:all 0.1s;
+      font-family:'DM Sans', system-ui, sans-serif;
+    }
+    .btn:hover { border-color:var(--accent); color:var(--accent); }
+    .btn.on { background:var(--accent); border-color:var(--accent); color:white; }
+
+    .copy-btn {
+      padding:4px 11px; border-radius:6px; font-family:'DM Sans';
+      font-weight:600; font-size:0.75rem;
+      border:1.5px solid var(--border); background:white; cursor:pointer;
+      transition:all 0.1s;
+    }
+    .copy-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .copy-btn.copied { background:var(--accent); color:white; border-color:var(--accent); }
+
+    /* Tree panel */
+    #tree-panel { position:relative; }
+    .tree-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:11px; }
+    .tree-header .panel-label { margin-bottom:0; }
+
+    #file-tree {
+      font-family:'Fira Code', monospace;
+      font-size:0.85rem;
+      max-height:600px;
+      overflow-y:auto;
+    }
+    #file-tree > ul { list-style:none; padding-left:0; margin-top:4px; }
+    #file-tree li { margin:2px 0; }
+
+    .tree-item-wrapper {
+      display:flex; align-items:center; gap:4px;
+    }
+
+    .tree-toggle {
+      width:16px; cursor:pointer; text-align:center; color:var(--muted);
+      user-select:none; font-size:0.75rem; flex-shrink:0; font-weight:bold;
+      display:inline-block;
+    }
+    .tree-toggle.expanded {
+      transform:rotate(90deg);
+    }
+    .tree-toggle.hidden { visibility:hidden; }
+
+    .tree-item {
+      cursor:pointer; padding:3px 5px; border-radius:4px;
+      transition:all 0.1s; user-select:none; flex:1;
+    }
+    .tree-item:hover { background:rgba(78, 170, 236, 0.1); color:var(--c-tree); }
+    .tree-item.active {
+      background:var(--c-tree); color:white; font-weight:600;
+    }
+    .tree-item.folder::before { content:'📁 '; }
+    .tree-item.file::before { content:'📄 '; }
+
+    .tree-children { list-style:none; padding-left:20px; margin-top:2px; max-height:1000px; overflow:hidden; }
+    .tree-children.collapsed { max-height:0; }
+    .tree-children.collapsed { transition:max-height 0.2s ease-out; }
+    .tree-children:not(.collapsed) { transition:max-height 0.2s ease-in; }
+
+    #tree-msg {
+      margin-top:10px; padding:8px 10px; border-radius:6px;
+      font-size:0.8rem; color:var(--muted); font-style:italic;
+      text-align:center; display:none;
+      background:#ece8de; border:1px solid var(--border);
+    }
+    #tree-msg.show { display:block; }
+
+    /* Code panel */
+    #code-panel { position:relative; display:flex; flex-direction:column; }
+    .code-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:11px; }
+    .code-header .panel-label { margin-bottom:0; }
+
+    .code-scroll {
+      background:var(--code-bg); border:1px solid var(--border);
+      border-radius:6px; padding:9px; font-family:'Fira Code', monospace;
+      font-size:0.79rem; color:#cdd3de; overflow-y:auto;
+      line-height:1.9; flex:1; min-height:200px;
+    }
+
+    .cl {
+      display:block; padding:1px 6px 1px 9px; border-radius:3px;
+      border-left:3px solid transparent; white-space:pre;
+    }
+    .cl-setup { color:#6a7a6a; font-style:italic; }
+    .cl-getwd { border-left-color:var(--c-code); }
+    .cl-readcsv { border-left-color:var(--c-code); }
+    .cl-error { border-left-color:var(--c-error); color:var(--c-error); }
+    .cl-ok    { border-left-color:var(--c-code); color:var(--c-code); font-style:italic; }
+    .cl-blank { display:block; height:1.1em; border:none; padding:0; }
+
+    #breadcrumb {
+      font-family:'Fira Code', monospace; font-size:0.72rem;
+      color:var(--muted); margin-bottom:8px; padding:5px 9px;
+      background:#ece8de; border-radius:5px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    #breadcrumb .bc-label {
+      font-family:'DM Sans', sans-serif; font-size:0.68rem;
+      font-weight:700; text-transform:uppercase; letter-spacing:0.08em;
+      color:var(--muted); margin-right:6px;
+    }
+    #breadcrumb .bc-current { color:var(--text); font-weight:500; }
+
+    .sf { color:#c792ea; }
+    .sv { color:#f78c6c; }
+    .sk { color:#89ddff; }
+    .ss { color:#c3e88d; }
+    .sn { color:#f0ab70; }
+    .so { color:#89ddff; }
+
+    /* Annotation box */
+    .ann {
+      margin-top:11px; padding:11px; border-radius:6px;
+      border:1px solid var(--border); border-left:3px solid var(--c-code);
+      background:#faf8f5; color:var(--text); font-size:0.85rem;
+      line-height:1.5; display:none;
+    }
+    .ann.show { display:block; }
+    .ann-welcome { border-left-color:var(--accent); background:#fdf6f0; }
+
+    @keyframes flash { 0% { background-color:rgba(255,255,255,0.22); } 100% { background-color:transparent; } }
+    .cl-flash { animation:flash 0.7s ease-out; }
+
+    #code-tip {
+      position:fixed; z-index:9999; pointer-events:none; display:none;
+      background:#2d2d42; color:#e0ddd5; border:1px solid #4a4860;
+      padding:5px 10px; border-radius:6px; font-size:0.73rem;
+      font-family:'DM Sans', sans-serif; line-height:1.4;
+      max-width:300px; box-shadow:0 2px 8px rgba(0,0,0,0.45);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>File Path Explorer</h1>
+    <p>Click any folder to see what R code you'd need to load your data from there</p>
+    <p><span class="pill">getwd()</span> <span class="pill">read_csv()</span></p>
+  </header>
+
+  <div class="grid">
+    <!-- Tree panel -->
+    <div class="panel" id="tree-panel">
+      <div class="tree-header">
+        <div class="panel-label">Your folders</div>
+        <button class="copy-btn" id="reset-btn">Reset</button>
+      </div>
+      <div id="file-tree">
+        <!-- Populated by JavaScript -->
+      </div>
+      <div id="tree-msg"></div>
+    </div>
+
+    <!-- Code panel -->
+    <div class="panel" id="code-panel">
+      <div class="code-header">
+        <div class="panel-label">R code</div>
+      </div>
+      <div id="breadcrumb"></div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- Populated by JavaScript -->
+      </div>
+      <div class="ann" id="ann-box">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // File tree data structure
+    const FILE_TREE = [
+      {
+        name: 'Documents',
+        path: '/Users/yourname/Documents',
+        type: 'folder',
+        children: [
+          {
+            name: 'psych_stats',
+            path: '/Users/yourname/Documents/psych_stats',
+            type: 'folder',
+            children: [
+              {
+                name: 'week1',
+                path: '/Users/yourname/Documents/psych_stats/week1',
+                type: 'folder',
+                children: [
+                  {
+                    name: '1_Tuesday',
+                    path: '/Users/yourname/Documents/psych_stats/week1/1_Tuesday',
+                    type: 'folder',
+                    children: [
+                      { name: '01_analysis.R', path: '/Users/yourname/Documents/psych_stats/week1/1_Tuesday/01_analysis.R', type: 'file' },
+                      { name: 'penguins.csv', path: '/Users/yourname/Documents/psych_stats/week1/1_Tuesday/penguins.csv', type: 'file' }
+                    ]
+                  },
+                  {
+                    name: '2_Thursday',
+                    path: '/Users/yourname/Documents/psych_stats/week1/2_Thursday',
+                    type: 'folder',
+                    children: [
+                      { name: '02_analysis.R', path: '/Users/yourname/Documents/psych_stats/week1/2_Thursday/02_analysis.R', type: 'file' },
+                      { name: 'penguins.csv', path: '/Users/yourname/Documents/psych_stats/week1/2_Thursday/penguins.csv', type: 'file' }
+                    ]
+                  }
+                ]
+              },
+              {
+                name: 'week2',
+                path: '/Users/yourname/Documents/psych_stats/week2',
+                type: 'folder',
+                children: [
+                  {
+                    name: '1_Tuesday',
+                    path: '/Users/yourname/Documents/psych_stats/week2/1_Tuesday',
+                    type: 'folder',
+                    children: [
+                      { name: '03_analysis.R', path: '/Users/yourname/Documents/psych_stats/week2/1_Tuesday/03_analysis.R', type: 'file' },
+                      { name: 'go_phils.csv', path: '/Users/yourname/Documents/psych_stats/week2/1_Tuesday/go_phils.csv', type: 'file' }
+                    ]
+                  },
+                  {
+                    name: '2_Thursday',
+                    path: '/Users/yourname/Documents/psych_stats/week2/2_Thursday',
+                    type: 'folder',
+                    children: [
+                      { name: '04_analysis.R', path: '/Users/yourname/Documents/psych_stats/week2/2_Thursday/04_analysis.R', type: 'file' },
+                      { name: 'mtcars.csv', path: '/Users/yourname/Documents/psych_stats/week2/2_Thursday/mtcars.csv', type: 'file' },
+                      { name: 'starwars.csv', path: '/Users/yourname/Documents/psych_stats/week2/2_Thursday/starwars.csv', type: 'file' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        name: 'Downloads',
+        path: '/Users/yourname/Downloads',
+        type: 'folder',
+        children: []
+      },
+      {
+        name: 'Desktop',
+        path: '/Users/yourname/Desktop',
+        type: 'folder',
+        children: []
+      }
+    ];
+
+    // State
+    const DEFAULTS = {
+      currentPath: '/Users/yourname/Documents/psych_stats/week1/1_Tuesday',
+      changed: 'welcome',
+      expandedFolders: new Set([
+        '/Users/yourname/Documents',
+        '/Users/yourname/Documents/psych_stats',
+        '/Users/yourname/Documents/psych_stats/week1'
+      ])
+    };
+    let S = Object.assign({}, DEFAULTS);
+    S.expandedFolders = new Set(DEFAULTS.expandedFolders);
+
+    // Utility: find a node in the tree by path (works on a node or array of nodes)
+    function findNode(nodeOrArray, path) {
+      if (Array.isArray(nodeOrArray)) {
+        for (let node of nodeOrArray) {
+          const found = findNode(node, path);
+          if (found) return found;
+        }
+        return null;
+      }
+      if (nodeOrArray.path === path) return nodeOrArray;
+      if (nodeOrArray.children) {
+        for (let child of nodeOrArray.children) {
+          const found = findNode(child, path);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    // Build the tree HTML recursively
+    function buildTreeHTML(node, depth = 0) {
+      const isActive = node.path === S.currentPath;
+      const isFolder = node.type === 'folder';
+      const hasChildren = isFolder && node.children && node.children.length > 0;
+      const isExpanded = S.expandedFolders.has(node.path);
+
+      let html = `<li>
+        <div class="tree-item-wrapper">
+          <div class="tree-toggle ${!isFolder ? 'hidden' : ''} ${isExpanded ? 'expanded' : ''}" data-path="${node.path}">
+            >
+          </div>
+          <div class="tree-item ${node.type} ${isActive ? 'active' : ''}" data-path="${node.path}">
+            ${node.name}
+          </div>
+        </div>`;
+
+      if (isFolder) {
+        const childrenClass = isExpanded ? '' : 'collapsed';
+        html += `<ul class="tree-children ${childrenClass}">`;
+        for (let child of node.children) {
+          html += buildTreeHTML(child, depth + 1);
+        }
+        html += '</ul>';
+      }
+
+      html += '</li>';
+      return html;
+    }
+
+    // Convert absolute path to ~ notation (Mac)
+    function toTildePath(absPath) {
+      return absPath.replace('/Users/yourname', '~');
+    }
+
+    // Convert path to Windows equivalent
+    function toWindowsPath(absPath) {
+      const parts = absPath.split('/').slice(1); // remove leading /
+      return 'C:\\' + parts.join('\\');
+    }
+
+    const STARWARS_PATH  = '/Users/yourname/Documents/psych_stats/week2/2_Thursday';
+    const GO_PHILS_PATH  = '/Users/yourname/Documents/psych_stats/week2/1_Tuesday';
+    const DOWNLOADS_PATH = '/Users/yourname/Downloads';
+
+    // Build the code display
+    function buildCode() {
+      const currentNode = findNode(FILE_TREE, S.currentPath);
+      if (!currentNode) return '';
+
+      const windowsPath = toWindowsPath(S.currentPath);
+
+      let html = '';
+
+      // Load tidyverse
+      html += `<code class="cl cl-setup"># load tidyverse package so we can access the read_csv() function</code>`;
+      html += `<code class="cl cl-setup"><span class="sf">library</span>(<span class="sv">tidyverse</span>)</code>`;
+      html += `<code class="cl cl-blank"></code>`;
+
+      // Current working directory
+      html += `<code class="cl cl-setup"># ask R: "what folder are you currently in?" (Mac)</code>`;
+      html += `<code class="cl cl-getwd"><span class="sf">getwd</span>()</code>`;
+      html += `<code class="cl cl-getwd">[1] "${S.currentPath}"</code>`;
+      html += `<code class="cl cl-blank"></code>`;
+
+      html += `<code class="cl cl-setup"># on Windows, getwd() would show:</code>`;
+      html += `<code class="cl cl-setup"># [1] "${windowsPath}"</code>`;
+      html += `<code class="cl cl-blank"></code>`;
+
+      const hasPenguins = currentNode.children && currentNode.children.some(c => c.name === 'penguins.csv');
+      const hasGoPhils  = S.currentPath === GO_PHILS_PATH;
+      const hasStarwars = S.currentPath === STARWARS_PATH;
+
+      // Three filename-only calls in a row — green if the file is here, red if not
+      html += `<code class="cl cl-setup"># read_csv() only looks in your current folder (your working directory)</code>`;
+      html += `<code class="cl cl-setup"># use just the file name (in quotes, including the .csv extension)</code>`;
+      html += `<code class="cl cl-blank"></code>`;
+
+      if (hasPenguins) {
+        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"penguins.csv"</span>)</code>`;
+        html += `<code class="cl cl-ok"># this works! it's in your working directory</code>`;
+      } else {
+        html += `<code class="cl cl-error"><span class="sf">read_csv</span>(<span class="ss">"penguins.csv"</span>)  <span style="opacity:0.7"># this would throw an error</span></code>`;
+      }
+
+      if (hasGoPhils) {
+        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"go_phils.csv"</span>)</code>`;
+        html += `<code class="cl cl-ok"># this works! it's in your working directory</code>`;
+      } else {
+        html += `<code class="cl cl-error"><span class="sf">read_csv</span>(<span class="ss">"go_phils.csv"</span>)  <span style="opacity:0.7"># this would throw an error</span></code>`;
+      }
+
+      if (hasStarwars) {
+        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"starwars.csv"</span>)</code>`;
+        html += `<code class="cl cl-ok"># this works! it's in your working directory</code>`;
+      } else {
+        html += `<code class="cl cl-error"><span class="sf">read_csv</span>(<span class="ss">"starwars.csv"</span>)  <span style="opacity:0.7"># this would throw an error</span></code>`;
+      }
+      html += `<code class="cl cl-blank"></code>`;
+
+      // Absolute path (Mac)
+      html += `<code class="cl cl-setup"># absolute path: works no matter what your working directory is (Mac)</code>`;
+      html += `<code class="cl cl-setup"># ~ is shorthand for your home folder (e.g., /Users/yourname)</code>`;
+      html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"~/Documents/psych_stats/penguins.csv"</span>)</code>`;
+      html += `<code class="cl cl-blank"></code>`;
+
+      // Absolute path (Windows)
+      html += `<code class="cl cl-setup"># absolute path on Windows: start from C:\\Users\\yourname instead of ~</code>`;
+      html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"C:\\Users\\yourname\\Documents\\psych_stats\\penguins.csv"</span>)</code>`;
+
+      return html;
+    }
+
+    // Get annotation
+    function getAnn() {
+      if (S.changed === 'welcome') {
+        return {
+          cls: 'ann-welcome',
+          html: `
+            <strong>R always needs to know where your files are.</strong><br><br>
+            Your computer organizes files into folders, and those folders can live inside other folders.
+            R can only see files in one folder at a time — the folder it's currently "inside," called
+            your <em>working directory</em>. If your data file is in that same folder, you can just use
+            the filename. If it's somewhere else, you need a longer path that tells R how to navigate
+            there.<br><br>
+            Run <code>getwd()</code> in R anytime to ask: <em>"what folder are you currently looking in?"</em>
+            The code panel above shows exactly what it would return.<br><br>
+            <strong>Click any folder in the tree on the left</strong> to explore what R's code would look
+            like from that location. Click the <strong>▶</strong> arrow to expand a folder and see
+            what's inside. Try clicking into a week/day folder—that's probably where you'll actually
+            be working.
+          `
+        };
+      }
+
+      const currentNode = findNode(FILE_TREE, S.currentPath);
+      if (!currentNode) {
+        return { cls: '', html: '' };
+      }
+
+      if (S.currentPath === '/Users/yourname/Downloads') {
+        return { cls: '', html: `<strong>Downloads</strong> is where files go when you download them from the web. Your psych_stats folder is not here. If R is pointed at Downloads, you'd need to use a full path like <code>~/Documents/psych_stats/penguins.csv</code> to find your data.` };
+      }
+      if (S.currentPath === '/Users/yourname/Desktop') {
+        return { cls: '', html: `<strong>Desktop</strong> is its own folder, not the same as Documents. Your psych_stats folder is not here. If R is pointed at Desktop, you'd need to use a full path like <code>~/Documents/psych_stats/penguins.csv</code> to find your data.` };
+      }
+      if (S.currentPath === '/Users/yourname/Documents') {
+        return { cls: '', html: `<strong>Documents</strong> contains your psych_stats folder, but the data files are deeper inside it. If R is pointed here, the plain filename <code>"penguins.csv"</code> won't work — use the full path <code>~/Documents/psych_stats/week1/1_Tuesday/penguins.csv</code> instead.` };
+      }
+
+      let html = `<strong>You're in:</strong> <code>${toTildePath(S.currentPath)}</code> <span style="color:var(--muted);font-size:0.82em">(~ is shorthand for /Users/yourname on Mac)</span><br><br>`;
+
+      if (S.currentPath.includes('1_Tuesday') || S.currentPath.includes('2_Thursday')) {
+        const hasCSV = currentNode.children && currentNode.children.some(c => c.name.endsWith('.csv'));
+        if (hasCSV) {
+          html += `This is a day folder with a .csv file in it. If your R script is open from this folder, you can just use the filename — <code>"penguins.csv"</code> — and R will find it.<br><br>
+          If you're not sure whether R is pointed here, use the full path starting with <code>~/</code> — that always works, no matter where R thinks it is.`;
+        } else {
+          html += `This day folder has an .R script but no .csv file. The plain filename <code>"penguins.csv"</code> would fail because the file isn't here. You'd need to use the full path starting with <code>~/</code>.`;
+        }
+      } else if (S.currentPath.includes('week')) {
+        html += `This is a week folder. Your actual .R scripts and data are inside the day folders (1_Tuesday, 2_Thursday). Navigate into one of those to see the most useful paths.`;
+      } else if (S.currentPath.includes('psych_stats')) {
+        html += `This is your main stats folder. Your .R scripts and data files are inside the week and day folders below this. Navigate into a day folder to see paths that will actually work for loading data.`;
+      }
+
+      return { cls: '', html };
+    }
+
+    // Handlers
+    function handleTreeClick(e) {
+      const path = e.currentTarget.dataset.path;
+      S.currentPath = path;
+      S.changed = 'navigate';
+      render();
+    }
+
+    function toggleFolder(path) {
+      if (S.expandedFolders.has(path)) {
+        S.expandedFolders.delete(path);
+      } else {
+        S.expandedFolders.add(path);
+      }
+    }
+
+    function handleToggle(e) {
+      e.stopPropagation();
+      toggleFolder(e.currentTarget.dataset.path);
+      render();
+    }
+
+    function handleFolderDblClick(e) {
+      e.stopPropagation();
+      toggleFolder(e.currentTarget.dataset.path);
+      render();
+    }
+
+    function handleReset() {
+      S = Object.assign({}, DEFAULTS);
+      S.expandedFolders = new Set(DEFAULTS.expandedFolders);
+      S.changed = 'welcome';
+      render();
+    }
+
+    // Attach event listeners
+    function attachEventListeners() {
+      document.querySelectorAll('.tree-item').forEach(item => {
+        item.addEventListener('click', handleTreeClick);
+      });
+      document.querySelectorAll('.tree-item.folder').forEach(item => {
+        item.addEventListener('dblclick', handleFolderDblClick);
+      });
+      document.querySelectorAll('.tree-toggle').forEach(toggle => {
+        toggle.addEventListener('click', handleToggle);
+      });
+    }
+
+    // Render function
+    function render() {
+      // Rebuild tree
+      const treeHTML = FILE_TREE.map(node => buildTreeHTML(node)).join('');
+      document.getElementById('file-tree').innerHTML = `<ul>${treeHTML}</ul>`;
+
+      // Update breadcrumb
+      const parts = S.currentPath.replace('/Users/yourname/', '').split('/');
+      const crumbHTML = parts.map((p, i) =>
+        i === parts.length - 1 ? `<span class="bc-current">${p}</span>` : p
+      ).join(' › ');
+      document.getElementById('breadcrumb').innerHTML = `<span class="bc-label">You are here:</span>${crumbHTML}`;
+
+      // Rebuild code
+      const codeHTML = buildCode();
+      document.getElementById('code-scroll').innerHTML = codeHTML;
+
+      // Update annotation
+      const { cls, html } = getAnn();
+      const annBox = document.getElementById('ann-box');
+      annBox.className = 'ann show ' + cls;
+      annBox.innerHTML = html;
+
+      // Tree message for Downloads / Desktop
+      const treeMsg = document.getElementById('tree-msg');
+      if (S.currentPath === DOWNLOADS_PATH) {
+        treeMsg.textContent = '😌 ahhh, a nice clean Downloads folder';
+        treeMsg.classList.add('show');
+      } else if (S.currentPath === '/Users/yourname/Desktop') {
+        treeMsg.textContent = 'Clear Desktop, clear mind.';
+        treeMsg.classList.add('show');
+      } else {
+        treeMsg.classList.remove('show');
+      }
+
+      // Attach event listeners after DOM update
+      attachEventListeners();
+    }
+
+    // Init
+    document.getElementById('reset-btn').addEventListener('click', handleReset);
+    render();
+  </script>
+</body>
+</html>
