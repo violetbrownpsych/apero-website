@@ -5,10 +5,12 @@ type: page
 layout: single
 ---
 
-Here are some interactive tools I've built for my stats students.
+Here are some interactive tools I've built for my stats students!
 
-- [dplyr Explorer](/explorers/dplyr_explorer/)
-- [File Path Explorer](/explorers/file_path_explorer/)
-- [ggplot Visualizer](/explorers/ggplot_visualizer/)
-- [Indexing Explorer](/explorers/indexing_explorer/)
-- [Pivot Explorer](/explorers/pivot_explorer/)
+<ul>
+  <li><a href="/explorers/dplyr_explorer/" target="_blank">dplyr Explorer</a></li>
+  <li><a href="/explorers/file_path_explorer/" target="_blank">File Path Explorer</a></li>
+  <li><a href="/explorers/ggplot_visualizer/" target="_blank">ggplot Visualizer</a></li>
+  <li><a href="/explorers/indexing_explorer/" target="_blank">Indexing Explorer</a></li>
+  <li><a href="/explorers/pivot_explorer/" target="_blank">Pivot Explorer</a></li>
+</ul>
