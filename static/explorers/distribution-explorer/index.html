@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distribution Explorer</title>
+  <link rel="icon" href="distribution-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      /* Per-tool color tokens — one per distribution */
+      --c-normal: #4eaaec;
+      --c-binom:  #52c97e;
+      --c-pois:   #c89850;
+      --c-t:      #b87fd4;
+      --c-chisq:  #e8a030;
+      --c-f:      #e06b8b;
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle (horizontal pill) */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Vertical stack (3+ options or long labels) */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === TOOL-SPECIFIC CSS === */
+
+    /* Distribution SVG plot area */
+    #dist-svg {
+      width: 100%;
+      display: block;
+    }
+
+    /* Parameter sliders */
+    .param-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+    .param-row label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.77rem;
+      color: var(--muted);
+      min-width: 56px;
+    }
+    .param-row input[type=range] {
+      flex: 1;
+      min-width: 0;
+      accent-color: var(--accent);
+    }
+    .param-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.77rem;
+      color: var(--text);
+      min-width: 32px;
+      text-align: right;
+    }
+
+    /* Probability readout below the plot */
+    #prob-readout {
+      margin-top: 10px;
+      padding: 9px 13px;
+      background: #ece8de;
+      border-radius: 7px;
+      font-size: 0.83rem;
+      line-height: 1.6;
+    }
+    #prob-readout .prob-big {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* Color stripe classes for code lines — defined AFTER .cl */
+    /* (populated after .cl in the code panel section below) */
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.9;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 1px 6px 1px 9px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+
+    /* Distribution-specific stripe colors — MUST come after .cl */
+    .cl-normal { border-left-color: var(--c-normal); }
+    .cl-binom  { border-left-color: var(--c-binom);  }
+    .cl-pois   { border-left-color: var(--c-pois);   }
+    .cl-t      { border-left-color: var(--c-t);      }
+    .cl-chisq  { border-left-color: var(--c-chisq);  }
+    .cl-f      { border-left-color: var(--c-f);      }
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }
+    .sv { color: #f78c6c; }
+    .sk { color: #89ddff; }
+    .ss { color: #c3e88d; }
+    .sn { color: #f0ab70; }
+    .so { color: #89ddff; }
+    .sb { color: #c3e88d; }
+    .sc { color: #6a7a6a; font-style: italic; }
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      max-width: 1360px; margin: 0 auto 18px;
+      padding: 13px 18px;
+      border-radius: 9px; border: 1.5px solid var(--border);
+      font-size: 0.84rem; line-height: 1.65;
+      background: var(--panel);
+    }
+    .ann.show { display: block; }
+    .ann-welcome { border-color: var(--accent); background: #fdf6f0; }
+    .ann-normal  { border-color: var(--c-normal); background: #f0f6fd; }
+    .ann-binom   { border-color: var(--c-binom);  background: #f0fdf5; }
+    .ann-pois    { border-color: var(--c-pois);   background: #fdf8f0; }
+    .ann-t       { border-color: var(--c-t);      background: #f8f0fd; }
+    .ann-chisq   { border-color: var(--c-chisq);  background: #fdf5e8; }
+    .ann-f       { border-color: var(--c-f);      background: #fdf0f4; }
+
+    /* inline code in annotations */
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Distribution Explorer</h1>
+    <p>Visualize probability distributions and area under the curve</p>
+    <span class="pill">pnorm()</span>
+    <span class="pill">pbinom()</span>
+    <span class="pill">ppois()</span>
+    <span class="pill">pt()</span>
+    <span class="pill">pchisq()</span>
+    <span class="pill">pf()</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Controls</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <div class="cs">
+        <div class="ch">Distribution</div>
+        <div class="mode-stack" id="dist-stack">
+          <button class="mbtn on" data-val="normal" onclick="setDist(this)">Normal</button>
+          <button class="mbtn" data-val="binom"  onclick="setDist(this)">Binomial</button>
+          <button class="mbtn" data-val="pois"   onclick="setDist(this)">Poisson</button>
+          <button class="mbtn" data-val="t"      onclick="setDist(this)">t</button>
+          <button class="mbtn" data-val="chisq"  onclick="setDist(this)">Chi-square (&chi;&sup2;)</button>
+          <button class="mbtn" data-val="f"      onclick="setDist(this)">F</button>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Parameters — shown/hidden by JS based on distribution -->
+      <div class="cs" id="params-block">
+        <div class="ch">Parameters</div>
+
+        <!-- Normal -->
+        <div id="p-normal">
+          <div class="param-row">
+            <label>&mu;</label>
+            <input type="range" id="sl-mean" min="-10" max="10" step="0.5" value="0" oninput="sliderChange('mean',this)">
+            <span class="param-val" id="v-mean">0</span>
+          </div>
+          <div class="param-row">
+            <label>&sigma;</label>
+            <input type="range" id="sl-sd" min="0.5" max="5" step="0.5" value="1" oninput="sliderChange('sd',this)">
+            <span class="param-val" id="v-sd">1</span>
+          </div>
+        </div>
+
+        <!-- t -->
+        <div id="p-t" style="display:none">
+          <div class="param-row">
+            <label>df</label>
+            <input type="range" id="sl-df-t" min="1" max="30" step="1" value="5" oninput="sliderChange('df',this)">
+            <span class="param-val" id="v-df-t">5</span>
+          </div>
+        </div>
+
+        <!-- Chi-square -->
+        <div id="p-chisq" style="display:none">
+          <div class="param-row">
+            <label>df</label>
+            <input type="range" id="sl-df-chisq" min="1" max="20" step="1" value="3" oninput="sliderChange('df',this)">
+            <span class="param-val" id="v-df-chisq">3</span>
+          </div>
+        </div>
+
+        <!-- F -->
+        <div id="p-f" style="display:none">
+          <div class="param-row">
+            <label>df<sub>1</sub></label>
+            <input type="range" id="sl-df1" min="1" max="20" step="1" value="3" oninput="sliderChange('df1',this)">
+            <span class="param-val" id="v-df1">3</span>
+          </div>
+          <div class="param-row">
+            <label>df<sub>2</sub></label>
+            <input type="range" id="sl-df2" min="1" max="40" step="1" value="10" oninput="sliderChange('df2',this)">
+            <span class="param-val" id="v-df2">10</span>
+          </div>
+        </div>
+
+        <!-- Binomial -->
+        <div id="p-binom" style="display:none">
+          <div class="param-row">
+            <label>n</label>
+            <input type="range" id="sl-n" min="1" max="40" step="1" value="10" oninput="sliderChange('n',this)">
+            <span class="param-val" id="v-n">10</span>
+          </div>
+          <div class="param-row">
+            <label>p</label>
+            <input type="range" id="sl-prob" min="0.05" max="0.95" step="0.05" value="0.5" oninput="sliderChange('prob',this)">
+            <span class="param-val" id="v-prob">0.5</span>
+          </div>
+        </div>
+
+        <!-- Poisson -->
+        <div id="p-pois" style="display:none">
+          <div class="param-row">
+            <label>&lambda;</label>
+            <input type="range" id="sl-lambda" min="0.5" max="15" step="0.5" value="3" oninput="sliderChange('lambda',this)">
+            <span class="param-val" id="v-lambda">3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Tail / shading direction -->
+      <div class="cs" id="tail-block">
+        <div class="ch">Shade area</div>
+        <div class="mode-stack" id="tail-stack">
+          <button class="mbtn on" data-val="lower" onclick="setTail(this)">Lower tail: P(X &le; q)</button>
+          <button class="mbtn" data-val="upper" onclick="setTail(this)">Upper tail: P(X &gt; q)</button>
+          <button class="mbtn" data-val="between" onclick="setTail(this)">Between: P(q&#8321; &le; X &le; q&#8322;)</button>
+          <button class="mbtn" data-val="outside" onclick="setTail(this)">Outside: P(X &lt; q&#8321; or X &gt; q&#8322;)</button>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Cutpoint slider(s) — label and range set by JS -->
+      <div class="cs" id="cutpoint-block">
+        <div class="ch" id="cut-label">Cutpoint (q)</div>
+        <p class="sub" id="cut-desc" style="margin-bottom:6px">The value that bounds the shaded region (passed to the <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">q</code> argument of the R function)</p>
+        <div id="cut-single">
+          <div class="param-row">
+            <label id="cut1-lbl">q</label>
+            <input type="range" id="sl-q1" min="-4" max="4" step="0.1" value="1" oninput="sliderChange('q1',this)">
+            <span class="param-val" id="v-q1">1.0</span>
+          </div>
+        </div>
+        <div id="cut-pair" style="display:none">
+          <div class="param-row">
+            <label id="cut2a-lbl">q&#8321;</label>
+            <input type="range" id="sl-q1b" min="-4" max="4" step="0.1" value="-1" oninput="sliderChange('q1b',this)">
+            <span class="param-val" id="v-q1b">-1.0</span>
+          </div>
+          <div class="param-row">
+            <label id="cut2b-lbl">q&#8322;</label>
+            <input type="range" id="sl-q2" min="-4" max="4" step="0.1" value="1" oninput="sliderChange('q2',this)">
+            <span class="param-val" id="v-q2">1.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Normal-only: z-score toggle -->
+      <div class="cs" id="zscore-block" style="display:none">
+        <div class="ch">Show z-score</div>
+        <div class="tog2">
+          <button class="btn on" data-val="off" onclick="setZscore(this)">Off</button>
+          <button class="btn" data-val="on"  onclick="setZscore(this)">On</button>
+        </div>
+        <div class="sub" style="margin-top:5px">Adds standardization formula and z-score annotation</div>
+      </div>
+
+      </div>
+
+    <!-- MIDDLE: MAIN VISUAL PANEL -->
+    <div class="panel" id="main-panel">
+      <div class="panel-header">
+        <div class="panel-label" id="plot-label">Distribution</div>
+      </div>
+      <svg id="dist-svg" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- populated by JS -->
+      </svg>
+      <div id="prob-readout">
+        <span id="prob-sentence"></span><br>
+        <span class="prob-big" id="prob-value"></span>
+      </div>
+    </div>
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANNOTATION BOX (below grid) -->
+  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // =====================================================================
+    // MATH HELPERS
+    // =====================================================================
+
+    // Error function — used by pnorm
+    function erf(x) {
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const t = 1 / (1 + 0.3275911 * x);
+      const p = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+      return sign * (1 - p * Math.exp(-x * x));
+    }
+
+    // Log-gamma (Lanczos, g=7) — used by incomplete gamma/beta and dist PDFs
+    function lgamma(z) {
+      const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+        771.32342877765313, -176.61502916214059, 12.507343278686905,
+        -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+      if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lgamma(1 - z);
+      z -= 1;
+      let x = c[0];
+      for (let i = 1; i < 9; i++) x += c[i] / (z + i);
+      const t = z + 7.5;
+      return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+    }
+
+    // Regularized lower incomplete gamma P(a, x) — used by pchisq
+    function pgamma_lower(a, x) {
+      if (x <= 0) return 0;
+      if (x < a + 1) {
+        let term = 1 / a, sum = term;
+        for (let n = 1; n < 300; n++) {
+          term *= x / (a + n); sum += term;
+          if (Math.abs(term) < 1e-12 * Math.abs(sum)) break;
+        }
+        return Math.exp(-x + a * Math.log(x) - lgamma(a)) * sum;
+      }
+      return 1 - pgamma_upper_cf(a, x);
+    }
+    function pgamma_upper_cf(a, x) {
+      let C = x - a + 1 + 1e-30, f = C, D = 0, delta;
+      for (let i = 1; i <= 300; i++) {
+        const an = i * (a - i), bn = x - a + 1 + 2 * i;
+        D = bn + an * D; if (Math.abs(D) < 1e-30) D = 1e-30;
+        C = bn + an / C; if (Math.abs(C) < 1e-30) C = 1e-30;
+        D = 1 / D; delta = C * D; f *= delta;
+        if (Math.abs(delta - 1) < 1e-12) break;
+      }
+      return Math.exp(-x + a * Math.log(x) - lgamma(a)) / f;
+    }
+
+    // Regularized incomplete beta I(x; a, b) — used by pt and pf
+    function ibeta(x, a, b) {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      return x < (a + 1) / (a + b + 2) ? ibeta_cf(x, a, b) : 1 - ibeta_cf(1 - x, b, a);
+    }
+    function ibeta_cf(x, a, b) {
+      const lbeta_ab = lgamma(a) + lgamma(b) - lgamma(a + b);
+      const qab = a + b, qap = a + 1, qam = a - 1;
+      let c = 1, d = 1 - qab * x / qap;
+      if (Math.abs(d) < 1e-30) d = 1e-30;
+      d = 1 / d; let h = d;
+      for (let m = 1; m <= 200; m++) {
+        const m2 = 2 * m;
+        let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+        d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+        c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+        d = 1 / d; h *= d * c;
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+        d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+        c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+        d = 1 / d; const del = d * c; h *= del;
+        if (Math.abs(del - 1) < 1e-12) break;
+      }
+      return Math.exp(a * Math.log(x) + b * Math.log(1 - x) - lbeta_ab) * h / a;
+    }
+
+    // ---- Distribution PDFs and CDFs ----
+
+    function dnorm(x, mu, sd)   { const z=(x-mu)/sd; return Math.exp(-0.5*z*z)/(sd*Math.sqrt(2*Math.PI)); }
+    function pnorm(x, mu, sd)   { return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+
+    function dt_(x, df)  { return Math.exp(lgamma((df+1)/2)-lgamma(df/2)-0.5*Math.log(df*Math.PI)-(df+1)/2*Math.log(1+x*x/df)); }
+    function pt_(x, df)  { const p=ibeta(df/(df+x*x),df/2,0.5)/2; return x>=0?1-p:p; }
+
+    function dchisq(x, df) { if(x<=0)return 0; return Math.exp((df/2-1)*Math.log(x)-x/2-(df/2)*Math.log(2)-lgamma(df/2)); }
+    function pchisq(x, df) { return x<=0?0:pgamma_lower(df/2,x/2); }
+
+    function df_(x, df1, df2) {
+      if(x<=0)return 0;
+      return Math.exp((df1/2)*Math.log(df1)+(df2/2)*Math.log(df2)+(df1/2-1)*Math.log(x)-((df1+df2)/2)*Math.log(df1*x+df2)-lgamma(df1/2)-lgamma(df2/2)+lgamma((df1+df2)/2));
+    }
+    function pf_(x, df1, df2)  { return x<=0?0:ibeta(df1*x/(df1*x+df2),df1/2,df2/2); }
+
+    function lchoose(n,k)     { return lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1); }
+    function dbinom(k, n, p)  { if(k<0||k>n)return 0; if(p===0)return k===0?1:0; if(p===1)return k===n?1:0; return Math.exp(lchoose(n,k)+k*Math.log(p)+(n-k)*Math.log(1-p)); }
+    function pbinom(q, n, p)  { let s=0; for(let k=0;k<=Math.floor(q);k++) s+=dbinom(k,n,p); return Math.min(1,s); }
+
+    function dpois(k, lam)    { if(k<0)return 0; if(lam===0)return k===0?1:0; return Math.exp(k*Math.log(lam)-lam-lgamma(k+1)); }
+    function ppois(q, lam)    { let s=0; for(let k=0;k<=Math.floor(q);k++) s+=dpois(k,lam); return Math.min(1,s); }
+
+    // =====================================================================
+    // STATE
+    // =====================================================================
+
+    const DEFAULTS = {
+      dist:   'normal',
+      mean: 0, sd: 1,        // normal
+      df: 5,                  // t and chisq share df
+      df1: 3, df2: 10,       // f
+      n: 10, prob: 0.5,      // binom
+      lambda: 3,             // pois
+      tail: 'lower',
+      q1: 1.0, q1b: -1.0, q2: 1.0,
+      zscore: false,
+      changed: 'welcome'
+    };
+    let S = Object.assign({}, DEFAULTS);
+
+    // =====================================================================
+    // DISTRIBUTION UTILITIES
+    // =====================================================================
+
+    function getParams() {
+      const d = S.dist;
+      if (d==='normal') return {mean:S.mean, sd:S.sd};
+      if (d==='t')      return {df:S.df};
+      if (d==='chisq')  return {df:S.df};
+      if (d==='f')      return {df1:S.df1, df2:S.df2};
+      if (d==='binom')  return {n:S.n, prob:S.prob};
+      if (d==='pois')   return {lambda:S.lambda};
+    }
+
+    function getCDF(x) {
+      const p = getParams();
+      switch(S.dist) {
+        case 'normal': return pnorm(x, p.mean, p.sd);
+        case 't':      return pt_(x, p.df);
+        case 'chisq':  return pchisq(x, p.df);
+        case 'f':      return pf_(x, p.df1, p.df2);
+        case 'binom':  return pbinom(x, p.n, p.prob);
+        case 'pois':   return ppois(x, p.lambda);
+      }
+    }
+
+    function getPDF(x) {
+      const p = getParams();
+      switch(S.dist) {
+        case 'normal': return dnorm(x, p.mean, p.sd);
+        case 't':      return dt_(x, p.df);
+        case 'chisq':  return dchisq(x, p.df);
+        case 'f':      return df_(x, p.df1, p.df2);
+        case 'binom':  return dbinom(Math.round(x), p.n, p.prob);
+        case 'pois':   return dpois(Math.round(x), p.lambda);
+      }
+    }
+
+    function calcProb() {
+      if (S.tail==='lower')   return getCDF(S.q1);
+      if (S.tail==='upper')   return 1 - getCDF(S.q1);
+      if (S.tail==='between') {
+      const isDisc2 = ['binom','pois'].includes(S.dist);
+      const lo = Math.min(S.q1b, S.q2), hi = Math.max(S.q1b, S.q2);
+      return Math.max(0, getCDF(hi) - (isDisc2 ? getCDF(Math.floor(lo) - 1) : getCDF(lo)));
+    }
+    if (S.tail==='outside') {
+      const isDisc2 = ['binom','pois'].includes(S.dist);
+      const lo = Math.min(S.q1b, S.q2), hi = Math.max(S.q1b, S.q2);
+      return (isDisc2 ? getCDF(Math.floor(lo) - 1) : getCDF(lo)) + (1 - getCDF(hi));
+    }
+    }
+
+    function getRange() {
+      const p = getParams(), d = S.dist;
+      if (d==='normal') return [p.mean-4*p.sd,  p.mean+4*p.sd];
+      if (d==='t')      return [-5, 5];
+      if (d==='chisq')  return [0, Math.max(p.df+5*Math.sqrt(2*p.df), 6)];
+      if (d==='f')      { const mode = p.df2>2 ? p.df1*(p.df2-2)/(p.df2*(p.df1+2)) : 0; return [0, Math.max(mode*6+2, 6)]; }
+      if (d==='binom')  return [-0.5, p.n+0.5];
+      if (d==='pois')   return [-0.5, Math.max(p.lambda+5*Math.sqrt(p.lambda)+0.5, 10)];
+    }
+
+    const DIST_COLORS = {normal:'#4eaaec', t:'#b87fd4', chisq:'#e8a030', f:'#e06b8b', binom:'#52c97e', pois:'#c89850'};
+    const DIST_LABEL  = {normal:'Normal',t:'t',chisq:'Chi-square (\u03c7\u00b2)',f:'F',binom:'Binomial',pois:'Poisson'};
+    function distColor() { return DIST_COLORS[S.dist]; }
+
+    // =====================================================================
+    // RENDER
+    // =====================================================================
+    function render() {
+      renderMain(); renderCode();
+      const {cls, html} = getAnn();
+      const a = document.getElementById('ann-box');
+      a.className = 'ann show ' + cls;
+      a.innerHTML = html;
+    }
+
+    function renderMain() {
+      const svg = document.getElementById('dist-svg');
+      const [xMin, xMax] = getRange();
+      const isCont = ['normal','t','chisq','f'].includes(S.dist);
+      const color = distColor();
+      const W=560, H=300, ML=52, MR=18, MT=24, MB=38;
+      const pw = W-ML-MR, ph = H-MT-MB;
+      const yLine = MT+ph;
+      const xS = x => ML + (x-xMin)/(xMax-xMin)*pw;
+      let out = '';
+
+      if (isCont) {
+        const N = 300;
+        const xs = Array.from({length:N+1}, (_,i) => xMin + i*(xMax-xMin)/N);
+        const ys = xs.map(x => getPDF(x));
+        const yMax = (Math.max(...ys) || 0.1) * 1.18;
+        const yS = y => yLine - (y/yMax)*ph;
+
+        const shadePoly = (lo, hi) => {
+          const clo = Math.max(lo, xMin), chi = Math.min(hi, xMax);
+          const pts = xs.filter(x => x >= clo && x <= chi);
+          if (!pts.length) return '';
+          let pathd = `M ${xS(clo).toFixed(1)},${yLine}`;
+          pts.forEach(x => { pathd += ` L ${xS(x).toFixed(1)},${yS(getPDF(x)).toFixed(1)}`; });
+          pathd += ` L ${xS(chi).toFixed(1)},${yLine} Z`;
+          return `<path d="${pathd}" fill="${color}" fill-opacity="0.30" stroke="none"/>`;
+        };
+        if (S.tail==='lower')   out += shadePoly(xMin, S.q1);
+        if (S.tail==='upper')   out += shadePoly(S.q1, xMax);
+        if (S.tail==='between') out += shadePoly(Math.min(S.q1b,S.q2), Math.max(S.q1b,S.q2));
+        if (S.tail==='outside') { out += shadePoly(xMin, Math.min(S.q1b,S.q2)); out += shadePoly(Math.max(S.q1b,S.q2), xMax); }
+
+        const curvePts = xs.map(x => `${xS(x).toFixed(1)},${yS(getPDF(x)).toFixed(1)}`).join(' ');
+        out += `<polyline points="${curvePts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+
+        // Cutpoint line — when z-score on, bottom label shows z= instead of q=
+        const cutLine = (q, label) => {
+          const cx   = Math.max(ML, Math.min(W-MR, xS(q))).toFixed(1);
+          const useZlabel = S.dist==='normal' && S.zscore && label==='q';
+          const z    = (q - S.mean) / S.sd;
+          const lbl  = useZlabel ? `z = ${+z.toFixed(2)}` : `${label} = ${+q.toFixed(2)}`;
+          return `<line x1="${cx}" y1="${MT}" x2="${cx}" y2="${yLine}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,3"/>` +
+                 `<text x="${cx}" y="${yLine+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="${color}">${lbl}</text>`;
+        };
+        if (S.tail==='lower'||S.tail==='upper') out += cutLine(S.q1,'q');
+        if (S.tail==='between'||S.tail==='outside') { out += cutLine(S.q1b,'q\u2081'); out += cutLine(S.q2,'q\u2082'); }
+      } else {
+        // Discrete bars
+        const lo = Math.max(0, Math.ceil(xMin+0.5)), hi = Math.floor(xMax-0.5);
+        const ks = Array.from({length: Math.max(0,hi-lo+1)}, (_,i) => lo+i);
+        const ys = ks.map(k => getPDF(k));
+        const yMax = (Math.max(...ys) || 0.1) * 1.2;
+        const yS = y => yLine - (y/yMax)*ph;
+        const bw = Math.min(pw/(ks.length+1)*0.72, 28);
+
+        ks.forEach((k,i) => {
+          const inShade =
+            (S.tail==='lower'   && k <= Math.floor(S.q1)) ||
+            (S.tail==='upper'   && k >  Math.floor(S.q1)) ||
+            (S.tail==='between' && k >= Math.ceil(Math.min(S.q1b,S.q2)) && k <= Math.floor(Math.max(S.q1b,S.q2))) ||
+            (S.tail==='outside' && (k < Math.ceil(Math.min(S.q1b,S.q2)) || k > Math.floor(Math.max(S.q1b,S.q2))));
+          const bx = (xS(k) - bw/2).toFixed(1);
+          const by = yS(ys[i]).toFixed(1);
+          const bh = (yLine - yS(ys[i])).toFixed(1);
+          out += `<rect x="${bx}" y="${by}" width="${bw.toFixed(1)}" height="${bh}" fill="${inShade?color:'#c8bfad'}" fill-opacity="${inShade?'0.85':'0.45'}" rx="2"/>`;
+        });
+
+        // Cutpoint line at bar boundary (q+0.5), not bar center
+        const cutLineD = (boundary, label, val) => {
+          const cx = Math.max(ML, Math.min(W-MR, xS(boundary))).toFixed(1);
+          return `<line x1="${cx}" y1="${MT}" x2="${cx}" y2="${yLine}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,3"/>` +
+                 `<text x="${cx}" y="${yLine+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="${color}">${label} = ${val}</text>`;
+        };
+        if (S.tail==='lower'||S.tail==='upper') out += cutLineD(Math.floor(S.q1)+0.5, 'q', Math.floor(S.q1));
+        if (S.tail==='between'||S.tail==='outside') {
+          const qlo=Math.min(S.q1b,S.q2), qhi=Math.max(S.q1b,S.q2);
+          out += cutLineD(Math.ceil(qlo)-0.5, 'q\u2081', Math.ceil(qlo));
+          out += cutLineD(Math.floor(qhi)+0.5, 'q\u2082', Math.floor(qhi));
+        }
+      }
+
+      // x-axis line
+      out += `<line x1="${ML}" y1="${yLine}" x2="${W-MR}" y2="${yLine}" stroke="#c8bfad" stroke-width="1.5"/>`;
+      // x-axis ticks
+      if (isCont) {
+        const nticks = 6;
+        for (let i=0; i<=nticks; i++) {
+          const xv = xMin + i*(xMax-xMin)/nticks;
+          const sx = xS(xv).toFixed(1);
+          out += `<line x1="${sx}" y1="${yLine}" x2="${sx}" y2="${yLine+4}" stroke="#79705f" stroke-width="1"/>`;
+          out += `<text x="${sx}" y="${yLine+23}" text-anchor="middle" font-size="9" font-family="Fira Code,monospace" fill="#79705f">${+xv.toFixed(1)}</text>`;
+        }
+      } else {
+        // Discrete: integer ticks only, step to avoid crowding
+        const lo2 = Math.max(0, Math.ceil(xMin+0.5)), hi2 = Math.floor(xMax-0.5);
+        const tickStep = Math.max(1, Math.ceil((hi2-lo2)/9));
+        for (let k=lo2; k<=hi2; k+=tickStep) {
+          const sx = xS(k).toFixed(1);
+          out += `<line x1="${sx}" y1="${yLine}" x2="${sx}" y2="${yLine+4}" stroke="#79705f" stroke-width="1"/>`;
+          out += `<text x="${sx}" y="${yLine+23}" text-anchor="middle" font-size="9" font-family="Fira Code,monospace" fill="#79705f">${k}</text>`;
+        }
+      }
+
+      svg.innerHTML = out;
+
+      // probability readout
+      const prob = calcProb();
+      const q1d = Math.floor(S.q1), q1bd = Math.floor(S.q1b), q2d = Math.floor(S.q2);
+      const isd = !isCont;
+      const qfmt = v => isd ? Math.floor(v) : +v.toFixed(2);
+      const sent = {
+        lower:   `P(X \u2264 ${qfmt(S.q1)})`,
+        upper:   `P(X > ${qfmt(S.q1)})`,
+        between: `P(${qfmt(Math.min(S.q1b,S.q2))} \u2264 X \u2264 ${qfmt(Math.max(S.q1b,S.q2))})`,
+        outside: `P(X < ${qfmt(Math.min(S.q1b,S.q2))} or X > ${qfmt(Math.max(S.q1b,S.q2))})`
+      };
+      document.getElementById('prob-sentence').innerHTML = `<strong>${DIST_LABEL[S.dist]}</strong> &nbsp; ${sent[S.tail]}`;
+      document.getElementById('prob-value').textContent  = `= ${prob.toFixed(4)}`;
+    }
+
+    function renderCode() {
+      const p = getParams(), d = S.dist;
+      const cl = `cl cl-${d}`;
+      const L  = (text, extra) => `<code class="${extra||cl}">${text}</code>`;
+      const fn = s => `<span class="sf">${s}</span>`;
+      const kw = s => `<span class="sk">${s}</span>`;
+      const nm = s => `<span class="sn">${s}</span>`;
+      const cm = s => `<span class="sc"># ${s}</span>`;
+      const blank = () => L('', 'cl cl-setup');
+
+      const fns  = {normal:'pnorm', t:'pt', chisq:'pchisq', f:'pf', binom:'pbinom', pois:'ppois'};
+      const dfns = {binom:'dbinom', pois:'dpois'};
+      const isDisc = ['binom','pois'].includes(d);
+
+      function pargs() {
+        if (d==='normal') return `, ${kw('mean')} = ${nm(p.mean)}, ${kw('sd')} = ${nm(p.sd)}`;
+        if (d==='t')      return `, ${kw('df')} = ${nm(p.df)}`;
+        if (d==='chisq')  return `, ${kw('df')} = ${nm(p.df)}`;
+        if (d==='f')      return `, ${kw('df1')} = ${nm(p.df1)}, ${kw('df2')} = ${nm(p.df2)}`;
+        if (d==='binom')  return `, ${kw('size')} = ${nm(p.n)}, ${kw('prob')} = ${nm(p.prob)}`;
+        if (d==='pois')   return `, ${kw('lambda')} = ${nm(p.lambda)}`;
+      }
+
+      const isSingle = S.tail==='lower' || S.tail==='upper';
+      const useZ = d==='normal' && S.zscore && isSingle;
+      const q1f  = isDisc ? Math.floor(S.q1) : +S.q1.toFixed(2);
+      const q1bf = isDisc ? Math.floor(Math.min(S.q1b,S.q2)) : +Math.min(S.q1b,S.q2).toFixed(2);
+      const q2f  = isDisc ? Math.floor(Math.max(S.q1b,S.q2)) : +Math.max(S.q1b,S.q2).toFixed(2);
+      const qv   = useZ ? kw('z') : nm(q1f);
+
+      let lines = [];
+      lines.push(L(cm('library(stats) is loaded by default'), 'cl cl-setup'));
+      lines.push(blank());
+
+      // Z-score block (normal only, single-cutpoint tails)
+      if (useZ) {
+        const z = (S.q1 - p.mean) / p.sd;
+        lines.push(L(cm(`z = (x \u2212 \u03bc) / \u03c3 = (${q1f} \u2212 ${p.mean}) / ${p.sd}`)));
+        lines.push(L(`${kw('z')} <- (${nm(q1f)} - ${nm(p.mean)}) / ${nm(p.sd)}`));
+        lines.push(blank());
+      }
+
+      // Probability mass (discrete only, single-cutpoint tails)
+      if (isDisc && isSingle) {
+        lines.push(L(cm(`P(X = ${q1f})`)));
+        lines.push(L(`${fn(dfns[d])}(${kw('x')} = ${nm(q1f)}${pargs()})`));
+        lines.push(blank());
+      }
+
+      // CDF call(s) — always uses lower.tail default (P(X ≤ q));
+      // upper/outside use 1 - p*() so students learn one convention
+      if (S.tail==='lower') {
+        lines.push(L(cm(`P(X \u2264 ${q1f})`)));
+        lines.push(L(`${fn(fns[d])}(${kw('q')} = ${qv}${useZ?'':pargs()})`));
+      } else if (S.tail==='upper') {
+        lines.push(L(cm(`P(X > ${q1f})`)));
+        lines.push(L(`1 - ${fn(fns[d])}(${kw('q')} = ${qv}${useZ?'':pargs()})`));
+      } else if (S.tail==='between') {
+        const q1bf_1 = isDisc ? q1bf - 1 : q1bf;
+        lines.push(L(cm(`P(${q1bf} \u2264 X \u2264 ${q2f})`)));
+        lines.push(L(`${fn(fns[d])}(${kw('q')} = ${nm(q2f)}${pargs()}) -`));
+        lines.push(L(`  ${fn(fns[d])}(${kw('q')} = ${nm(q1bf_1)}${pargs()})`));
+      } else {
+        const q1bf_1 = isDisc ? q1bf - 1 : q1bf;
+        lines.push(L(cm(`P(X < ${q1bf} or X > ${q2f})`)));
+        lines.push(L(`${fn(fns[d])}(${kw('q')} = ${nm(q1bf_1)}${pargs()}) +`));
+        lines.push(L(`  (1 - ${fn(fns[d])}(${kw('q')} = ${nm(q2f)}${pargs()}))`));
+      }
+      lines.push(blank());
+      lines.push(L(cm(`[1] ${calcProb().toFixed(4)}`)));
+
+      document.getElementById('code-scroll').innerHTML = lines.join('');
+    }
+
+    // =====================================================================
+    // ANNOTATIONS
+    // =====================================================================
+    function getAnn() {
+      const d = S.dist, c = S.changed;
+      const fname = {normal:'pnorm',t:'pt',chisq:'pchisq',f:'pf',binom:'pbinom',pois:'ppois'}[d];
+
+      if (c==='welcome') return {cls:'ann-welcome', html:`
+        Pick a distribution on the left to get started. Each one models a different kind of random process.<br><br>
+        The <strong>plot</strong> shows the distribution's shape. The <strong>shaded region</strong> is the probability you're calculating —
+        it's the area under the curve (or the heights of the bars for discrete distributions) in that region.
+        The <strong>Shade area</strong> buttons let you choose: below a value, above it, between two values, or outside two values.<br><br>
+        The <strong>cutpoint slider</strong> sets where the boundary is. The R code on the right updates live and shows
+        exactly what you'd type to get that probability in R. You can copy it and run it yourself.`};
+
+      const distAnn = {
+        normal: {cls:'ann-normal', html:`<strong>Normal distribution:</strong> the classic bell curve. Describes things that cluster symmetrically around a mean: heights, test scores, measurement error.<br><br>
+          <code>pnorm(q, mean, sd)</code> gives P(X \u2264 q). Two parameters: <code>mean</code> shifts the curve left or right; <code>sd</code> controls how wide it is. Try moving both sliders to see the effect.<br><br>
+          This is the only distribution here with a <em>Show z-score</em> option below; turn it on to see how standardization works.`},
+        t: {cls:'ann-t', html:`<strong>t distribution</strong> looks like a Normal, but with heavier tails. Used when estimating a population mean from a small sample, where you don't know the true standard deviation.<br><br>
+          <code>pt(q, df)</code> gives P(X \u2264 q). One parameter: <code>df</code> (degrees of freedom). Low df = fatter tails = more probability far from zero. As df grows, the t approaches the standard Normal.
+          Try dragging df up to 20 or 30; the curve will look nearly Normal.`},
+        chisq: {cls:'ann-chisq', html:`<strong>Chi-square (\u03c7\u00b2) distribution:</strong> always positive and right-skewed. Shows up in tests about categorical data (like chi-square goodness-of-fit) and in comparing variances.<br><br>
+          <code>pchisq(q, df)</code> gives P(X \u2264 q). One parameter: <code>df</code>. With small df the distribution is strongly right-skewed. As df increases it shifts right and becomes more symmetric, eventually resembling a Normal.`},
+        f: {cls:'ann-f', html:`<strong>F distribution:</strong> a ratio of two chi-square distributions. Used in ANOVA and regression to test whether variance differs between groups.<br><br>
+          <code>pf(q, df1, df2)</code> gives P(X \u2264 q). Two parameters: <code>df1</code> (numerator) and <code>df2</code> (denominator). Always positive. In ANOVA output, a large F statistic lands in the right tail; that's the region associated with a small p-value.`},
+        binom: {cls:'ann-binom', html:`<strong>Binomial distribution</strong> counts successes in <em>n</em> independent yes/no trials, each with probability <em>p</em>.<br><br>
+          <code>pbinom(q, size, prob)</code> gives P(X \u2264 q). Probabilities exist only at whole numbers, shown as bars on the plot. The shaded bars are the ones included in your probability. Try n=10, p=0.5 for a fair coin flipped 10 times.`},
+        pois: {cls:'ann-pois', html:`<strong>Poisson distribution</strong> counts events that occur at a constant average rate, like emails per hour or cars passing per minute.<br><br>
+          <code>ppois(q, lambda)</code> gives P(X \u2264 q). One parameter: \u03bb (lambda), the average count. Always non-negative. As \u03bb grows the distribution shifts right and looks increasingly bell-shaped.`}
+      };
+
+      if (c==='dist') return distAnn[d];
+
+      if (c==='tail') {
+        const t = S.tail;
+        const h = {
+          lower:   `<strong>Lower tail: P(X \u2264 q)</strong> The probability of getting a value at or below the cutpoint. This is what all <code>p*()</code> functions return by default. Move the cutpoint slider to see it change.`,
+          upper:   `<strong>Upper tail: P(X > q)</strong> The probability of getting a value above the cutpoint. In R, add <code>lower.tail = FALSE</code> to the function call. Equivalent to <code>1 - p*(q, ...)</code>.`,
+          between: `<strong>Between: P(q\u2081 \u2264 X \u2264 q\u2082)</strong> The probability in an interval. Computed as the difference of two CDF calls: <code>p*(q\u2082) - p*(q\u2081)</code>. Use the two cutpoint sliders to set the interval boundaries.`,
+          outside: `<strong>Outside: P(X < q\u2081 or X > q\u2082)</strong> Both tails combined. Computed as <code>p*(q\u2081) + p*(q\u2082, lower.tail=FALSE)</code>. This is exactly what a two-tailed p-value represents.`
+        }[t];
+        return {cls:`ann-${d}`, html:h};
+      }
+
+      if (c==='zscore') {
+        if (S.zscore) return {cls:'ann-normal', html:`<strong>Z-score (standardization)</strong> — converts any Normal value to the <em>standard</em> Normal (mean=0, sd=1) using z = (x \u2212 \u03bc) / \u03c3.<br><br>
+          The code now shows the two-step version: compute z first, then call <code>pnorm(z)</code> without mean or sd arguments (the defaults are 0 and 1). The result is identical to the one-step version — standardizing first just makes the math visible.`};
+        return distAnn['normal'];
+      }
+
+      if (c==='mean') return {cls:'ann-normal', html:`<strong>\u03bc (mean)</strong> is the center of the Normal distribution. Moving it shifts the entire curve without changing its shape. Notice that the probability also shifts — the shaded area moves with the curve.`};
+      if (c==='sd')   return {cls:'ann-normal', html:`<strong>\u03c3 (sd)</strong> controls the spread. A larger \u03c3 flattens and widens the curve; a smaller \u03c3 makes it tall and narrow. The total area always equals 1 — so a wider curve is shorter, not larger.`};
+      if (c==='df' && (d==='t'))     return {cls:'ann-t',     html:`<strong>df (degrees of freedom)</strong> controls how fat the tails are. Low df means more probability in the extremes. As df increases, the t distribution approaches the standard Normal — by df=30 they're nearly identical.`};
+      if (c==='df' && d==='chisq')   return {cls:'ann-chisq', html:`<strong>df (degrees of freedom)</strong> shifts the chi-square distribution right and makes it more symmetric. The mean of a \u03c7\u00b2 distribution is its df; the variance is 2\u00d7df.`};
+      if (c==='df1'||c==='df2')      return {cls:'ann-f',     html:`<strong>df\u2081 and df\u2082</strong> (numerator and denominator degrees of freedom) both affect the shape of the F distribution. In an ANOVA table, these correspond to the "between groups" and "within groups" degrees of freedom.`};
+      if (c==='n'||c==='prob')       return {cls:'ann-binom', html:`<strong>n</strong> is the number of trials; <strong>p</strong> is the success probability per trial. Moving p away from 0.5 skews the distribution. Increasing n makes it wider and more symmetric — with large n it starts to look like a Normal.`};
+      if (c==='lambda')              return {cls:'ann-pois',  html:`<strong>\u03bb (lambda)</strong> is the average number of events. The mean and variance of a Poisson are both equal to \u03bb — so as events get more frequent, the spread grows too.`};
+      if (c==='q1'||c==='q1b'||c==='q2') return {cls:`ann-${d}`, html:`The <strong>cutpoint</strong> sets the boundary of the shaded region. This is the <code>q</code> argument passed to <code>${fname}()</code> in R. The probability value in the readout below updates as you drag.`};
+
+      return distAnn[d] || {cls:'ann-welcome', html:`Use the controls on the left to explore the ${DIST_LABEL[d]} distribution.`};
+    }
+
+    // =====================================================================
+    // EVENT HANDLERS
+    // =====================================================================
+    function setDist(btn) {
+      document.querySelectorAll('#dist-stack .mbtn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      S.dist = btn.dataset.val;
+      S.changed = 'dist';
+      if (S.dist !== 'normal') S.zscore = false;
+      syncParamPanels(); syncCutSliders(); syncCutPair();
+      render();
+    }
+    function setTail(btn) {
+      document.querySelectorAll('#tail-stack .mbtn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      S.tail = btn.dataset.val;
+      S.changed = 'tail';
+      syncCutPair();
+      render();
+    }
+    function setZscore(btn) {
+      document.querySelectorAll('#zscore-block .btn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      S.zscore = btn.dataset.val === 'on';
+      S.changed = 'zscore';
+      render();
+    }
+    function sliderChange(key, el) {
+      S[key] = parseFloat(el.value);
+      // update displayed value — df is shared by t and chisq so update both spans
+      if (key === 'df') {
+        const vt = document.getElementById('v-df-t');
+        const vc = document.getElementById('v-df-chisq');
+        if (vt) vt.textContent = el.value;
+        if (vc) vc.textContent = el.value;
+      } else {
+        const vEl = document.getElementById('v-' + key);
+        if (vEl) vEl.textContent = el.value;
+      }
+      if (key === 'n' || key === 'lambda') syncCutSliders();
+      S.changed = key;
+      render();
+    }
+
+    function syncParamPanels() {
+      ['normal','t','chisq','f','binom','pois'].forEach(d => {
+        const el = document.getElementById('p-' + d);
+        if (el) el.style.display = d === S.dist ? '' : 'none';
+      });
+      document.getElementById('zscore-block').style.display = S.dist === 'normal' ? '' : 'none';
+    }
+    function syncCutPair() {
+      const pair = S.tail === 'between' || S.tail === 'outside';
+      document.getElementById('cut-single').style.display = pair ? 'none' : '';
+      document.getElementById('cut-pair').style.display   = pair ? '' : 'none';
+      document.getElementById('cut-label').textContent    = pair ? 'Cutpoints' : 'Cutpoint (q)';
+    }
+    function syncCutSliders() {
+      const [lo, hi] = getRange();
+      const isCont = ['normal','t','chisq','f'].includes(S.dist);
+      const step = isCont ? 0.1 : 1;
+      ['sl-q1','sl-q1b','sl-q2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.min = lo; el.max = hi; el.step = step;
+      });
+      // Sensible per-distribution defaults
+      const p = getParams();
+      if      (S.dist==='normal') { S.q1=+(p.mean+p.sd).toFixed(1); S.q1b=+(p.mean-p.sd).toFixed(1); S.q2=+(p.mean+p.sd).toFixed(1); }
+      else if (S.dist==='t')      { S.q1=1.5;  S.q1b=-1.5; S.q2=1.5; }
+      else if (S.dist==='chisq')  { S.q1=Math.max(1,p.df); S.q1b=Math.max(0.5,p.df*0.3); S.q2=Math.min(hi-0.5,p.df*2); }
+      else if (S.dist==='f')      { S.q1=2.0;  S.q1b=0.5;  S.q2=3.0; }
+      else if (S.dist==='binom')  { const mu=p.n*p.prob; S.q1=Math.round(mu); S.q1b=Math.max(0,Math.round(mu)-2); S.q2=Math.min(p.n,Math.round(mu)+2); }
+      else if (S.dist==='pois')   { S.q1=Math.round(p.lambda); S.q1b=Math.max(0,Math.round(p.lambda)-1); S.q2=Math.round(p.lambda)+2; }
+      // Clamp to valid range
+      const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+      S.q1=clamp(S.q1,lo,hi); S.q1b=clamp(S.q1b,lo,hi); S.q2=clamp(S.q2,lo,hi);
+      document.getElementById('sl-q1').value  = S.q1;  document.getElementById('v-q1').textContent  = S.q1;
+      document.getElementById('sl-q1b').value = S.q1b; document.getElementById('v-q1b').textContent = S.q1b;
+      document.getElementById('sl-q2').value  = S.q2;  document.getElementById('v-q2').textContent  = S.q2;
+    }
+
+    // =====================================================================
+    // RESET
+    // =====================================================================
+    function resetAll() {
+      S = Object.assign({}, DEFAULTS);
+      S.changed = 'welcome';
+      document.querySelectorAll('#dist-stack .mbtn').forEach(b => b.classList.toggle('on', b.dataset.val === 'normal'));
+      document.querySelectorAll('#tail-stack .mbtn').forEach(b => b.classList.toggle('on', b.dataset.val === 'lower'));
+      document.querySelectorAll('#zscore-block .btn').forEach(b => b.classList.toggle('on', b.dataset.val === 'off'));
+      document.getElementById('sl-mean').value = S.mean; document.getElementById('v-mean').textContent = S.mean;
+      document.getElementById('sl-sd').value   = S.sd;   document.getElementById('v-sd').textContent   = S.sd;
+      syncParamPanels(); syncCutPair(); syncCutSliders();
+      render();
+    }
+
+    // === COPY CODE ===
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // === TOOLTIP ===
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      if (tip.style.display === 'block') {
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+      }
+    });
+
+    // === INIT ===
+    syncParamPanels(); syncCutPair(); syncCutSliders();
+    render();
+  </script>
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
+</body>
+</html>

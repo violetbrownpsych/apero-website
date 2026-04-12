@@ -61,7 +61,7 @@ Read this file instead. All CSS variables and component classes below are copy-p
 
 A finished tool is ~1000 lines of HTML and easily exceeds the 32K-token single-response limit if written in one shot. Always build in four sequential edits:
 
-1. **Write** — document shell only: `<!DOCTYPE html>`, `<head>` with font/favicon links and an empty `<style>` block, `<body>` with placeholder comments, empty `<script>` block
+1. **Write** — document shell only: `<!DOCTYPE html>`, `<head>` with font/favicon links and an empty `<style>` block, `<body>` with placeholder comments, empty `<script>` block, and the footer (see below)
 2. **Edit** — fill in the complete `<style>` block
 3. **Edit** — fill in the complete `<body>` markup (header, all three panels, all controls, table/SVG DOM)
 4. **Edit** — fill in the complete `<script>` block (data, state, render functions, handlers, init)
@@ -348,6 +348,16 @@ The dataset is a JS `const DATA` array of arrays, with a parallel `const COLS` a
 Each tool has a favicon. Add to `<head>`:
 ```html
 <link rel="icon" href="tool_icon.png">
+```
+
+---
+
+## Footer
+
+Every tool has a copyright footer as the last element inside `<body>`, after `</script>`:
+
+```html
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
 ```
 
 ---
