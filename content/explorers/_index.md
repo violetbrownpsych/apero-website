@@ -15,34 +15,34 @@ Good luck, have fun, and remember: WE ARE ALL MATH PEOPLE.
 
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:1.5rem;">
 
+   <a href="/explorers/ggplot-visualizer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">ggplot Visualizer</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Build layered plots by tweaking aesthetics and geoms</div>
+  </a> 
+  
   <a href="/explorers/dplyr-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">dplyr Explorer</div>
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Filter, select, mutate, and arrange data using dplyr verbs</div>
   </a>
 
-  <a href="/explorers/file-path-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
-    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">File Path Explorer</div>
-    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Understand and navigate file paths for reading and writing data</div>
-  </a>
-
-  <a href="/explorers/ggplot-visualizer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
-    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">ggplot Visualizer</div>
-    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Build charts by tweaking aesthetics, geoms, and layers</div>
-  </a>
-
-  <a href="/explorers/indexing-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
-    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Indexing Explorer</div>
-    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">See how R indexes vectors, lists, and data frames</div>
-  </a>
-
-  <a href="/explorers/pivot-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+   <a href="/explorers/pivot-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Pivot Explorer</div>
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Reshape data between wide and long formats with tidyr</div>
   </a>
 
+  <a href="/explorers/indexing-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Indexing Explorer</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">See how R indexes vectors and data frames, and practice using logical operators and Booleans to filter rows </div>
+  </a>
+
   <a href="/explorers/distribution-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Distribution Explorer</div>
-    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Explore probability distributions and how their parameters shape them</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Adjust the parameters of probability distributions to visualize area under the curve and the p*() family of functions</div>
   </a>
+
+   <a href="/explorers/file-path-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">File Path Explorer</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Practice navigating file paths for reading data to build intuition about working directories</div>
+  </a> 
 
 </div>
