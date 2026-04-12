@@ -177,6 +177,15 @@ header p { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 | `.ch` | Control section heading: `font-size:0.8rem; font-weight:600; margin-bottom:7px` |
 | `.copy-btn` | Small secondary button (copy/reset) — top-right of a panel. `padding:4px 11px; border-radius:6px; font-family:'DM Sans'; font-weight:600` |
 | `.copy-btn.copied` | Flash state: accent bg, white text |
+
+**Reset button placement:** Every tool has a Reset button in the upper-right of the controls panel, using `.copy-btn` inside a `.panel-header` — the same pattern as the Copy button in the code panel. Never place Reset at the bottom of the controls panel.
+
+```html
+<div class="panel-header">
+  <div class="panel-label">Controls</div>
+  <button class="copy-btn" onclick="resetAll()">Reset</button>
+</div>
+```
 | `.ann` | Annotation box below code panel — hidden by default |
 | `.ann.show` | Makes annotation visible |
 | `.code-scroll` | Dark scrollable code area inside the code panel — `font-family:'Fira Code',monospace; font-size:0.79rem; line-height:1.9` |
@@ -348,6 +357,17 @@ The dataset is a JS `const DATA` array of arrays, with a parallel `const COLS` a
 Each tool has a favicon. Add to `<head>`:
 ```html
 <link rel="icon" href="tool_icon.png">
+```
+
+**Package pills:** Add `.pill-pkg` to any `.pill` that names an R package (not a function). This gives it a cool blue tint to visually distinguish the package from function names.
+
+```html
+<span class="pill pill-pkg">psych</span>
+<span class="pill">alpha()</span>
+```
+
+```css
+.pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
 ```
 
 ---

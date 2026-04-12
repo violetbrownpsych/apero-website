@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reliability &amp; Validity Explorer</title>
+  <link rel="icon" href="reliability_validity_icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      --c-half1:    #4eaaec;   /* split half 1 — blue */
+      --c-half2:    #52c97e;   /* split half 2 — green */
+      --c-alpha:    #e8a030;   /* Cronbach's alpha — amber */
+      --c-sb:       #c89850;   /* Spearman-Brown — warm gold */
+      --c-validity: #b87fd4;   /* validity ceiling — purple */
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle (horizontal pill) */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Vertical stack (3+ options or long labels) */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === SLIDERS === */
+    .slider-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 3px;
+    }
+    .slider-row .ch { margin-bottom: 0; }
+    .slider-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .slider-wrap { margin-bottom: 11px; }
+    .slider-wrap input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 4px;
+      display: block;
+    }
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.64rem;
+      color: var(--muted);
+      font-family: 'Fira Code', monospace;
+      margin-top: 2px;
+      padding: 0 1px;
+    }
+
+    /* === ALPHA READOUT (controls panel) === */
+    .alpha-readout {
+      text-align: center;
+      background: #fdf6ec;
+      border: 1.5px solid var(--c-alpha);
+      border-radius: 9px;
+      padding: 10px 8px 8px;
+      margin: 4px 0 10px;
+    }
+    .alpha-readout .ar-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c-alpha);
+      margin-bottom: 1px;
+    }
+    .alpha-readout .ar-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 2.1rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .alpha-readout .ar-interp {
+      font-size: 0.71rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* === SPEARMAN-BROWN PROJECTION (controls panel) === */
+    .sb-proj-wrap { margin-bottom: 4px; }
+    .sb-proj-result {
+      margin-top: 7px;
+      padding: 7px 10px;
+      background: #fdf9f0;
+      border: 1px solid var(--c-sb);
+      border-radius: 7px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .sb-proj-result .sb-n {
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--c-sb);
+    }
+
+    /* === MAIN PANEL SECTION LABELS === */
+    .sec-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin: 13px 0 7px;
+      padding-top: 11px;
+      border-top: 1px solid var(--border);
+    }
+    .sec-label:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    #main-panel .sec-label:first-child { padding-top: 5px; }
+
+    /* === ITEM CHIPS === */
+    .item-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .item-chip {
+      width: 38px;
+      height: 38px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: white;
+      transition: background 0.35s;
+      user-select: none;
+    }
+    .item-chip.half1 { background: var(--c-half1); }
+    .item-chip.half2 { background: var(--c-half2); }
+
+    /* === SPLIT-HALF DATA TABLE === */
+    .data-table-wrap {
+      overflow-x: auto;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.73rem;
+    }
+    .data-table th {
+      padding: 5px 7px;
+      font-weight: 600;
+      font-size: 0.68rem;
+      text-align: center;
+      border-bottom: 1.5px solid var(--border);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 3px 7px;
+      text-align: center;
+      border-bottom: 1px solid #ece8de;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* Column color classes */
+    .data-table th.col-pid  { color: var(--muted); font-size: 0.65rem; background: #f8f5ef; }
+    .data-table td.col-pid  { color: var(--muted); font-size: 0.68rem; background: #f8f5ef; }
+    .data-table th.col-h1   { color: var(--c-half1); background: #eaf5fd; }
+    .data-table td.col-h1   { background: #f4fbff; }
+    .data-table th.col-h2   { color: var(--c-half2); background: #edfaf3; }
+    .data-table td.col-h2   { background: #f2fdf6; }
+    .data-table th.col-avg1 { color: var(--c-half1); background: #d6ecfb; font-style: italic; }
+    .data-table td.col-avg1 { background: #e5f4fd; font-weight: 600; }
+    .data-table th.col-avg2 { color: var(--c-half2); background: #ccf5e2; font-style: italic; }
+    .data-table td.col-avg2 { background: #dff9ee; font-weight: 600; }
+
+    /* Divider between halves and avg cols */
+    .data-table th.col-avg1,
+    .data-table td.col-avg1 { border-left: 2px solid var(--border); }
+
+    /* === CORRELATION FLOW === */
+    .corr-flow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8f5ef;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .corr-box {
+      text-align: center;
+      flex: 1;
+    }
+    .corr-box .cb-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .corr-box .cb-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.35rem;
+      font-weight: 500;
+      line-height: 1.1;
+    }
+    .cb-val.v-half  { color: var(--c-half1); }
+    .cb-val.v-sb    { color: var(--c-sb); }
+    .cb-val.v-alpha { color: var(--c-alpha); }
+    .corr-box .cb-formula {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .corr-arrow {
+      font-size: 1.1rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    /* === VALIDITY CEILING BARS === */
+    .vbars-wrap {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .vbar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .vbar-lbl {
+      font-size: 0.72rem;
+      font-weight: 600;
+      width: 148px;
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+    .vbar-track {
+      flex: 1;
+      height: 24px;
+      background: #ece8de;
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+    .vbar-fill {
+      height: 100%;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      transition: width 0.4s ease;
+      min-width: 0;
+    }
+    .vbar-fill.vf-reliability { background: var(--c-alpha); }
+    .vbar-fill.vf-validity    { background: var(--c-validity); }
+    .vbar-fill span {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.71rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+    .vbar-num {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .vbar-num.vn-reliability { color: var(--c-alpha); }
+    .vbar-num.vn-validity    { color: var(--c-validity); }
+    .validity-why {
+      margin-top: 9px;
+      padding: 8px 11px;
+      font-size: 0.76rem;
+      line-height: 1.6;
+      color: var(--muted);
+      background: #f6f0fb;
+      border-left: 3px solid var(--c-validity);
+      border-radius: 0 6px 6px 0;
+    }
+    .validity-why strong { color: var(--text); font-weight: 600; }
+
+    /* === CORR-FLOW DESCRIPTION === */
+    .corr-desc {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.74rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    .corr-desc .cd-row { display: flex; gap: 7px; align-items: baseline; }
+    .corr-desc .cd-dot { flex-shrink: 0; font-size: 0.6rem; line-height: 2; }
+    .corr-desc strong  { color: var(--text); font-weight: 600; }
+
+    /* === INTER-ITEM HEATMAP === */
+    .heatmap-wrap { margin-top: 4px; }
+    .heatmap-row  { display: flex; gap: 16px; align-items: flex-start; }
+    .heatmap-grid { display: grid; gap: 2px; flex-shrink: 0; }
+    .hm-label {
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fira Code', monospace; font-size: 0.67rem; color: var(--muted);
+    }
+    .hm-cell {
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fira Code', monospace; font-size: 0.62rem; font-weight: 500;
+    }
+    .hm-empty { background: transparent !important; }
+    .hm-formula {
+      font-size: 0.74rem; line-height: 1.75;
+      color: var(--muted); flex: 1; min-width: 0;
+    }
+    .hm-formula .hf-block {
+      font-family: 'Fira Code', monospace; font-size: 0.73rem;
+      background: #fdf8f0; border-left: 3px solid var(--c-alpha);
+      border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 5px;
+      line-height: 1.8; color: var(--text);
+    }
+    .hm-formula .hf-label {
+      font-size: 0.74rem; font-weight: 600;
+      color: var(--text); margin-bottom: 5px;
+    }
+
+    /* === SB FORMULA STEPS === */
+    .sb-formula-steps {
+      margin-top: 6px; padding: 5px 8px;
+      background: #fdf9f0; border-left: 2px solid var(--c-sb);
+      border-radius: 0 4px 4px 0;
+      font-family: 'Fira Code', monospace; font-size: 0.68rem;
+      line-height: 1.75; color: var(--text);
+    }
+
+    /* === PACKAGE PILL === */
+    .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
+
+    /* === OUTCOME MODE BUTTONS (smaller than standard .btn) === */
+    .ymode-btn { padding: 3px 7px; font-size: 0.75rem; }
+
+    /* === ACTUAL AVG R IN ALPHA READOUT === */
+    .alpha-readout .ar-actualr {
+      font-size: 0.68rem; color: var(--muted);
+      margin-top: 4px; padding-top: 4px;
+      border-top: 1px solid #f0e6d0;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.9;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 3px 6px 3px 9px;
+      margin-bottom: 2px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+    /* Code line color classes — defined after .cl so border-left-color overrides */
+    .cl-alpha    { border-left-color: var(--c-alpha); }
+    .cl-splithalf { border-left-color: var(--c-half1); }
+    .cl-sb       { border-left-color: var(--c-sb); }
+    .cl-validity { border-left-color: var(--c-validity); }
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }
+    .sv { color: #f78c6c; }
+    .sk { color: #89ddff; }
+    .ss { color: #c3e88d; }
+    .sn { color: #f0ab70; }
+    .so { color: #89ddff; }
+    .sb { color: #c3e88d; }
+    .sc { color: #6a7a6a; font-style: italic; }
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      max-width: 1360px; margin: 0 auto 18px;
+      padding: 13px 18px;
+      border-radius: 9px; border: 1.5px solid var(--border);
+      font-size: 0.84rem; line-height: 1.65;
+      background: var(--panel);
+    }
+    .ann.show { display: block; }
+    .ann-welcome  { border-color: var(--accent);      background: #fdf6f0; }
+    .ann-alpha    { border-color: var(--c-alpha);     background: #fdf8f0; }
+    .ann-splithalf { border-color: var(--c-half1);    background: #f0f8fd; }
+    .ann-sb       { border-color: var(--c-sb);        background: #fdf6e8; }
+    .ann-validity { border-color: var(--c-validity);  background: #f8f0fc; }
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Reliability &amp; Validity Explorer</h1>
+    <p>Build a scale, split it in half, and watch reliability place a ceiling on validity</p>
+    <span class="pill pill-pkg">psych</span>
+    <span class="pill">alpha()</span>
+    <span class="pill">splitHalf()</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Scale Settings</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <div class="cs">
+        <div class="slider-row">
+          <span class="ch">Number of items</span>
+          <span class="slider-val" id="val-k">8</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="slider-k" min="2" max="20" step="1" value="8" oninput="setK(this)">
+          <div class="slider-ticks"><span>2</span><span>20</span></div>
+        </div>
+      </div>
+
+      <div class="cs">
+        <div class="slider-row">
+          <span class="ch">Avg inter-item r</span>
+          <span class="slider-val" id="val-r">0.30</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="slider-r" min="0.05" max="0.90" step="0.05" value="0.30" oninput="setR(this)">
+          <div class="slider-ticks"><span>.05</span><span>.45</span><span>.90</span></div>
+        </div>
+      </div>
+
+      <div class="alpha-readout">
+        <div class="ar-label">Cronbach's &alpha;</div>
+        <div class="ar-val" id="alpha-val">—</div>
+        <div class="ar-interp" id="alpha-interp"></div>
+        <div class="ar-actualr" id="actual-r-line"></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs">
+        <div class="ch">Spearman-Brown target &#127919;</div>
+        <div class="sub">How many items to reach &alpha;<sub>t</sub>&nbsp;=&nbsp;…?</div>
+        <div class="mode-stack" style="margin-top:7px;">
+          <button class="mbtn" data-target="0.70" onclick="setTarget(this)">&alpha;<sub>t</sub> = .70</button>
+          <button class="mbtn" data-target="0.80" onclick="setTarget(this)">&alpha;<sub>t</sub> = .80</button>
+          <button class="mbtn" data-target="0.90" onclick="setTarget(this)">&alpha;<sub>t</sub> = .90</button>
+        </div>
+        <div class="sb-proj-result" id="sb-proj-result" style="display:none;"></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs">
+        <div class="ch">Split assignment</div>
+        <button class="btn" style="width:100%;margin-top:2px;" onclick="reshuffleSplit()">Reshuffle split</button>
+        <div class="sub" style="margin-top:5px;">Randomly reassign items to
+          <span style="color:var(--c-half1);font-weight:600;">Half 1</span> and
+          <span style="color:var(--c-half2);font-weight:600;">Half 2</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MIDDLE: MAIN VISUAL PANEL -->
+    <div class="panel" id="main-panel">
+
+      <!-- Inter-item heatmap -->
+      <div class="sec-label">Inter-item correlations</div>
+      <div class="heatmap-wrap" id="heatmap-wrap"><!-- populated by JS --></div>
+
+      <!-- Item chips -->
+      <div class="hr" style="margin: 10px 0 11px;"></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 0 7px;">
+        <div class="sec-label" style="margin:0;padding:0;border:none;">Items by half</div>
+        <div style="font-size:0.72rem;color:var(--muted);">Randomly assigned to
+          <span style="color:var(--c-half1);font-weight:600;">Half&nbsp;1</span> or
+          <span style="color:var(--c-half2);font-weight:600;">Half&nbsp;2</span>
+        </div>
+      </div>
+      <div class="item-grid" id="item-grid">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Data table -->
+      <div class="sec-label">Item scores from 10 participants</div>
+      <div class="sub" style="margin-bottom:6px;">The two colored averages are what get correlated in split-half reliability.</div>
+      <div class="data-table-wrap">
+        <table class="data-table" id="data-table">
+          <thead id="data-thead"></thead>
+          <tbody id="data-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Correlation flow -->
+      <div class="sec-label">Split-half &rarr; Spearman-Brown correction</div>
+      <div class="corr-flow">
+        <div class="corr-box">
+          <div class="cb-label">r (split-half correlation)</div>
+          <div class="cb-val v-half" id="cf-rhalf">—</div>
+          <div class="cb-formula">cor(avg&#x2081;, avg&#x2082;)</div>
+        </div>
+        <div class="corr-arrow">&#x2192;</div>
+        <div class="corr-box">
+          <div class="cb-label">r (SB-corrected)</div>
+          <div class="cb-val v-sb" id="cf-rsb">—</div>
+          <div class="cb-formula">2r&nbsp;/&nbsp;(1&nbsp;+&nbsp;r)</div>
+        </div>
+        <div class="corr-arrow" style="font-size:0.85rem;">&asymp;</div>
+        <div class="corr-box">
+          <div class="cb-label">Cronbach's &alpha;</div>
+          <div class="cb-val v-alpha" id="cf-alpha">—</div>
+          <div class="cb-formula" id="cf-alpha-formula">k&thinsp;&middot;&thinsp;r&#772;&nbsp;/&nbsp;(1&nbsp;+&nbsp;(k&minus;1)&thinsp;&middot;&thinsp;r&#772;)</div>
+        </div>
+      </div>
+      <div class="corr-desc">
+        <div class="cd-row"><span class="cd-dot" style="color:var(--c-half1);">●</span><span><strong>r (split-half correlation)</strong> This value represents the raw correlation between the two half-averages. It is necessarily lower than true reliability because each half has only half the items.</span></div>
+        <div class="cd-row"><span class="cd-dot" style="color:var(--c-sb);">●</span><span><strong>r (SB-corrected)</strong> The Spearman-Brown formula adjusts for length of the half-scale, estimating what the full-scale reliability would be if the values used in the correlations were more precise/less noisy (i.e., calculated with twice as many items). The formula below this value is derived by plugging k = 2 into the Spearman-Brown formula.</span></div>
+        <div class="cd-row"><span class="cd-dot" style="color:var(--c-alpha);">●</span><span><strong>Cronbach's &alpha;</strong> This value estimates full-scale reliability using a different route than the split-half approach. Here, the avg inter-item r from the slider (the same r&#772; averaged in the heatmap above) is plugged directly into the Spearman-Brown formula. <strong>r&nbsp;(SB-corrected) and &alpha; are estimating the same thing</strong>—full-scale reliability—just via different routes. Small differences are normal: &alpha; uses the slider's r&#772; exactly, while r&nbsp;(SB-corrected) is derived from the actual simulated split-half correlation, which varies due to sampling.</span></div>
+      </div>
+
+      <!-- Validity ceiling -->
+      <div class="sec-label">Reliability ceiling on validity</div>
+      <div class="vbars-wrap">
+        <div class="vbar-row">
+          <span class="vbar-lbl">Scale reliability (&alpha;)</span>
+          <div class="vbar-track">
+            <div class="vbar-fill vf-reliability" id="vbar-rel" style="width:0%;"><span id="vbar-rel-lbl"></span></div>
+          </div>
+          <span class="vbar-num vn-reliability" id="vbar-rel-num">—</span>
+        </div>
+        <div class="vbar-row">
+          <span class="vbar-lbl">Max possible validity (&radic;&alpha;)</span>
+          <div class="vbar-track">
+            <div class="vbar-fill vf-validity" id="vbar-val" style="width:0%;"><span id="vbar-val-lbl"></span></div>
+          </div>
+          <span class="vbar-num vn-validity" id="vbar-val-num">—</span>
+        </div>
+      </div>
+      <div class="validity-why" id="validity-why">
+        <!-- populated by JS -->
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-top:14px;">
+        <div style="flex-shrink:0;">
+          <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Scale variance breakdown</div>
+          <div id="var-circle-wrap"></div>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Reliability of hypothetical outcome variable</div>
+          <div class="br" style="margin-bottom:8px;">
+            <button class="btn ymode-btn on" data-mode="perfect" onclick="setYMode(this)">&alpha;<sub>y</sub> = 1.0</button>
+            <button class="btn ymode-btn" data-mode="same" onclick="setYMode(this)">&alpha;<sub>y</sub> = &alpha;<sub>x</sub></button>
+            <button class="btn ymode-btn" data-mode="low" onclick="setYMode(this)">&alpha;<sub>y</sub> = .45</button>
+          </div>
+          <div id="var-scatter-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANNOTATION BOX (below grid) -->
+  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // === SEEDED PRNG (mulberry32) ===
+    function mulberry32(seed) {
+      return function() {
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function randNormal(rand) {
+      // Box-Muller transform
+      let u;
+      do { u = rand(); } while (u === 0);
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+    }
+
+    // === CONSTANTS ===
+    const N_P    = 30;           // participants used for all computations
+    const N_SHOW = 10;           // rows displayed in the table
+    const SEED   = 20260412;     // fixed seed — same 30 "people" every session
+    // Pre-seeded noise vector for outcome Y construction — fixed so scatter doesn't jump on slider changes
+    const NOISE_Y = (() => { const r = mulberry32(SEED * 7 + 13); return Array.from({length: N_P}, () => randNormal(r)); })();
+
+    // === DATA GENERATION ===
+    // Regenerated when k or rBar changes. True scores are drawn first (same
+    // seed = same 10 participants), then item noise is layered on top.
+    // Each item_j = sqrt(rBar)*trueScore + sqrt(1-rBar)*noise, scaled to 1–7 Likert.
+    function generateData(k, rBar) {
+      const rand   = mulberry32(SEED);
+      const trueScores = Array.from({length: N_P}, () => randNormal(rand));
+      const sqR = Math.sqrt(Math.max(0, rBar));
+      const sqE = Math.sqrt(Math.max(0, 1 - rBar));
+      const data = Array.from({length: N_P}, () => []);
+      for (let j = 0; j < k; j++) {
+        for (let i = 0; i < N_P; i++) {
+          const z = sqR * trueScores[i] + sqE * randNormal(rand);
+          data[i].push(Math.max(1, Math.min(7, Math.round(z * 1.1 + 4))));
+        }
+      }
+      return data;
+    }
+
+    // === SPLIT ASSIGNMENT ===
+    // Roughly equal halves (ceil/floor), shuffled randomly.
+    function makeSplit(k) {
+      const assign = Array.from({length: k}, (_, i) => i < Math.ceil(k / 2) ? 1 : 2);
+      for (let i = assign.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [assign[i], assign[j]] = [assign[j], assign[i]];
+      }
+      return assign;
+    }
+
+    // === COMPUTATIONS ===
+    // Cronbach's alpha from k items and average inter-item r
+    function computeAlpha(k, rBar) {
+      if (k < 2 || rBar <= 0) return 0;
+      return (k * rBar) / (1 + (k - 1) * rBar);
+    }
+
+    // Per-participant averages for each half
+    function computeHalfAvgs(data, split) {
+      const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+      return data.map(row => {
+        const h1 = [], h2 = [];
+        split.forEach((h, j) => (h === 1 ? h1 : h2).push(row[j]));
+        return [avg(h1), avg(h2)];
+      });
+    }
+
+    // Pearson r between two arrays of equal length
+    function pearsonR(x, y) {
+      const n  = x.length;
+      const mx = x.reduce((a, b) => a + b, 0) / n;
+      const my = y.reduce((a, b) => a + b, 0) / n;
+      let num = 0, sx = 0, sy = 0;
+      for (let i = 0; i < n; i++) {
+        const dx = x[i] - mx, dy = y[i] - my;
+        num += dx * dy; sx += dx * dx; sy += dy * dy;
+      }
+      const denom = Math.sqrt(sx * sy);
+      return denom === 0 ? 0 : num / denom;
+    }
+
+    // Average of all pairwise inter-item correlations across k items
+    function computeActualAvgR(data, k) {
+      let sum = 0, count = 0;
+      for (let i = 0; i < k; i++) {
+        for (let j = i + 1; j < k; j++) {
+          sum += pearsonR(data.map(r => r[i]), data.map(r => r[j]));
+          count++;
+        }
+      }
+      return count > 0 ? sum / count : 0;
+    }
+
+    // Heatmap cell color: interpolate from near-white to amber across r = 0→1
+    function heatColor(r) {
+      const t  = Math.max(0, Math.min(1, r));
+      const from = [248, 244, 237];   // warm near-white
+      const to   = [220, 140,  35];   // deep amber
+      return `rgb(${from.map((f, i) => Math.round(f + t * (to[i] - f))).join(',')})`;
+    }
+
+    // Spearman-Brown correction: full-length r from split-half r
+    function sbCorrect(r) {
+      if (r <= -1) return -1;
+      return (2 * r) / (1 + r);
+    }
+
+    // Spearman-Brown projection: items needed to reach targetAlpha (may be fewer)
+    function sbItemsNeeded(curAlpha, targetAlpha, k) {
+      if (curAlpha <= 0 || curAlpha >= 1) return null;
+      const mult = (targetAlpha * (1 - curAlpha)) / (curAlpha * (1 - targetAlpha));
+      return Math.max(1, Math.ceil(mult * k));
+    }
+
+    // === HELPERS ===
+    const fmt2 = n => isNaN(n) ? '—' : n.toFixed(2);
+    const fmt1 = n => isNaN(n) ? '—' : n.toFixed(1);
+    const pct  = n => Math.round(n * 100) + '%';
+
+    function alphaLabel(a) {
+      if (a >= 0.90) return 'Excellent';
+      if (a >= 0.80) return 'Good';
+      if (a >= 0.70) return 'Meh';
+      if (a >= 0.50) return 'Unacceptable';
+      return 'Unacceptable';
+    }
+
+    // === STATE ===
+    const DEFAULTS = { k: 8, rBar: 0.30, target: null, yMode: 'perfect', changed: 'welcome' };
+    let S = Object.assign({}, DEFAULTS);
+
+    let DATA  = [];  // DATA[participant][item] — 10 × k matrix
+    let SPLIT = [];  // SPLIT[item] = 1 or 2
+
+    // === INIT DATA ===
+    DATA  = generateData(S.k, S.rBar);
+    SPLIT = makeSplit(S.k);
+
+    // === RENDER ===
+    function render() {
+      const allAvgR = S.rBar;  // use slider target — actual computed avg r shifts with k due to sampling noise
+      const alpha   = computeAlpha(S.k, allAvgR);
+      const avgs    = computeHalfAvgs(DATA, SPLIT);
+      const rHalf   = pearsonR(avgs.map(a => a[0]), avgs.map(a => a[1]));
+      const rSB     = sbCorrect(rHalf);
+      const maxVal  = Math.sqrt(Math.max(0, alpha));
+      renderMain(alpha, avgs, rHalf, rSB, maxVal, allAvgR);
+      renderCode(alpha, rHalf, rSB, maxVal);
+      const {cls, html} = getAnn(alpha, rHalf, rSB, maxVal);
+      const ann = document.getElementById('ann-box');
+      ann.className = 'ann show ' + cls;
+      ann.innerHTML = html;
+    }
+
+    function renderMain(alpha, avgs, rHalf, rSB, maxVal, allAvgR) {
+      // Alpha readout
+      document.getElementById('alpha-val').textContent    = fmt2(alpha);
+      document.getElementById('alpha-interp').textContent = alphaLabel(alpha);
+      document.getElementById('actual-r-line').textContent =
+        `Avg inter-item r\u00a0=\u00a0${fmt2(allAvgR)}`;
+
+      // SB projection result
+      const sbEl = document.getElementById('sb-proj-result');
+      if (S.target !== null) {
+        const need = sbItemsNeeded(alpha, S.target, S.k);
+        const t    = S.target;
+        const mult = (t * (1 - alpha)) / (alpha * (1 - t));
+        const multLabel = mult >= 1
+          ? `${mult.toFixed(2)} times longer`
+          : `${mult.toFixed(2)} times the current length (shorter)`;
+        const formulaSteps = `<div class="sb-formula-steps"><span style="font-size:0.62rem;color:var(--muted);font-style:italic;">Spearman-Brown formula: reliability after scaling a scale by a factor of k</span><br>
+             &alpha;<sub>t</sub> = k&thinsp;&middot;&thinsp;&alpha; / (1&nbsp;+&nbsp;(k&minus;1)&thinsp;&middot;&thinsp;&alpha;)<br>
+             <span style="font-size:0.62rem;color:var(--muted);font-style:italic;">&darr; rearrange to solve for k (how many times the length needs to change)</span><br>
+             k = &alpha;<sub>t</sub>(1&minus;&alpha;) / (&alpha;(1&minus;&alpha;<sub>t</sub>))<br>
+             &nbsp;&nbsp;= ${t.toFixed(2)}&thinsp;&times;&thinsp;${(1-alpha).toFixed(2)} / (${fmt2(alpha)}&thinsp;&times;&thinsp;${(1-t).toFixed(2)}) = ${multLabel}<br>
+             &lceil;${mult.toFixed(2)}&thinsp;&times;&thinsp;${S.k} items&rceil; = <strong>${need} items</strong></div>`;
+        if (need === S.k) {
+          sbEl.innerHTML = `Already at &alpha;<sub>t</sub>&nbsp;=&nbsp;${t.toFixed(2)} — no change needed.`;
+        } else if (need > S.k) {
+          sbEl.innerHTML = `Need <span class="sb-n">${need}</span> items total; add <span class="sb-n">${need - S.k}</span> more to your current ${S.k}.${formulaSteps}`;
+        } else {
+          sbEl.innerHTML = `You can reduce to <span class="sb-n">${need}</span> items; remove <span class="sb-n">${S.k - need}</span> from your current ${S.k}.${formulaSteps}`;
+        }
+        sbEl.style.display = '';
+      } else {
+        sbEl.style.display = 'none';
+      }
+
+      // Item chips
+      document.getElementById('item-grid').innerHTML =
+        Array.from({length: S.k}, (_, j) =>
+          `<div class="item-chip half${SPLIT[j]}">i${j+1}</div>`
+        ).join('');
+
+      // Inter-item heatmap (first 6 items)
+      const nH  = Math.min(S.k, 6);
+      const cs  = 34;   // cell size px
+      const rMat = Array.from({length: nH}, () => Array(nH).fill(0));
+      for (let i = 0; i < nH; i++) {
+        rMat[i][i] = 1;
+        for (let j = i + 1; j < nH; j++) {
+          const v = pearsonR(DATA.map(row => row[i]), DATA.map(row => row[j]));
+          rMat[i][j] = v;
+          rMat[j][i] = v;
+        }
+      }
+      // Matrix — upper triangle + diagonal only; lower triangle cells are invisible
+      let mat = `<div class="heatmap-grid" style="grid-template-columns:repeat(${nH+1},${cs}px);gap:2px;">`;
+      mat += `<div class="hm-label" style="width:${cs}px;height:${cs}px;"></div>`;
+      for (let j = 0; j < nH; j++) mat += `<div class="hm-label" style="width:${cs}px;height:${cs}px;">i${j+1}</div>`;
+      for (let i = 0; i < nH; i++) {
+        mat += `<div class="hm-label" style="width:${cs}px;height:${cs}px;">i${i+1}</div>`;
+        for (let j = 0; j < nH; j++) {
+          if (j < i) {
+            mat += `<div class="hm-cell hm-empty" style="width:${cs}px;height:${cs}px;"></div>`;
+          } else {
+            const r   = rMat[i][j];
+            const bg  = heatColor(r);
+            const clr = r > 0.55 ? '#fff' : 'rgba(0,0,0,0.55)';
+            const lbl = i === j ? '1' : fmt2(r).replace('0.', '.');
+            mat += `<div class="hm-cell" style="width:${cs}px;height:${cs}px;background:${bg};color:${clr};">${lbl}</div>`;
+          }
+        }
+      }
+      mat += '</div>';
+
+      // Formula panel — shows how r̄ is computed and feeds into α
+      const nPairs       = (S.k * (S.k - 1)) / 2;
+      const rSum         = allAvgR * nPairs;
+      const alphaFromData = computeAlpha(S.k, allAvgR);
+      const denom        = `1 + ${S.k - 1} &middot; ${fmt2(allAvgR)}`;
+      const fml = `<div class="hm-formula">
+        <div class="hf-label">How &alpha; is calculated</div>
+        <div class="hf-block">
+          <span style="font-size:0.63rem;color:var(--muted);font-style:italic;">Step 1: Average all the pairwise correlations by adding them up and dividing by the number of pairwise correlations</span><br>
+          r&#772; = sum of all pairs / # of pairs<br>
+          r&#772; = &Sigma;r<sub>ij</sub> / (k(k&minus;1)/2)<br>
+          &nbsp;&nbsp;= ${fmt2(rSum)} / ${nPairs} = <strong>${fmt2(allAvgR)}</strong>
+          <br><br>
+          <span style="font-size:0.63rem;color:var(--muted);font-style:italic;">Step 2: Plug r&#772; and k (number of items) into Cronbach's formula (this same formula drives the number in the split-half flow below)</span><br>
+          &alpha; = k &middot; r&#772; / (1+(k&minus;1)&middot;r&#772;)<br>
+          &nbsp;&nbsp;= ${S.k} &middot; ${fmt2(allAvgR)} / (${denom})<br>
+          &nbsp;&nbsp;= <strong>${fmt2(alphaFromData)}</strong>
+        </div>
+        ${S.k > 6 ? `<div class="sub" style="margin-top:4px;">r&#772; uses all ${S.k} items; matrix shows first 6 for simplicity</div>` : ''}
+      </div>`;
+
+      const note = S.k > 6 ? `<div class="sub" style="margin-top:4px;">matrix shows first 6 of ${S.k} items</div>` : '';
+      document.getElementById('heatmap-wrap').innerHTML =
+        `<div class="heatmap-row">${mat}${fml}</div>${note}`;
+
+      // Data table — items grouped by half for visual clarity
+      const h1idx = SPLIT.map((h,j) => h===1 ? j : -1).filter(j => j>=0);
+      const h2idx = SPLIT.map((h,j) => h===2 ? j : -1).filter(j => j>=0);
+      let thead = '<tr><th class="col-pid">P</th>';
+      h1idx.forEach(j => thead += `<th class="col-h1">i${j+1}</th>`);
+      h2idx.forEach(j => thead += `<th class="col-h2">i${j+1}</th>`);
+      thead += '<th class="col-avg1">Avg&nbsp;1</th><th class="col-avg2">Avg&nbsp;2</th></tr>';
+      document.getElementById('data-thead').innerHTML = thead;
+
+      let tbody = '';
+      for (let i = 0; i < N_SHOW; i++) {
+        tbody += `<tr><td class="col-pid">P${i+1}</td>`;
+        h1idx.forEach(j => tbody += `<td class="col-h1">${DATA[i][j]}</td>`);
+        h2idx.forEach(j => tbody += `<td class="col-h2">${DATA[i][j]}</td>`);
+        tbody += `<td class="col-avg1">${fmt1(avgs[i][0])}</td><td class="col-avg2">${fmt1(avgs[i][1])}</td></tr>`;
+      }
+      tbody += `<tr><td colspan="99" style="font-size:0.67rem;color:var(--muted);font-style:italic;padding:4px 7px;">showing ${N_SHOW} of ${N_P} participants; r computed on all ${N_P}</td></tr>`;
+      document.getElementById('data-tbody').innerHTML = tbody;
+
+      // Correlation flow
+      document.getElementById('cf-rhalf').textContent = fmt2(rHalf);
+      document.getElementById('cf-rsb').textContent   = fmt2(rSB);
+      document.getElementById('cf-alpha').textContent = fmt2(alpha);
+
+      // Validity bars
+      const relW = Math.round(alpha * 100);
+      const valW = Math.round(maxVal * 100);
+      document.getElementById('vbar-rel').style.width     = relW + '%';
+      document.getElementById('vbar-rel-lbl').textContent = relW >= 18 ? fmt2(alpha) : '';
+      document.getElementById('vbar-rel-num').textContent = fmt2(alpha);
+      document.getElementById('vbar-val').style.width     = valW + '%';
+      document.getElementById('vbar-val-lbl').textContent = valW >= 18 ? fmt2(maxVal) : '';
+      document.getElementById('vbar-val-num').textContent = fmt2(maxVal);
+
+      // Validity why
+      const gap = fmt2(maxVal - alpha);
+      document.getElementById('validity-why').innerHTML =
+        `<strong>Why &radic;&alpha;?</strong> Only the <em>true-score</em> portion of your scale can correlate with an
+        external measure—random measurement error cannot correlate with anything. With &alpha;&nbsp;=&nbsp;${fmt2(alpha)},
+        roughly ${pct(alpha)} of your scale's variance is systematic signal; the rest is noise.
+        The maximum possible correlation with any other measure is therefore &radic;${fmt2(alpha)}&nbsp;&asymp;&nbsp;<strong>${fmt2(maxVal)}</strong>.
+        (Formally: the maximum correlation between any two measures equals &radic;(r&#x2081;&#x2081;&nbsp;&times;&nbsp;r&#x2082;&#x2082;),
+        where r&#x2081;&#x2081; and r&#x2082;&#x2082; are their reliabilities. A perfectly reliable measure has reliability&nbsp;=&nbsp;1,
+        so the ceiling reduces to &radic;(&alpha;&nbsp;&times;&nbsp;1)&nbsp;=&nbsp;&radic;&alpha; when correlating a measure with another measure with perfect reliability.)` +
+        (alpha < 0.50
+          ? ` At this reliability, over half the scale variance is error—the ceiling is severe.`
+          : alpha < 0.70
+          ? ` Even a perfectly reliable measure could correlate no higher than <strong>${fmt2(maxVal)}</strong> with this scale.`
+          : ` <strong>The ${gap}-point gap between &alpha; and &radic;&alpha; shrinks as reliability improves.</strong>`);
+
+      // Variance circle
+      document.getElementById('var-circle-wrap').innerHTML = buildVarianceCircleSVG(alpha, maxVal);
+
+      // Scatter plot
+      const xVals = DATA.map(row => row.slice(0, S.k).reduce((a,b) => a+b, 0) / S.k);
+      document.getElementById('var-scatter-wrap').innerHTML = buildScatterSVG(xVals, alpha, S.yMode);
+    }
+
+    // === SCATTER HELPERS ===
+    // Construct Y so that cor(xVals, Y) = exactly rTarget, using a fixed orthogonalized noise vector
+    function buildOutcomeY(xVals, rTarget) {
+      const n  = xVals.length;
+      const mx = xVals.reduce((a,b) => a+b) / n;
+      const sx = Math.sqrt(xVals.reduce((s,v) => s+(v-mx)**2, 0) / n) || 1;
+      const xS = xVals.map(v => (v-mx)/sx);
+      // Orthogonalize NOISE_Y against xS
+      const dot  = NOISE_Y.reduce((s,z,i) => s + z*xS[i], 0) / n;
+      const zOrt = NOISE_Y.map((z,i) => z - dot*xS[i]);
+      const mz   = zOrt.reduce((a,b) => a+b) / n;
+      const sz   = Math.sqrt(zOrt.reduce((s,v) => s+(v-mz)**2, 0) / n) || 1;
+      const zS   = zOrt.map(v => (v-mz)/sz);
+      const r    = Math.max(0, Math.min(1, rTarget));
+      return { xS, y: xS.map((x,i) => r*x + Math.sqrt(Math.max(0,1-r*r))*zS[i]) };
+    }
+
+    function buildScatterSVG(xVals, alpha, yMode) {
+      const ayVal  = yMode === 'same' ? alpha : yMode === 'low' ? 0.45 : 1.0;
+      const rCeil  = Math.sqrt(Math.max(0, alpha) * Math.max(0, ayVal));
+      const { xS, y } = buildOutcomeY(xVals, rCeil);
+
+      const W=260, H=163, ml=32, mr=10, mt=16, mb=30;
+      const pw = W-ml-mr, ph = H-mt-mb;
+      const rng = 2.6;
+      const px = v => ml + (v+rng)/(2*rng)*pw;
+      const py = v => mt + ph - (v+rng)/(2*rng)*ph;
+
+      // Zero-lines (light)
+      const zx = `<line x1="${ml}" y1="${py(0).toFixed(1)}" x2="${ml+pw}" y2="${py(0).toFixed(1)}" stroke="#e8e0d0" stroke-width="1"/>`;
+      const zy = `<line x1="${px(0).toFixed(1)}" y1="${mt}" x2="${px(0).toFixed(1)}" y2="${mt+ph}" stroke="#e8e0d0" stroke-width="1"/>`;
+
+      // Axes
+      const ax = `<line x1="${ml}" y1="${mt+ph}" x2="${ml+pw}" y2="${mt+ph}" stroke="#c8bfaf" stroke-width="1"/>`;
+      const ay = `<line x1="${ml}" y1="${mt}" x2="${ml}" y2="${mt+ph}" stroke="#c8bfaf" stroke-width="1"/>`;
+
+      // Regression line (y_std = rCeil * x_std)
+      const rx1=px(-rng), ry1=py(rCeil*-rng), rx2=px(rng), ry2=py(rCeil*rng);
+      const reg = `<line x1="${rx1.toFixed(1)}" y1="${Math.max(mt,Math.min(mt+ph,ry1)).toFixed(1)}" x2="${rx2.toFixed(1)}" y2="${Math.max(mt,Math.min(mt+ph,ry2)).toFixed(1)}" stroke="#b87fd4" stroke-width="1.8" stroke-dasharray="4,3"/>`;
+
+      // Dots
+      const dots = xS.map((x,i) => {
+        const cx = Math.max(ml, Math.min(ml+pw, px(x)));
+        const cy = Math.max(mt, Math.min(mt+ph, py(y[i])));
+        return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.2" fill="#4eaaec" fill-opacity="0.5" stroke="#2a7ab5" stroke-width="0.8"/>`;
+      }).join('');
+
+      // r annotation with background rect to prevent overlap with dots
+      const rRect = `<rect x="${ml+pw-65}" y="${mt+1}" width="69" height="16" rx="2" fill="white" fill-opacity="0.85"/>`;
+      const rAnn  = `<text x="${ml+pw-2}" y="${mt+13}" text-anchor="end" font-family="Fira Code,monospace" font-size="10.5" fill="#b87fd4" font-weight="600">r = ${fmt2(rCeil)}</text>`;
+
+      // Axis labels — two lines each: name + (α = ##)
+      const cy = mt + ph / 2;
+      const xLab = `
+        <text x="${ml+pw/2}" y="${H-18}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#79705f">Scale score</text>
+        <text x="${ml+pw/2}" y="${H-7}"  text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#79705f">(\u03b1 = ${fmt2(alpha)})</text>`;
+      // Y-axis: two separate rotated labels — second at larger x (one column closer to plot)
+      const yLab = `
+        <text x="9"  y="${cy}" text-anchor="middle" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#79705f" transform="rotate(-90,9,${cy})">Outcome</text>
+        <text x="21" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#79705f" transform="rotate(-90,21,${cy})">(\u03b1 = ${fmt2(ayVal)})</text>`;
+
+      // Subtitle inside SVG: plain text, no subscript characters needed
+      const ayDesc = yMode === 'same'
+        ? `outcome \u03b1 = ${fmt2(ayVal)} (= scale \u03b1) \u2192 ceiling = ${fmt2(rCeil)}`
+        : yMode === 'low'
+        ? `outcome \u03b1 = .45 \u2192 ceiling = ${fmt2(rCeil)}`
+        : `perfectly reliable outcome \u2192 ceiling = ${fmt2(rCeil)}`;
+      const sub = `<text x="${ml+pw/2}" y="${mt-3}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#79705f">${ayDesc}</text>`;
+
+      return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;">${zx}${zy}${ax}${ay}${reg}${dots}${rRect}${rAnn}${xLab}${yLab}${sub}</svg>`;
+    }
+
+    function setYMode(btn) {
+      S.yMode = btn.dataset.mode;
+      S.changed = 'validity';
+      document.querySelectorAll('.ymode-btn').forEach(b => b.classList.toggle('on', b === btn));
+      render();
+    }
+
+    // === VARIANCE CIRCLE SVG ===
+    function buildVarianceCircleSVG(alpha, maxVal) {
+      const cx = 62, cy = 68, r = 52;
+      function pol(deg) {
+        const rad = (deg - 90) * Math.PI / 180;
+        return { x: +(cx + r * Math.cos(rad)).toFixed(2), y: +(cy + r * Math.sin(rad)).toFixed(2) };
+      }
+      let segs = '';
+      if (alpha >= 0.999) {
+        segs = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e8a030"/>`;
+      } else if (alpha <= 0.001) {
+        segs = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e4ddd0"/>`;
+      } else {
+        const a  = alpha * 360;
+        const ts = pol(0), te = pol(a), ee = pol(360);
+        const tsLg = a > 180 ? 1 : 0;
+        const esLg = (360 - a) > 180 ? 1 : 0;
+        segs = `<path d="M${cx},${cy} L${ts.x},${ts.y} A${r},${r} 0 ${tsLg} 1 ${te.x},${te.y} Z" fill="#e8a030"/>
+        <path d="M${cx},${cy} L${te.x},${te.y} A${r},${r} 0 ${esLg} 1 ${ee.x},${ee.y} Z" fill="#e4ddd0"/>`;
+      }
+      const lx = 130;
+      return `<svg viewBox="0 0 295 197" width="100%" style="display:block;max-width:295px;">
+        ${segs}
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#c8bfaf" stroke-width="1.5"/>
+        <text x="${cx}" y="${cy + r + 13}" text-anchor="middle" font-family="DM Sans,sans-serif"
+          font-size="10" fill="#79705f" letter-spacing="0.08em">SCALE VARIANCE</text>
+        <rect x="${lx}" y="20" width="12" height="12" rx="2.5" fill="#e8a030"/>
+        <text x="${lx+17}" y="30" font-family="DM Sans,sans-serif" font-size="11.5" font-weight="600" fill="#1c1811">True score</text>
+        <text x="${lx+17}" y="44" font-family="Fira Code,monospace" font-size="10" fill="#79705f">α = ${fmt2(alpha)}</text>
+        <rect x="${lx}" y="58" width="12" height="12" rx="2.5" fill="#e4ddd0" stroke="#c8bfaf" stroke-width="1"/>
+        <text x="${lx+17}" y="68" font-family="DM Sans,sans-serif" font-size="11.5" font-weight="600" fill="#1c1811">Error</text>
+        <text x="${lx+17}" y="82" font-family="Fira Code,monospace" font-size="10" fill="#79705f">1−α = ${fmt2(1 - alpha)}</text>
+        <line x1="8" y1="149" x2="287" y2="149" stroke="#dbd3c3" stroke-width="1"/>
+        <text x="8" y="163" font-family="DM Sans,sans-serif" font-size="10.5" fill="#79705f">Only true score can correlate with external variables</text>
+        <text x="8" y="176" font-family="DM Sans,sans-serif" font-size="10.5" fill="#79705f">(noise is random; any correlations are driven</text>
+        <text x="8" y="189" font-family="DM Sans,sans-serif" font-size="10.5" fill="#79705f">by true score variability) → max r = √α = <tspan font-family="Fira Code,monospace" fill="#b87fd4" font-weight="600">${fmt2(maxVal)}</tspan></text>
+      </svg>`;
+    }
+
+    // === CODE BUILDER ===
+    function buildCode(alpha, rHalf, rSB, maxVal) {
+      const h1cols = SPLIT.map((h,j) => h===1 ? j+1 : -1).filter(j => j>0).join(', ');
+      const h2cols = SPLIT.map((h,j) => h===2 ? j+1 : -1).filter(j => j>0).join(', ');
+      const cl = (cls, html) => `<code class="cl${html ? ' '+cls : ''}">${html}</code>`;
+      const sf = s => `<span class="sf">${s}</span>`;
+      const sv = s => `<span class="sv">${s}</span>`;
+      const sn = s => `<span class="sn">${s}</span>`;
+      const sc = s => `<span class="sc">${s}</span>`;
+      return [
+        cl('cl-setup',    `${sf('library')}(${sv('psych')})`),
+        cl('cl-setup',    `${sf('library')}(${sv('dplyr')})`),
+        cl('cl-setup',    ''),
+        cl('cl-alpha',    sc(`# ── Cronbach's alpha  (k = ${S.k}, avg r = ${S.rBar.toFixed(2)}) ──`)),
+        cl('cl-alpha',    `${sv('alpha_result')} <- ${sf('alpha')}(${sv('scale_items')})`),
+        cl('cl-alpha',    `${sv('alpha_result')}$total$raw_alpha  ${sc(`# \u03b1 = ${fmt2(alpha)}`)}`),
+        cl('cl-alpha',    ''),
+        cl('cl-splithalf', sc('# ── Split-half reliability ──────────────────────')),
+        cl('cl-splithalf', `${sv('half1_avg')} <- ${sf('rowMeans')}(${sv('scale_items')}[, ${sf('c')}(${h1cols})])`),
+        cl('cl-splithalf', `${sv('half2_avg')} <- ${sf('rowMeans')}(${sv('scale_items')}[, ${sf('c')}(${h2cols})])`),
+        cl('cl-splithalf', `${sv('r_half')}    <- ${sf('cor')}(${sv('half1_avg')}, ${sv('half2_avg')})  ${sc(`# r = ${fmt2(rHalf)}`)}`),
+        cl('cl-splithalf', ''),
+        cl('cl-sb',       sc('# ── Spearman-Brown correction ────────────────────')),
+        cl('cl-sb',       `${sv('r_sb')} <- ${sn('2')} * ${sv('r_half')} / (${sn('1')} + ${sv('r_half')})  ${sc(`# r = ${fmt2(rSB)}`)}`),
+        cl('cl-sb',       ''),
+        cl('cl-validity', sc('# ── Validity ceiling ─────────────────────────────')),
+        cl('cl-validity', `${sf('sqrt')}(${sv('alpha_result')}$total$raw_alpha)  ${sc(`# max r \u2264 ${fmt2(maxVal)}`)}`)
+      ].join('\n');
+    }
+
+    function renderCode(alpha, rHalf, rSB, maxVal) {
+      document.getElementById('code-scroll').innerHTML = buildCode(alpha, rHalf, rSB, maxVal);
+    }
+
+    // === ANNOTATION ===
+    function getAnn(alpha, rHalf, rSB, maxVal) {
+      const lbl = alphaLabel(alpha);
+      if (S.changed === 'welcome') return {cls: 'ann-welcome', html:
+        `<strong>How this works.</strong><br><br>
+        The <strong>left panel</strong> controls your scale — drag the sliders to set the number of items and their
+        average inter-item correlation. Cronbach's &alpha; updates live.<br><br>
+        The <strong>middle panel</strong> shows three things: items color-coded into two random halves;
+        simulated scores for ${N_P} participants (the colored averages are what actually get correlated in
+        split-half reliability); and how the raw split-half r gets Spearman-Brown corrected to approximate &alpha;.
+        At the bottom, two bars show how reliability places a hard ceiling on validity.<br><br>
+        Try the <strong>Spearman-Brown target</strong> buttons to see how many items you'd need to reach
+        &alpha;&nbsp;=&nbsp;.70, .80, or .90. Hit <strong>Reshuffle split</strong> to see how the same &alpha;
+        emerges from different random splits.`};
+      if (S.changed === 'k') return {cls: 'ann-alpha', html:
+        `You now have <strong>${S.k} items</strong>. With an average inter-item r of ${S.rBar.toFixed(2)},
+        that gives &alpha;&nbsp;=&nbsp;<strong>${fmt2(alpha)}</strong> (${lbl.toLowerCase()}).
+        Adding items gives each participant's score more chances to average out random error —
+        the signal accumulates while the noise cancels. This is the core intuition behind Spearman-Brown.`};
+      if (S.changed === 'r') return {cls: 'ann-alpha', html:
+        `Average inter-item r&nbsp;=&nbsp;<strong>${S.rBar.toFixed(2)}</strong>. Items that share more
+        variance with each other are measuring the same construct more consistently, which is what
+        reliability captures. With ${S.k} items at this average correlation,
+        &alpha;&nbsp;=&nbsp;<strong>${fmt2(alpha)}</strong> (${lbl.toLowerCase()}).`};
+      if (S.changed === 'target') {
+        if (S.target === null) return {cls: 'ann-sb', html: `Select a target &alpha;<sub>t</sub> to see the Spearman-Brown projection.`};
+        const need = sbItemsNeeded(alpha, S.target, S.k);
+        return {cls: 'ann-sb', html: (need === S.k)
+          ? `Your current &alpha;&nbsp;=&nbsp;${fmt2(alpha)} already equals the target — no change needed.`
+          : need > S.k
+          ? `To reach &alpha;<sub>t</sub>&nbsp;=&nbsp;${S.target.toFixed(2)} while keeping the same average inter-item r,
+            the Spearman-Brown formula says you need <strong>${need} items</strong> total — ${need - S.k} more than your current ${S.k}.
+            The formula assumes added items are parallel to the existing ones (same quality, same average correlation).`
+          : `Your current reliability is already above &alpha;<sub>t</sub>&nbsp;=&nbsp;${S.target.toFixed(2)}, so you actually have more items than you need.
+            The Spearman-Brown formula says <strong>${need} items</strong> would be enough to reach that target;
+            you could remove ${S.k - need} items and still hit a target alpha of &alpha;<sub>t</sub>&nbsp;=&nbsp;${S.target.toFixed(2)}.`};
+      }
+      if (S.changed === 'reshuffle') return {cls: 'ann-splithalf', html:
+        `This split gives r_half&nbsp;=&nbsp;<strong>${fmt2(rHalf)}</strong>, which Spearman-Brown corrects to
+        r_sb&nbsp;=&nbsp;<strong>${fmt2(rSB)}</strong> &mdash; close to &alpha;&nbsp;=&nbsp;<strong>${fmt2(alpha)}</strong>.
+        Different splits give different raw r values because each split is a different random sample of the item space.
+        After correction they all land near &alpha;, which is why we correct: the split is arbitrary, but &alpha; is not.`};
+      return {cls: 'ann-validity', html:
+        `With &alpha;&nbsp;=&nbsp;${fmt2(alpha)}, the maximum correlation this scale can have with
+        <em>any</em> external variable is &radic;${fmt2(alpha)}&nbsp;&asymp;&nbsp;<strong>${fmt2(maxVal)}</strong>.
+        This is a mathematical ceiling, not a practical one — no amount of careful measurement
+        can push the observed r above it as long as the scale stays this unreliable.`};
+    }
+
+    // === HANDLERS ===
+    function setK(el) {
+      S.k = +el.value;
+      document.getElementById('val-k').textContent = S.k;
+      DATA  = generateData(S.k, S.rBar);
+      SPLIT = makeSplit(S.k);
+      S.changed = 'k';
+      render();
+    }
+    function setR(el) {
+      S.rBar = +el.value;
+      document.getElementById('val-r').textContent = S.rBar.toFixed(2);
+      DATA  = generateData(S.k, S.rBar);
+      S.changed = 'r';
+      render();
+    }
+    function setTarget(btn) {
+      const t = +btn.dataset.target;
+      S.target = (S.target === t) ? null : t;
+      document.querySelectorAll('.mbtn').forEach(b =>
+        b.classList.toggle('on', +b.dataset.target === S.target));
+      S.changed = 'target';
+      render();
+    }
+    function reshuffleSplit() {
+      SPLIT = makeSplit(S.k);
+      S.changed = 'reshuffle';
+      render();
+    }
+
+    // === RESET ===
+    function resetAll() {
+      S = Object.assign({}, DEFAULTS);
+      S.changed = 'welcome';
+      document.getElementById('slider-k').value = S.k;
+      document.getElementById('slider-r').value = S.rBar;
+      document.getElementById('val-k').textContent = S.k;
+      document.getElementById('val-r').textContent = S.rBar.toFixed(2);
+      document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('on'));
+      document.querySelectorAll('.ymode-btn').forEach((b,i) => b.classList.toggle('on', i === 0));
+      DATA  = generateData(S.k, S.rBar);
+      SPLIT = makeSplit(S.k);
+      render();
+    }
+
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      if (tip.style.display === 'block') {
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+      }
+    });
+
+    render();
+  </script>
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
+</body>
+</html>
