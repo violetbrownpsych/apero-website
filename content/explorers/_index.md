@@ -38,16 +38,21 @@ Good luck, have fun, and remember: WE ARE ALL MATH PEOPLE.
    <a href="/explorers/file-path-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">File Path Explorer</div>
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Practice navigating file paths to  build intuition about working directories and reading data into R</div>
-  </a>   
+  </a>  
+  
+  <a href="/explorers/measurement-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Reliability & Validity Explorer</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Explore reliability (including the Spearman-Brown formula) and its relationship with validity </div>
+  </a> 
 
   <a href="/explorers/distribution-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Distribution Explorer</div>
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Adjust the parameters of probability distributions to visualize area under the curve and learn about the p*() family of functions</div>
   </a>
 
-  <a href="/explorers/measurement-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
-    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Reliability & Validity Explorer</div>
-    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Explore how reliability and validity relate to each other and to the quality of measurement</div>
+  <a href="/explorers/sampling-distribution-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Sampling Distribution Explorer</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Simulate drawing samples from a population to build intuition about sampling distributions, the Central Limit Theorem, and the t-distribution</div>
   </a>
 
 </div>

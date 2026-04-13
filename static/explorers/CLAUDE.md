@@ -7,6 +7,7 @@ Self-contained single-file browser tools for teaching statistics concepts. Each 
 - `indexing_explorer/index.html` — R indexing ($, [ , ], Boolean filter) — https://psych200-indexing-explorer.netlify.app/
 - `dplyr_explorer/index.html` — dplyr pipeline builder (filter, select, mutate/case_when, group_by+summarize, arrange, separate, unite)
 - `pivot_explorer/index.html` — pivot_longer / pivot_wider visualizer
+- `sampling_distribution_explorer/index.html` — CLT + t-distribution explorer (in progress)
 **Tools in progress / planned:**
 - `file_path_explorer/index.html` — working directory and read_csv path navigator
 
@@ -20,6 +21,62 @@ Self-contained single-file browser tools for teaching statistics concepts. Each 
 ---
 
 ## Planned tool designs
+
+### sampling_distribution_explorer
+
+**Pedagogical goal:** Bridge CLT to the t-distribution. The CLT assumes you know σ. You almost never do. That extra uncertainty is exactly what inflates the tails of the t-distribution — not wider spread of means, but a second layer of variability from estimating σ with s.
+
+**Phase 1 — CLT simulation (top of page)**
+- Controls: population shape (Normal / Right-skewed / Uniform / Bimodal), n slider
+- "Sample once" and "Sample 1000" buttons; no other controls
+- Left SVG: population distribution (static density curve once shape is chosen)
+- Right SVG: sampling distribution of x̄ building up as a histogram, with theoretical N(μ, σ²/n) overlay once enough samples accumulate
+- Annotation explains CLT: means go normal regardless of population shape, spread shrinks as n grows
+
+**Phase 2 — "But we never know σ" (scroll down, same page)**
+This phase reframes Phase 1: z uses the true σ (known); t uses s (estimated, varies).
+Three SVG panels side by side — all linked:
+1. **z-statistic panel**: distribution of (x̄ − μ) / (σ/√n), overlaid with N(0,1)
+2. **s panel**: distribution of sample s values, with a reference line at σ
+3. **t-statistic panel**: distribution of (x̄ − μ) / (s/√n), overlaid with both t(df) and N(0,1) for comparison
+
+**The causal chain — the whole point of the tool:**
+When you hit "Sample once," all three panels highlight the SAME sample simultaneously:
+- Panel 1: where that sample's x̄ (as a z-score) landed
+- Panel 2: where that sample's s landed (annotated: "s < σ" or "s > σ")
+- Panel 3: where the resulting t landed — and WHY it's further out than z when s was small
+
+Students should be able to trace: "s was small → divided by something too small → t landed further out than z" in one concrete example before accumulating 1000 draws.
+
+**What makes fat tails feel earned (not arbitrary):**
+s can't go below 0 but has no upper bound. When s is small, t gets inflated (more extreme). The asymmetry in the errors is visible in the s-distribution panel — it's right-skewed, especially at small n. As n grows, s stabilizes (histogram tightens around σ) and the t-distribution converges to normal. df = n−1 controls this; show df explicitly alongside n.
+
+**Layout:**
+- Phase 1: standard 3-column grid (controls 244px | two stacked SVGs | annotation)
+- Phase 2: full-width section with its own header, then three equal-width SVG panels, controls below, annotation below that. This is intentionally wider than 3-column to give the three panels room.
+- The two phases are separated by a full-width "But we never know σ" divider band.
+
+**Color tokens:**
+- `--c-pop`: population fill (warm amber)
+- `--c-samp`: sampling distribution of means (blue)
+- `--c-z`: z-statistic (cyan)
+- `--c-s`: sample s (orange/amber)
+- `--c-t`: t-statistic (purple)
+- `--c-hi`: highlight color for the linked single-draw (bright gold/yellow, used across all three panels simultaneously)
+
+**Build stages (this tool is larger than most — follow these carefully):**
+1. Write shell + head
+2. Edit: complete CSS (includes Phase 2 three-panel layout and highlight animation)
+3. Edit: complete body HTML (Phase 1 controls + SVGs, Phase 2 divider + three panels + controls)
+4. Edit: data/state + Phase 1 render functions + sampling logic
+5. Edit: Phase 2 render functions + linked highlight logic + annotations + init
+
+**Do not conflate these two things — students always do:**
+- The WIDTH of the sampling distribution (controlled by σ/√n — how much means vary)
+- The FAT TAILS of the t-distribution (controlled by how noisy s is — a second layer of uncertainty)
+These are different phenomena. The annotation system should call this out explicitly whenever the n slider is moved.
+
+---
 
 ### file_path_explorer
 Solves a very concrete spatial problem: students have no mental model of where they "are" in the file system. Show a realistic mock folder tree (e.g., Desktop / PSYC200 / data / penguins.csv) and let students click to "be in" different folders. The code panel shows what getwd() returns, and what read_csv() looks like from that location — relative path, ../relative path, and absolute path variants. The annotation explains why a path works or breaks.

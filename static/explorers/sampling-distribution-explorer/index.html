@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sampling Distribution Explorer</title>
+  <link rel="icon" href="sampling-distribution-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      --c-pop:   #e8a030;   /* population fill */
+      --c-samp:  #4eaaec;   /* sampling distribution of means */
+      --c-z:     #52c97e;   /* z-statistic */
+      --c-s:     #e8a030;   /* sample s */
+      --c-t:     #b87fd4;   /* t-statistic */
+      --c-hi:    #f6d860;   /* highlight: linked single draw */
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+
+    /* === LAYOUT — PHASE 1 === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 300px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Vertical stack (shape selector) */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === SLIDER === */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .slider-row input[type=range] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .slider-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      font-weight: 500;
+      min-width: 28px;
+      text-align: right;
+      color: var(--text);
+    }
+
+    /* === ACTION BUTTONS (Sample once / Sample 1000) === */
+    .sample-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .sample-btn-once {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--c-samp);
+      border-radius: 7px;
+      background: white;
+      color: var(--text);
+      font-size: 0.83rem;
+      font-weight: 600;
+      transition: all .12s;
+    }
+    .sample-btn-once:hover { background: var(--c-samp); color: white; }
+    .sample-btn-many {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--accent);
+      border-radius: 7px;
+      background: white;
+      color: var(--accent);
+      font-size: 0.83rem;
+      font-weight: 600;
+      transition: all .12s;
+    }
+    .sample-btn-many:hover { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === PHASE 1 SVG AREA === */
+    #main-panel { display: flex; flex-direction: column; gap: 10px; }
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .chart-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    svg.chart { width: 100%; display: block; }
+    .count-badge {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    /* === PHASE 1 ANNOTATION (right panel) === */
+    #ann-panel {
+      font-size: 0.84rem;
+      line-height: 1.65;
+      overflow-y: auto;
+      background: #fdf6f0;
+      border-color: var(--accent);
+    }
+    #ann-panel .ann-inner {
+      height: 100%;
+    }
+    #ann-panel code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .ann-hl-pop  { color: #9b6000; font-weight: 600; }
+    .ann-hl-samp { color: #1a6fa3; font-weight: 600; }
+    .ann-hl-z    { color: #1e8f56; font-weight: 600; }
+    .ann-hl-s    { color: #9b6000; font-weight: 600; }
+    .ann-hl-t    { color: #7c3faa; font-weight: 600; }
+    .ann-hl-hi   { color: #b07e00; font-weight: 600; }
+
+    /* x-bar: border-top sits just above the glyph; padding creates the gap */
+    .xbar { display: inline-block; border-top: 1.5px solid currentColor; line-height: 1; padding-top: 0.1em; margin-top: -0.1em; }
+
+    /* === PHASE 2 DIVIDER === */
+    #phase2-divider {
+      max-width: 1360px;
+      margin: 4px auto 14px;
+      padding: 0 11px;
+    }
+    .divider-band {
+      background: var(--text);
+      color: white;
+      border-radius: 10px;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .divider-band .divider-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .divider-band h2 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .divider-band p {
+      font-size: 0.83rem;
+      opacity: 0.75;
+      line-height: 1.5;
+    }
+
+    /* === PHASE 2 SECTION === */
+    #phase2-section {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 11px 15px;
+    }
+
+    /* Three-panel row */
+    .p2-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .p2-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    /* color-coded top border per panel */
+    .p2-panel-z { border-top: 3px solid var(--c-z); }
+    .p2-panel-s { border-top: 3px solid var(--c-s); }
+    .p2-panel-t { border-top: 3px solid var(--c-t); }
+
+    .p2-panel-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 2px;
+    }
+    .p2-panel-title-z { color: #1e8f56; }
+    .p2-panel-title-s { color: #9b6000; }
+    .p2-panel-title-t { color: #7c3faa; }
+
+    .p2-formula {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .p2-conv {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 7px;
+      min-height: 2.2rem;
+    }
+
+    /* Highlighted dot that appears on single draw */
+    .hi-dot {
+      r: 5;
+      fill: var(--c-hi);
+      stroke: #b07e00;
+      stroke-width: 1.5;
+      pointer-events: none;
+      transition: cx 0.2s, cy 0.2s;
+    }
+    .hi-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      fill: #b07e00;
+      font-weight: 600;
+    }
+
+    /* Phase 2 controls row */
+    .p2-controls {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .p2-ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .p2-ctrl-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .p2-ctrl-sub {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .p2-sample-btns {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    /* Phase 2 annotation */
+    #p2-ann {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.84rem;
+      line-height: 1.65;
+      min-height: 60px;
+    }
+    #p2-ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* Causal chain callout (shown on single draw) */
+    .causal-chain {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #fdf6f0;
+      border: 1.5px solid var(--accent);
+      border-radius: 7px;
+      font-size: 0.81rem;
+      flex-wrap: wrap;
+    }
+    .chain-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .chain-arrow {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .chain-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .chain-val-s   { background: #fdf0d8; color: #9b6000; }
+    .chain-val-z   { background: #e6f7ee; color: #1e8f56; }
+    .chain-val-t   { background: #f3eafa; color: #7c3faa; }
+    .chain-note    { font-size: 0.76rem; color: var(--muted); width: 100%; margin-top: 2px; }
+
+    /* === TOOLTIP === */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === PHASE 1 INTRO BAND === */
+    #phase1-intro {
+      max-width: 1360px;
+      margin: 0 auto 11px;
+      padding: 0 11px;
+    }
+    .intro-band {
+      background: #fdf4e5;
+      border: 1px solid #e8c880;
+      border-radius: 10px;
+      padding: 13px 22px;
+    }
+    .intro-band h2 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+    .intro-band p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* === SECTION ZONES === */
+    #phase2-zone {
+      background: #edeaf5;
+      padding-top: 8px;
+      padding-bottom: 20px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    @keyframes drop-in {
+      0%   { opacity: 0; transform: translateY(-6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .bar-new { animation: drop-in 0.25s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Sampling Distribution Explorer</h1>
+    <p>Watch the Central Limit Theorem in action, then dig into the t-distribution</p>
+    <span class="pill">sampling distribution</span>
+    <span class="pill">CLT</span>
+    <span class="pill">t-distribution</span>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PHASE 1: CLT SIMULATION
+  ════════════════════════════════════════════════════════════ -->
+  <div id="phase1-intro">
+    <div class="intro-band">
+      <h2>For now, let's assume we know σ: the population standard deviation</h2>
+      <p style="font-size:0.79rem;color:var(--muted);margin-top:5px;font-style:italic">That is, <strong>we'll assume our sample SD is a perfect estimator of the population SD</strong>, so the only source of variability is the sample mean itself. This is never actually the case, but let's pretend <span style="font-style:normal">&#128521;.</span></p>
+      <p style="margin-top:8px">Watch what happens to the distribution of sample means as you draw more samples. Does the shape of the resulting <strong>sampling distribution</strong> depend on the population shape? Peruse the Explorer to find out!</p>
+      <div style="margin-top:10px;padding:8px 12px;background:#ece8de;border-radius:6px;font-size:0.78rem;color:var(--muted);line-height:1.5">
+        <strong style="color:var(--text)">Notation reminder:</strong> Greek letters and uppercase N describe the <em>population</em>: μ (mu) = population mean, σ (sigma) = population standard deviation, N = population size. Roman letters and lowercase n describe the <em>sample</em>&thinsp;: x&#773; ("x-bar") = sample mean, s = sample SD, n = sample size.
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" id="phase1-grid">
+
+    <!-- LEFT: CONTROLS -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Controls</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <div class="cs">
+        <div class="ch">Population shape</div>
+        <div class="mode-stack" id="shape-btns">
+          <button class="mbtn on" data-shape="normal"    onclick="setShape(this)">Normal</button>
+          <button class="mbtn"    data-shape="skewed"    onclick="setShape(this)">Right-skewed</button>
+          <button class="mbtn"    data-shape="uniform"   onclick="setShape(this)">Uniform</button>
+          <button class="mbtn"    data-shape="bimodal"   onclick="setShape(this)">Bimodal</button>
+        </div>
+        <div class="sub" id="pop-params-label">μ = 0, σ = 1</div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs">
+        <div class="ch">Sample size <span style="font-weight:400;color:var(--muted)">n</span></div>
+        <div class="slider-row">
+          <input type="range" id="n-slider" min="2" max="100" value="10"
+                 oninput="setN(this)">
+          <span class="slider-val" id="n-val">10</span>
+        </div>
+        <div class="sub">Standard error (SD of the sampling distribution of means) = σ/√n = <span id="se-val">0.316</span></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs">
+        <div class="ch">Draw samples</div>
+        <div class="sample-btns">
+          <button class="sample-btn-once" onclick="sampleOnce()">Sample once</button>
+          <button class="sample-btn-once" onclick="sampleFive()">Sample 5</button>
+          <button class="sample-btn-many" onclick="sampleMany()">Sample 1,000</button>
+        </div>
+        <div class="sub" id="p1-count-label" style="margin-top:7px;text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: POPULATION + SAMPLING DISTRIBUTION -->
+    <div class="panel" id="main-panel">
+
+      <div class="chart-wrap">
+        <div class="chart-label" style="color:var(--muted)">
+          Population distribution
+          <span style="float:right;font-weight:400;text-transform:none;letter-spacing:0;font-size:0.73rem" id="pop-sigma-note"></span>
+        </div>
+        <svg class="chart" id="pop-svg" height="130"></svg>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="chart-wrap">
+        <div class="chart-label" style="color:#1a6fa3">
+          Sampling distribution of x&#773;
+          <span style="float:right;font-weight:400;text-transform:none;letter-spacing:0;font-size:0.73rem;color:var(--muted)" id="p1-n-note"></span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <svg class="chart" id="samp-svg" height="170" style="flex:1;min-width:0"></svg>
+          <div id="samp-stats" style="min-width:115px;font-family:'Fira Code',monospace;font-size:0.78rem;line-height:1.9;color:#1a6fa3;margin-top:18px"></div>
+        </div>
+        <div class="count-badge" id="p1-count"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: ANNOTATION / EXPLANATION -->
+    <div class="panel" id="ann-panel">
+      <div class="panel-label">How this Explorer works</div>
+      <div id="p1-ann"></div>
+    </div>
+
+  </div>
+
+  <div id="phase2-zone">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       DIVIDER
+  ════════════════════════════════════════════════════════════ -->
+  <div id="phase2-divider">
+    <div class="divider-band">
+      <div>
+        <h2>BUT. We never actually know σ.</h2>
+        <p>The CLT above assumed you know the true population SD. In real life, you estimate it from your sample. <strong>That extra source of uncertainty is exactly what makes the t-distribution fatter in the tails.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PHASE 2: z vs t — THE SECOND LAYER
+  ════════════════════════════════════════════════════════════ -->
+  <div id="phase2-section">
+
+    <!-- Three linked SVG panels -->
+    <div class="p2-panels">
+
+      <!-- Panel 1: z-statistic distribution -->
+      <div class="p2-panel p2-panel-z">
+        <div class="p2-panel-title p2-panel-title-z">z-statistic</div>
+        <div class="p2-formula">(x̄ − μ) / (σ / √n)</div>
+        <div class="p2-conv">The gold line (average of all drawn z-statistics) converges on 0 as draws increase.</div>
+        <svg class="chart" id="z-svg" height="220"></svg>
+        <div style="height:16px"></div>
+      </div>
+
+      <!-- Panel 2: sample s distribution -->
+      <div class="p2-panel p2-panel-s">
+        <div class="p2-panel-title p2-panel-title-s">Sample SD (s)</div>
+        <div class="p2-formula">distribution of sample SDs</div>
+        <div class="p2-conv" id="p2-s-conv">gold line → σ = 1.00 as draws increase</div>
+        <svg class="chart" id="s-svg" height="220"></svg>
+        <div style="height:16px"></div>
+      </div>
+
+      <!-- Panel 3: t-statistic distribution -->
+      <div class="p2-panel p2-panel-t">
+        <div class="p2-panel-title p2-panel-title-t">t-statistic</div>
+        <div class="p2-formula">(x̄ − μ) / (s / √n)</div>
+        <div class="p2-conv">The gold line (average of all drawn t-statistics) converges on 0 as draws increase.</div>
+        <svg class="chart" id="t-svg" height="220"></svg>
+        <div style="height:16px"></div>
+      </div>
+
+    </div>
+
+    <!-- Phase 2 controls -->
+    <div class="p2-controls">
+      <div class="p2-ctrl-group">
+        <div class="p2-ctrl-label">Sample size <span style="font-weight:400;color:var(--muted)">n</span></div>
+        <div class="slider-row" style="width:200px">
+          <input type="range" id="p2-n-slider" min="2" max="100" value="10"
+                 oninput="setP2N(this)">
+          <span class="slider-val" id="p2-n-val">10</span>
+        </div>
+      </div>
+      <div class="p2-ctrl-group">
+        <div class="p2-ctrl-label">df (degrees of freedom) = n − 1 = <span id="p2-df-val" style="font-family:'Fira Code',monospace;font-size:1rem;color:var(--c-t)">9</span></div>
+      </div>
+      <div class="p2-sample-btns">
+        <button class="sample-btn-once" onclick="p2SampleOnce()" style="width:auto;padding:8px 16px">Sample once</button>
+        <button class="sample-btn-once" onclick="p2SampleFive()" style="width:auto;padding:8px 16px">Sample 5</button>
+        <button class="sample-btn-many" onclick="p2SampleMany()" style="width:auto;padding:8px 16px">Sample 1,000</button>
+        <button class="copy-btn" onclick="resetP2()" style="align-self:center;margin-left:4px">Reset</button>
+      </div>
+    </div>
+
+    <!-- Phase 2 annotation -->
+    <div id="p2-ann">
+      <!-- populated by JS -->
+    </div>
+
+  </div>
+
+  </div><!-- /#phase2-zone -->
+
+  <div id="code-tip"></div>
+
+  <script>
+    // ================================================================
+    // UTILITIES
+    // ================================================================
+
+    function randn() {
+      let u, v;
+      do { u = Math.random(); } while (u === 0);
+      do { v = Math.random(); } while (v === 0);
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function normalPdf(x, mu = 0, sigma = 1) {
+      const z = (x - mu) / sigma;
+      return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+    }
+
+    function tPdf(x, df) {
+      // Student's t PDF
+      const a = Math.exp(logGamma((df + 1) / 2) - logGamma(df / 2));
+      return a / (Math.sqrt(df * Math.PI) * Math.pow(1 + x * x / df, (df + 1) / 2));
+    }
+
+    function logGamma(z) {
+      // Lanczos approximation
+      const g = 7;
+      const c = [0.99999999999980993,676.5203681218851,-1259.1392167224028,
+                 771.32342877765313,-176.61502916214059,12.507343278686905,
+                 -0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+      if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - logGamma(1 - z);
+      z -= 1;
+      let x = c[0];
+      for (let i = 1; i < g + 2; i++) x += c[i] / (z + i);
+      const t = z + g + 0.5;
+      return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+    }
+
+    function niceTicks(lo, hi, count = 5) {
+      const span = hi - lo;
+      const rough = span / count;
+      const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+      const frac = rough / mag;
+      const step = frac < 1.5 ? mag : frac < 3 ? 2 * mag : frac < 7 ? 5 * mag : 10 * mag;
+      const start = Math.ceil(lo / step) * step;
+      const ticks = [];
+      for (let t = start; t <= hi + 1e-9; t = +(t + step).toFixed(10)) ticks.push(+t.toFixed(8));
+      return ticks;
+    }
+
+    const MAR = { t: 10, r: 12, b: 28, l: 38 };
+    function sc(d0, d1, r0, r1) { return x => r0 + (x - d0) / (d1 - d0) * (r1 - r0); }
+    function plotArea(el) {
+      const W = el.clientWidth || 400, H = +el.getAttribute('height');
+      return { pw: W - MAR.l - MAR.r, ph: H - MAR.t - MAR.b, L: MAR.l, T: MAR.t };
+    }
+
+    function axisHtml(ticks, scX, T, ph, fmtFn) {
+      let h = `<line x1="${MAR.l}" y1="${T+ph}" x2="${MAR.l + (scX(ticks[ticks.length-1]) - scX(ticks[0]) + (scX(ticks[1])-scX(ticks[0])))}" y2="${T+ph}" stroke="var(--border)" stroke-width="1.5"/>`;
+      // simpler: just draw from L to L+pw via the scaler
+      ticks.forEach(t => {
+        const px = scX(t).toFixed(1);
+        h += `<line x1="${px}" y1="${T+ph}" x2="${px}" y2="${T+ph+4}" stroke="var(--muted)" stroke-width="1"/>`;
+        h += `<text x="${px}" y="${T+ph+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${fmtFn(t)}</text>`;
+      });
+      return h;
+    }
+
+    // ================================================================
+    // POPULATION DEFINITIONS
+    // ================================================================
+
+    const POPS = {
+      normal: {
+        label: 'Normal', mu: 0, sigma: 1, params: 'μ = 0, σ = 1', xRange: [-4, 4],
+        sample: () => randn(),
+        pdf: x => normalPdf(x, 0, 1)
+      },
+      skewed: {
+        label: 'Right-skewed', mu: 0, sigma: 1, params: 'μ = 0, σ = 1', xRange: [-2, 6],
+        // Gamma(4,1) shifted to mean=0, SD=1: Y = (X−4)/2 where X~Gamma(4,1)
+        // Skewness = 1 (vs. 2 for exponential) — converges faster under CLT
+        sample: () => (-Math.log(Math.random()) - Math.log(Math.random()) - Math.log(Math.random()) - Math.log(Math.random()) - 4) / 2,
+        pdf: x => { const u = 2*x + 4; return u > 0 ? (u**3 * Math.exp(-u)) / 3 : 0; }
+      },
+      uniform: {
+        label: 'Uniform', mu: 0, sigma: 1, params: 'μ = 0, σ = 1',
+        xRange: [-2, 2],
+        sample: () => (Math.random() - 0.5) * 2 * Math.sqrt(3),
+        pdf: x => Math.abs(x) <= Math.sqrt(3) ? 1 / (2 * Math.sqrt(3)) : 0
+      },
+      bimodal: {
+        label: 'Bimodal', mu: 0, sigma: Math.sqrt(2.5),
+        params: 'μ = 0, σ ≈ 1.58', xRange: [-4.5, 4.5],
+        sample: () => (Math.random() < 0.5 ? -1.5 : 1.5) + randn() * 0.5,
+        pdf: x => 0.5 * normalPdf(x, -1.5, 0.5) + 0.5 * normalPdf(x, 1.5, 0.5)
+      }
+    };
+
+    // ================================================================
+    // PHASE 1 STATE
+    // ================================================================
+
+    const DEFAULTS = { shape: 'normal', n: 10, means: [], lastMean: null, changed: 'welcome' };
+    let S = Object.assign({}, DEFAULTS);
+
+    // ================================================================
+    // PHASE 1 SAMPLING
+    // ================================================================
+
+    function drawOneMean() {
+      const pop = POPS[S.shape];
+      let sum = 0;
+      for (let i = 0; i < S.n; i++) sum += pop.sample();
+      return sum / S.n;
+    }
+
+    function sampleOnce() {
+      S.lastMean = drawOneMean();
+      S.means.push(S.lastMean);
+      S.changed = 'sample1';
+      renderP1();
+      updateP1Ann();
+    }
+
+    function sampleFive() {
+      for (let i = 0; i < 5; i++) {
+        S.lastMean = drawOneMean();
+        S.means.push(S.lastMean);
+      }
+      S.changed = 'sampleFew';
+      renderP1();
+      updateP1Ann();
+    }
+
+    function sampleMany() {
+      for (let i = 0; i < 1000; i++) S.means.push(drawOneMean());
+      S.lastMean = S.means[S.means.length - 1];
+      S.changed = 'sample1000';
+      renderP1();
+      updateP1Ann();
+    }
+
+    // ================================================================
+    // PHASE 1 HANDLERS
+    // ================================================================
+
+    function setShape(btn) {
+      document.querySelectorAll('#shape-btns .mbtn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      S.shape = btn.dataset.shape;
+      S.means = []; S.lastMean = null;
+      S.changed = 'shape';
+      syncPopLabels();
+      renderP1();
+      updateP1Ann();
+    }
+
+    function setN(inp) {
+      S.n = +inp.value;
+      document.getElementById('n-val').textContent = S.n;
+      S.means = []; S.lastMean = null;
+      S.changed = 'n';
+      syncPopLabels();
+      renderP1();
+      updateP1Ann();
+    }
+
+    function syncPopLabels() {
+      const pop = POPS[S.shape];
+      document.getElementById('pop-params-label').textContent = pop.params;
+      document.getElementById('se-val').textContent = (pop.sigma / Math.sqrt(S.n)).toFixed(3);
+      document.getElementById('p2-s-conv').textContent = `The gold line (average of all drawn s values) converges on σ = ${pop.sigma.toFixed(2)} as draws increase.`;
+    }
+
+    // ================================================================
+    // PHASE 1 RENDER
+    // ================================================================
+
+    function renderP1() {
+      renderPopSvg();
+      renderSampSvg();
+      document.getElementById('p1-n-note').textContent = `n = ${S.n}`;
+    }
+
+    function renderPopSvg() {
+      const svg = document.getElementById('pop-svg');
+      const pop = POPS[S.shape];
+      const { pw, ph, L, T } = plotArea(svg);
+      const [xMin, xMax] = pop.xRange;
+      const scX = sc(xMin, xMax, L, L + pw);
+
+      const pts = [];
+      for (let i = 0; i <= 300; i++) {
+        const x = xMin + i / 300 * (xMax - xMin);
+        pts.push([x, pop.pdf(x)]);
+      }
+      const yMax = Math.max(...pts.map(p => p[1])) * 1.15;
+      const scY = sc(0, yMax, T + ph, T);
+      const ticks = niceTicks(xMin, xMax, 5);
+
+      let h = `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--border)" stroke-width="1.5"/>`;
+      ticks.forEach(t => {
+        const px = scX(t).toFixed(1);
+        h += `<line x1="${px}" y1="${T+ph}" x2="${px}" y2="${T+ph+4}" stroke="var(--muted)" stroke-width="1"/>`;
+        h += `<text x="${px}" y="${T+ph+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${t}</text>`;
+      });
+
+      // σ reference lines at μ ± σ
+      [pop.mu - pop.sigma, pop.mu + pop.sigma].forEach(x => {
+        if (x < xMin || x > xMax) return;
+        const px = scX(x).toFixed(1);
+        h += `<line x1="${px}" y1="${T}" x2="${px}" y2="${T+ph}" stroke="var(--c-pop)" stroke-width="1" stroke-dasharray="3,2" opacity="0.45"/>`;
+      });
+
+      const filled = [[xMin, 0], ...pts, [xMax, 0]];
+      h += `<path d="${filled.map(([x,y],i) => `${i===0?'M':'L'}${scX(x).toFixed(1)},${scY(y).toFixed(1)}`).join(' ')} Z" fill="var(--c-pop)" fill-opacity="0.18"/>`;
+      h += `<path d="${pts.map(([x,y],i) => `${i===0?'M':'L'}${scX(x).toFixed(1)},${scY(y).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--c-pop)" stroke-width="2.5"/>`;
+
+      svg.innerHTML = h;
+    }
+
+    function renderSampSvg() {
+      const svg = document.getElementById('samp-svg');
+      const pop = POPS[S.shape];
+      const { pw, ph, L, T } = plotArea(svg);
+      const mu = pop.mu, sigma = pop.sigma, n = S.n;
+      const se = sigma / Math.sqrt(n);
+      const xMin = mu - 4 * sigma, xMax = mu + 4 * sigma;
+      const nBins = 50, bw = (xMax - xMin) / nBins;
+
+      const counts = new Array(nBins).fill(0);
+      S.means.forEach(m => {
+        const i = Math.max(0, Math.min(nBins - 1, Math.floor((m - xMin) / bw)));
+        counts[i]++;
+      });
+      const N = S.means.length;
+
+      // Theoretical normal peak in count-space (to set y scale)
+      const normPeak = N >= 10 ? normalPdf(mu, mu, se) * N * bw : 0;
+      const yMax = Math.max(...counts, normPeak) * 1.1 || 1;
+      const scX = sc(xMin, xMax, L, L + pw);
+      const scY = sc(0, yMax, T + ph, T);
+      const ticks = niceTicks(xMin, xMax, 6);
+
+      let h = `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--border)" stroke-width="1.5"/>`;
+      ticks.forEach(t => {
+        const px = scX(t).toFixed(1);
+        h += `<line x1="${px}" y1="${T+ph}" x2="${px}" y2="${T+ph+4}" stroke="var(--muted)" stroke-width="1"/>`;
+        h += `<text x="${px}" y="${T+ph+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${t.toFixed(1)}</text>`;
+      });
+
+      for (let i = 0; i < nBins; i++) {
+        if (!counts[i]) continue;
+        const x0 = scX(xMin + i * bw).toFixed(1), x1 = scX(xMin + (i + 1) * bw).toFixed(1);
+        const y0 = scY(counts[i]).toFixed(1), yb = scY(0).toFixed(1);
+        h += `<rect x="${x0}" y="${y0}" width="${Math.max(0, +x1 - +x0).toFixed(1)}" height="${(+yb - +y0).toFixed(1)}" fill="var(--c-samp)" fill-opacity="0.75"/>`;
+      }
+
+      if (N >= 10) {
+        const normPts = [];
+        for (let i = 0; i <= 300; i++) {
+          const x = xMin + i / 300 * (xMax - xMin);
+          normPts.push([x, normalPdf(x, mu, se) * N * bw]);
+        }
+        h += `<path d="${normPts.map(([x,y],i) => `${i===0?'M':'L'}${scX(x).toFixed(1)},${scY(y).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--c-samp)" stroke-width="2" stroke-dasharray="6,3"/>`;
+      }
+
+      svg.innerHTML = h;
+      document.getElementById('p1-count').textContent =
+        N === 0 ? '' : `${N.toLocaleString()} sample mean${N === 1 ? '' : 's'}`;
+
+      // Stats panel to the right of the SVG
+      const statsDiv = document.getElementById('samp-stats');
+      if (N === 0) {
+        statsDiv.innerHTML = '';
+      } else {
+        const pop2 = POPS[S.shape];
+        const se = (pop2.sigma / Math.sqrt(S.n)).toFixed(3);
+        const obsMean = S.means.reduce((a, b) => a + b, 0) / N;
+        const obsSd = N >= 2
+          ? Math.sqrt(S.means.reduce((a, b) => a + (b - obsMean) ** 2, 0) / (N - 1))
+          : null;
+        statsDiv.innerHTML =
+          `<div style="color:var(--muted);font-size:0.62rem;font-family:'DM Sans',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px">observed</div>` +
+          `<div>mean = <strong>${obsMean.toFixed(3)}</strong></div>` +
+          `<div>sd&#x202F;&#x202F;&#x202F;&#x202F;= <strong>${obsSd !== null ? obsSd.toFixed(3) : '—'}</strong></div>` +
+          `<div style="color:var(--muted);font-size:0.62rem;font-family:'DM Sans',sans-serif;margin-top:5px">sd ≈ SE = σ/√n = ${se}</div>`;
+      }
+    }
+
+    // ================================================================
+    // PHASE 1 ANNOTATION
+    // ================================================================
+
+    function updateP1Ann() {
+      const pop = POPS[S.shape];
+      const se = (pop.sigma / Math.sqrt(S.n)).toFixed(3);
+      const N = S.means.length;
+      let html = '';
+
+      if (S.changed === 'welcome') {
+        html = `The top chart shows the <span class="ann-hl-pop">population</span>—the full distribution you're drawing samples from.
+          The bottom chart shows the <span class="ann-hl-samp">sampling distribution of x&#773;</span>, which builds up as you draw samples.<br><br>
+          Choose a population shape and a sample size <em>n</em>, then press <strong>Sample once</strong> to add one mean at a time,
+          or <strong>Sample 1,000</strong> to fill it in fast. <em>n</em> is the number of observations in each individual sample—not the number of samples you draw. Each press of "Sample once" draws one sample of size <em>n</em>, computes its mean, and adds that single dot to the histogram.<br><br>
+          Try different shapes...you'll soon discover that the sampling distribution goes normal regardless!`;
+      } else if (S.changed === 'shape') {
+        html = `You switched to the <span class="ann-hl-pop">${pop.label}</span> population (${pop.params}).
+          The sampling distribution was cleared. Draw new samples to rebuild it.<br><br>
+          Notice: even though this population isn't normal, the sampling distribution of x&#773; will still converge to a bell curve as you accumulate samples. That's the Central Limit Theorem.`;
+      } else if (S.changed === 'n') {
+        html = `Sample size is now <strong>n = ${S.n}</strong>. SE = σ/√n = ${se}.<br><br>
+          The sampling distribution was cleared. When you draw new samples, watch how the spread of the histogram compares to before.<br><br>
+          <strong>Larger n → smaller SE → means cluster more tightly around μ.</strong><br><br>
+          <em>Note:</em> This is about the <span class="ann-hl-samp">width</span> of the sampling distribution—how much means vary. This is a separate idea from why the t-distribution has fat tails. Scroll down to the next section for that.`;
+      } else if (S.changed === 'sampleFew') {
+        const obsMean = (S.means.reduce((a,b) => a+b, 0) / N).toFixed(3);
+        html = `Drew 5 samples of n = ${S.n}. The <span style="color:#b07e00;font-weight:600">gold line</span> shows the mean of all your drawn sample means so far: <code>${obsMean}</code>. It converges toward μ = ${pop.mu} (the dashed amber line) as you accumulate more draws.<br><br>
+          ${N < 10 ? 'Keep sampling to see the distribution take shape.' :
+            N < 50 ? 'A bell curve is starting to emerge.' :
+            'The dashed blue curve shows what the CLT predicts: N(μ, σ²/n). Your histogram is converging to that theoretical distribution.'}`;
+      } else if (S.changed === 'sample1') {
+        const v = S.lastMean.toFixed(3);
+        const obsMean = (S.means.reduce((a,b) => a+b, 0) / N).toFixed(3);
+        html = `Drew one sample of n = ${S.n}. That sample's mean was <code>${v}</code>.<br><br>
+          The <span style="color:#b07e00;font-weight:600">gold line</span> shows the mean of all your drawn sample means so far: <code>${obsMean}</code>. It converges toward μ = ${pop.mu} (the dashed amber line) as you accumulate more draws.<br><br>
+          ${N < 10 ? 'Keep sampling to see the distribution take shape.' :
+            N < 50 ? 'A bell curve is starting to emerge.' :
+            'The dashed blue curve shows what the CLT predicts: N(μ, σ²/n). Your histogram is converging to that theoretical distribution.'}`;
+      } else if (S.changed === 'sample1000') {
+        html = `<strong>${N.toLocaleString()} sample means drawn.</strong><br><br>
+          The dashed curve is the theoretical sampling distribution: <code>N(μ = ${pop.mu}, σ²/n = ${(pop.sigma**2/S.n).toFixed(3)})</code>.<br><br>
+          Your histogram matches this theoretical distribution closely; that's the CLT in action. The population shape (${pop.label}) doesn't matter; the means always pile up in a normal curve.<br><br>
+          Now scroll down to see why this picture is incomplete.`;
+      }
+
+      document.getElementById('p1-ann').innerHTML = html;
+    }
+
+    // ================================================================
+    // PHASE 2 STATE
+    // ================================================================
+
+    let P2 = { n: 10, draws: [], lastDraw: null };
+
+    // ================================================================
+    // PHASE 2 SAMPLING
+    // ================================================================
+
+    function drawP2Sample() {
+      const pop = POPS[S.shape];
+      const vals = Array.from({ length: P2.n }, () => pop.sample());
+      const mean = vals.reduce((a, b) => a + b, 0) / P2.n;
+      const s = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (P2.n - 1));
+      const z = (mean - pop.mu) / (pop.sigma / Math.sqrt(P2.n));
+      const t = s > 0 ? (mean - pop.mu) / (s / Math.sqrt(P2.n)) : 0;
+      return { z, s, t };
+    }
+
+    function p2SampleOnce() {
+      P2.lastDraw = drawP2Sample();
+      P2.draws.push(P2.lastDraw);
+      renderP2();
+      updateP2Ann('sample1');
+    }
+
+    function p2SampleFive() {
+      for (let i = 0; i < 5; i++) P2.draws.push(drawP2Sample());
+      P2.lastDraw = P2.draws[P2.draws.length - 1];
+      renderP2();
+      updateP2Ann('sampleFew');
+    }
+
+    function p2SampleMany() {
+      for (let i = 0; i < 1000; i++) P2.draws.push(drawP2Sample());
+      P2.lastDraw = P2.draws[P2.draws.length - 1];
+      renderP2();
+      updateP2Ann('sample1000');
+    }
+
+    // ================================================================
+    // PHASE 2 HANDLERS
+    // ================================================================
+
+    function setP2N(inp) {
+      P2.n = +inp.value;
+      document.getElementById('p2-n-val').textContent = P2.n;
+      document.getElementById('p2-df-val').textContent = P2.n - 1;
+      P2.draws = []; P2.lastDraw = null;
+      renderP2();
+      updateP2Ann('n');
+    }
+
+    function resetP2() {
+      P2 = { n: 10, draws: [], lastDraw: null };
+      document.getElementById('p2-n-slider').value = 10;
+      document.getElementById('p2-n-val').textContent = 10;
+      document.getElementById('p2-df-val').textContent = 9;
+      renderP2();
+      updateP2Ann('welcome');
+    }
+
+    // ================================================================
+    // PHASE 2 RENDER HELPERS
+    // ================================================================
+
+    function buildHist(vals, xMin, xMax, nBins = 50) {
+      const bw = (xMax - xMin) / nBins;
+      const counts = new Array(nBins).fill(0);
+      vals.forEach(v => {
+        const i = Math.max(0, Math.min(nBins - 1, Math.floor((v - xMin) / bw)));
+        counts[i]++;
+      });
+      return { counts, bw };
+    }
+
+    function curvePts(fn, xMin, xMax, N, bw, nPts = 250) {
+      const pts = [];
+      for (let i = 0; i <= nPts; i++) {
+        const x = xMin + i / nPts * (xMax - xMin);
+        pts.push([x, fn(x) * N * bw]);
+      }
+      return pts;
+    }
+
+    function pathD(pts, scX, scY) {
+      return pts.map(([x, y], i) =>
+        `${i === 0 ? 'M' : 'L'}${scX(x).toFixed(1)},${scY(y).toFixed(1)}`).join(' ');
+    }
+
+    function renderP2() {
+      // Pre-compute a shared y-scale so all three histograms use the same height
+      const N = P2.draws.length;
+      const pop = POPS[S.shape];
+      const df = P2.n - 1;
+
+      const { counts: zCts, bw: zBw } = buildHist(
+        P2.draws.map(d => Math.max(-5, Math.min(5, d.z))), -5, 5, 50);
+      const normPk = N >= 10 ? Math.max(...curvePts(x => normalPdf(x), -5, 5, N, zBw).map(p => p[1])) : 0;
+
+      const sXMax = pop.sigma * 3.5;
+      const { counts: sCts } = buildHist(
+        P2.draws.map(d => Math.min(sXMax, d.s)), 0, sXMax, 50);
+
+      const { counts: tCts, bw: tBw } = buildHist(
+        P2.draws.map(d => Math.max(-6, Math.min(6, d.t))), -6, 6, 50);
+      const tPk = N >= 10 ? Math.max(...curvePts(x => tPdf(x, df), -6, 6, N, tBw).map(p => p[1])) : 0;
+
+      const sharedYMax = Math.max(...zCts, ...sCts, ...tCts, normPk, tPk, 1) * 1.1;
+
+      renderZSvg(sharedYMax); renderSSvg(sharedYMax); renderTSvg(sharedYMax);
+    }
+
+    // ================================================================
+    // PHASE 2 SVG: z-statistic
+    // ================================================================
+
+    function renderZSvg(yMax) {
+      const svg = document.getElementById('z-svg');
+      const { pw, ph, L, T } = plotArea(svg);
+      const xMin = -5, xMax = 5, nBins = 50;
+      const N = P2.draws.length;
+      const vals = P2.draws.map(d => Math.max(xMin, Math.min(xMax, d.z)));
+      const { counts, bw } = buildHist(vals, xMin, xMax, nBins);
+      const norm = N >= 10 ? curvePts(x => normalPdf(x), xMin, xMax, N, bw) : [];
+      const scX = sc(xMin, xMax, L, L + pw), scY = sc(0, yMax, T + ph, T);
+
+      let h = `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--border)" stroke-width="1.5"/>`;
+      [-4,-2,0,2,4].forEach(t => {
+        const px = scX(t).toFixed(1);
+        h += `<line x1="${px}" y1="${T+ph}" x2="${px}" y2="${T+ph+4}" stroke="var(--muted)" stroke-width="1"/>`;
+        h += `<text x="${px}" y="${T+ph+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${t}</text>`;
+      });
+      for (let i = 0; i < nBins; i++) {
+        if (!counts[i]) continue;
+        const x0 = scX(xMin+i*bw).toFixed(1), x1 = scX(xMin+(i+1)*bw).toFixed(1);
+        const y0 = scY(counts[i]).toFixed(1), yb = scY(0).toFixed(1);
+        h += `<rect x="${x0}" y="${y0}" width="${Math.max(0,+x1-+x0).toFixed(1)}" height="${(+yb-+y0).toFixed(1)}" fill="var(--c-z)" fill-opacity="0.65"/>`;
+      }
+      if (norm.length) h += `<path d="${pathD(norm, scX, scY)}" fill="none" stroke="var(--c-z)" stroke-width="2" stroke-dasharray="6,3"/>`;
+      // Gold mean line (mean of all drawn z values)
+      if (N > 0) {
+        const zMean = P2.draws.reduce((a, d) => a + d.z, 0) / N;
+        const zMPx = scX(Math.max(xMin, Math.min(xMax, zMean))).toFixed(1);
+        h += `<line x1="${zMPx}" y1="${T}" x2="${zMPx}" y2="${T+ph}" stroke="var(--c-hi)" stroke-width="2" opacity="0.85"/>`;
+        h += `<text x="${+zMPx+5}" y="${T+13}" font-size="12" font-family="Fira Code,monospace" fill="#b07e00" font-weight="600">mean = ${zMean.toFixed(3)}</text>`;
+      }
+      svg.innerHTML = h;
+    }
+
+    // ================================================================
+    // PHASE 2 SVG: sample s
+    // ================================================================
+
+    function renderSSvg(yMax) {
+      const svg = document.getElementById('s-svg');
+      const pop = POPS[S.shape];
+      const { pw, ph, L, T } = plotArea(svg);
+      const sigma = pop.sigma;
+      const xMax = sigma * 3.5, nBins = 50;
+      const N = P2.draws.length;
+      const vals = P2.draws.map(d => Math.min(xMax, d.s));
+      const { counts, bw } = buildHist(vals, 0, xMax, nBins);
+      const scX = sc(0, xMax, L, L + pw), scY = sc(0, yMax, T + ph, T);
+      const ticks = niceTicks(0, xMax, 5).filter(t => t >= 0);
+
+      let h = `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--border)" stroke-width="1.5"/>`;
+      ticks.forEach(t => {
+        const px = scX(t).toFixed(1);
+        h += `<line x1="${px}" y1="${T+ph}" x2="${px}" y2="${T+ph+4}" stroke="var(--muted)" stroke-width="1"/>`;
+        h += `<text x="${px}" y="${T+ph+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${t.toFixed(1)}</text>`;
+      });
+      for (let i = 0; i < nBins; i++) {
+        if (!counts[i]) continue;
+        const x0 = scX(i*bw).toFixed(1), x1 = scX((i+1)*bw).toFixed(1);
+        const y0 = scY(counts[i]).toFixed(1), yb = scY(0).toFixed(1);
+        h += `<rect x="${x0}" y="${y0}" width="${Math.max(0,+x1-+x0).toFixed(1)}" height="${(+yb-+y0).toFixed(1)}" fill="var(--c-s)" fill-opacity="0.65"/>`;
+      }
+      // Gold mean line (mean of all drawn s values)
+      if (N > 0) {
+        const sMean = P2.draws.reduce((a, d) => a + d.s, 0) / N;
+        const sMPx = scX(Math.min(xMax, sMean)).toFixed(1);
+        h += `<line x1="${sMPx}" y1="${T}" x2="${sMPx}" y2="${T+ph}" stroke="var(--c-hi)" stroke-width="2" opacity="0.85"/>`;
+        h += `<text x="${+sMPx+5}" y="${T+13}" font-size="12" font-family="Fira Code,monospace" fill="#b07e00" font-weight="600">mean = ${sMean.toFixed(3)}</text>`;
+      }
+      svg.innerHTML = h;
+    }
+
+    // ================================================================
+    // PHASE 2 SVG: t-statistic
+    // ================================================================
+
+    function renderTSvg(yMax) {
+      const svg = document.getElementById('t-svg');
+      const { pw, ph, L, T } = plotArea(svg);
+      const df = P2.n - 1;
+      const xMin = -6, xMax = 6, nBins = 50;
+      const N = P2.draws.length;
+      const vals = P2.draws.map(d => Math.max(xMin, Math.min(xMax, d.t)));
+      const { counts, bw } = buildHist(vals, xMin, xMax, nBins);
+      const tCurve  = N >= 10 ? curvePts(x => tPdf(x, df), xMin, xMax, N, bw) : [];
+      const normCurve = N >= 10 ? curvePts(x => normalPdf(x), xMin, xMax, N, bw) : [];
+      const scX = sc(xMin, xMax, L, L + pw), scY = sc(0, yMax, T + ph, T);
+
+      let h = `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--border)" stroke-width="1.5"/>`;
+      [-4,-2,0,2,4].forEach(t => {
+        const px = scX(t).toFixed(1);
+        h += `<line x1="${px}" y1="${T+ph}" x2="${px}" y2="${T+ph+4}" stroke="var(--muted)" stroke-width="1"/>`;
+        h += `<text x="${px}" y="${T+ph+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${t}</text>`;
+      });
+      for (let i = 0; i < nBins; i++) {
+        if (!counts[i]) continue;
+        const x0 = scX(xMin+i*bw).toFixed(1), x1 = scX(xMin+(i+1)*bw).toFixed(1);
+        const y0 = scY(counts[i]).toFixed(1), yb = scY(0).toFixed(1);
+        h += `<rect x="${x0}" y="${y0}" width="${Math.max(0,+x1-+x0).toFixed(1)}" height="${(+yb-+y0).toFixed(1)}" fill="var(--c-t)" fill-opacity="0.65"/>`;
+      }
+      // N(0,1) overlay for comparison
+      if (normCurve.length) h += `<path d="${pathD(normCurve, scX, scY)}" fill="none" stroke="var(--c-z)" stroke-width="2" stroke-dasharray="5,3" opacity="0.8"/>`;
+      // t(df) curve
+      if (tCurve.length) h += `<path d="${pathD(tCurve, scX, scY)}" fill="none" stroke="var(--c-t)" stroke-width="2" stroke-dasharray="6,3"/>`;
+      // Legend with real dashed lines
+      if (N >= 10) {
+        const lx = L + pw - 54;
+        h += `<line x1="${lx}" y1="${T+9}" x2="${lx+22}" y2="${T+9}" stroke="var(--c-t)" stroke-width="2" stroke-dasharray="6,3"/>`;
+        h += `<text x="${lx+26}" y="${T+13}" font-size="11" font-family="DM Sans,sans-serif" fill="var(--c-t)">t(${df})</text>`;
+        h += `<line x1="${lx}" y1="${T+25}" x2="${lx+22}" y2="${T+25}" stroke="var(--c-z)" stroke-width="2" stroke-dasharray="5,3" opacity="0.8"/>`;
+        h += `<text x="${lx+26}" y="${T+29}" font-size="11" font-family="DM Sans,sans-serif" fill="var(--c-z)" opacity="0.8">N(0,1)</text>`;
+      }
+      // Gold mean line (mean of all drawn t values)
+      if (N > 0) {
+        const tMean = P2.draws.reduce((a, d) => a + d.t, 0) / N;
+        const tMPx = scX(Math.max(xMin, Math.min(xMax, tMean))).toFixed(1);
+        h += `<line x1="${tMPx}" y1="${T}" x2="${tMPx}" y2="${T+ph}" stroke="var(--c-hi)" stroke-width="2" opacity="0.85"/>`;
+        h += `<text x="${+tMPx+5}" y="${T+13}" font-size="12" font-family="Fira Code,monospace" fill="#b07e00" font-weight="600">mean = ${tMean.toFixed(3)}</text>`;
+      }
+      svg.innerHTML = h;
+    }
+
+    // ================================================================
+    // PHASE 2 ANNOTATION
+    // ================================================================
+
+    function updateP2Ann(reason) {
+      const pop = POPS[S.shape];
+      const df = P2.n - 1;
+      const N = P2.draws.length;
+      const xb = 'x&#773;';
+      let html = '';
+
+      if (reason === 'welcome') {
+        html = `<strong>Here's what this section shows.</strong><br><br>
+          In the previous section, you saw the CLT: sample means pile up in a bell curve regardless of population shape. But there was a hidden assumption. Computing a z-statistic requires knowing σ—the true population standard deviation. In real life, you never know σ; you estimate it from your sample as <em>s</em>.<br><br>
+          The catch: <em>s</em> is different for every sample. Sometimes it's close to σ; sometimes it's far off. That extra layer of variability—on top of the variability in the sample mean—is exactly what creates fat tails in the t-distribution.<br><br>
+          In this simulation we actually know σ (it's built in), so we can compute both z and t and compare them directly.<br><br>
+          <span class="ann-hl-z">z = (${xb} − μ) / (σ/√n):</span> uses the true, fixed σ. Since σ never changes, z varies only because the sample mean varies—nothing else. This is a benchmark: the green histogram shows what a standardized statistic looks like when there is zero estimation error.<br>
+          <span class="ann-hl-s"><em>s</em> varies with every sample.</span> It's your sample's best guess at σ, but it's never exactly right.<br>
+          <span class="ann-hl-t">t = (${xb} − μ) / (s/√n):</span> uses your sample's estimated s instead of the true σ. Everything that makes t differ from z traces back to one thing: s wasn't exactly σ.<br><br>
+          Press <strong>Sample once</strong> to trace a single draw across all three panels simultaneously.`;
+
+      } else if (reason === 'n') {
+        const se = (pop.sigma / Math.sqrt(P2.n)).toFixed(3);
+        const fatness = df < 5  ? 'extremely fat; s is highly unreliable at this sample size' :
+                        df < 15 ? 'noticeably fatter than the normal' :
+                        df < 30 ? 'still slightly fatter than the normal' :
+                                  'nearly identical to the normal; s has stabilized';
+        html = `n = <strong>${P2.n}</strong>, df = <strong>${df}</strong>. Draws cleared.<br><br>
+          With df = ${df}, the t-distribution tails are <em>${fatness}</em>.<br><br>
+          Keep two ideas separate. The <span class="ann-hl-samp">width</span> of the sampling distribution (σ/√n = ${se}) reflects how much sample means vary; the previous section showed that. The <span class="ann-hl-t">fat tails</span> of t reflect how much <em>s</em> varies around σ. Both change with n, but for different reasons: as n grows, each sample contains more data, so s becomes a more reliable estimate of σ. That is why t(df) converges toward the normal at large n—not because means become less variable, but because the second source of variability (noisy s) nearly disappears.`;
+
+      } else if ((reason === 'sample1' || reason === 'sampleFew') && P2.lastDraw) {
+        const { z, s, t } = P2.lastDraw;
+        const sBelow = s < pop.sigma;
+        const ratio = (pop.sigma / s).toFixed(2);
+        const pctOff = sBelow
+          ? `${((1 - s / pop.sigma) * 100).toFixed(0)}% below σ`
+          : `${((s / pop.sigma - 1) * 100).toFixed(0)}% above σ`;
+        const chainNote = sBelow
+          ? `s was ${pctOff}, so t's denominator was too small, which pushed |t| further from 0 than |z| for this same sample. The key: s can shrink toward 0 with no floor, so |t| can rise without limit. Overestimates can only pull |t| down toward 0; there is a hard floor. That asymmetry is why the tails fill in: underestimates are unlimited; overestimates are bounded.`
+          : `s was ${pctOff}, so t's denominator was too large, which pulled |t| closer to 0 than |z| for this same sample. This is the bounded case: overestimates can only moderate t toward 0, never below. Underestimates from other samples can push t out without limit. So this draw was pulled in, but it cannot cancel out the draws where s was small.`;
+        html = `${reason === 'sampleFew' ? `${N} draws so far. For that last draw, trace how s drove t away from z` : 'One draw — trace how s drove t away from z'}:<br>
+          <div class="causal-chain">
+            <div class="chain-item">s = <span class="chain-val chain-val-s">${s.toFixed(3)}</span></div>
+            <span class="chain-arrow">${sBelow ? '&lt; σ' : '&gt; σ'} = ${pop.sigma.toFixed(2)}</span>
+            <span class="chain-arrow">→</span>
+            <div class="chain-item">denominator of t is ${sBelow ? '<strong>too small</strong>' : 'too large'} by factor ${ratio}</div>
+            <span class="chain-arrow">→</span>
+            <div class="chain-item">|t| = <span class="chain-val chain-val-t">${Math.abs(t).toFixed(3)}</span> is ${Math.abs(t) > Math.abs(z) ? '<strong>more extreme</strong>' : 'less extreme'} than |z| = <span class="chain-val chain-val-z">${Math.abs(z).toFixed(3)}</span></div>
+            <div class="chain-note">${chainNote}</div>
+          </div>`;
+
+      } else if (reason === 'sample1000') {
+        const pctBelow = ((P2.draws.filter(d => d.s < pop.sigma).length / N) * 100).toFixed(0);
+        const sMeanStr = (P2.draws.reduce((a, d) => a + d.s, 0) / N).toFixed(3);
+        html = `<strong>${N.toLocaleString()} draws.</strong> Here's what to notice.<br><br>
+          <strong><span class="ann-hl-z">z histogram:</span></strong> This distribution hugs the N(0,1) curve (green dashed) closely. That's the benchmark. Because z uses the fixed σ, the only thing that makes z vary is the sample mean—there's no estimation noise. Any extra spread in t beyond what you see here is coming entirely from s not matching σ.<br><br>
+          <strong><span class="ann-hl-t">t histogram:</span></strong> Compare the left and right edges with the z histogram. The t bars reach further into the extremes. The purple t(${df}) curve fits; the green N(0,1) does not—it predicts too few extreme values. Those extra values in the tails are the fat tails.<br><br>
+          <strong><span class="ann-hl-s">s panel explains why:</span></strong> Each bar is one sample's standard deviation. The mean of s across all draws is ${sMeanStr}, close to σ = ${pop.sigma.toFixed(2)}—confirming <strong>s is an unbiased estimator on average</strong>. But look at the spread. ${pctBelow}% of your draws had s below σ (left of the σ reference line in the middle panel). Those are the draws that produced t values more extreme than their z values. Why? Because t = (${xb} − μ) / (s/√n). When s < σ, the denominator of t is smaller than the denominator of z, so t ends up farther from 0 than z for the same sample mean.<br><br>
+          <strong>The asymmetry that creates fat tails:</strong> The errors are not symmetric. When s is 50% below σ (s = σ/2), |t| is twice what |z| was for that same sample—you divided by half the denominator. When s is 50% above σ (s = 1.5σ), |t| is only two-thirds of what |z| was for that same sample—you divided by a larger denominator, pulling t in. Crucially, these effects are unequal in size and in limits. Overestimates can only pull |t| toward 0; no matter how large s gets, |t| stays non-negative—there is a hard floor of 0 on how much an overestimate can moderate. Underestimates can push s toward 0 and send |t| toward ±∞—there is no ceiling on how extreme t can become. So a few draws with unusually small s launch t far into the extremes, and no draw with large s can cancel that out. That one-sided inflation is the whole reason the t-distribution exists as a separate distribution from the normal.<br><br>
+          Notice that this does not require a majority of draws to have s below σ. Even if most of your ${N.toLocaleString()} draws overestimated σ, you would still see fat tails—because each underestimate inflates |t| by a large and unbounded amount, while each overestimate only moderates |t| by a small and bounded amount. The count of underestimates matters less than the asymmetric magnitude of their effect.
+          ${df <= 5  ? `<br><br>At df = ${df}, s is especially unreliable and the tails are dramatically fat. Slide n upward to watch them converge.` :
+            df >= 30 ? `<br><br>At df = ${df}, s barely varies from sample to sample and the t and z histograms nearly overlap.` : ''}`;
+      }
+
+      document.getElementById('p2-ann').innerHTML = html;
+    }
+
+    // ================================================================
+    // RESET ALL
+    // ================================================================
+
+    function resetAll() {
+      S = { shape: 'normal', n: 10, means: [], lastMean: null, changed: 'welcome' };
+      P2 = { n: 10, draws: [], lastDraw: null };
+      document.querySelectorAll('#shape-btns .mbtn').forEach(b =>
+        b.classList.toggle('on', b.dataset.shape === 'normal'));
+      document.getElementById('n-slider').value = 10;
+      document.getElementById('n-val').textContent = 10;
+      document.getElementById('p2-n-slider').value = 10;
+      document.getElementById('p2-n-val').textContent = 10;
+      document.getElementById('p2-df-val').textContent = 9;
+      syncPopLabels();
+      renderP1(); updateP1Ann();
+      renderP2(); updateP2Ann('welcome');
+    }
+
+    // ================================================================
+    // INIT
+    // ================================================================
+
+    syncPopLabels();
+    renderP1();
+    updateP1Ann();
+    renderP2();
+    updateP2Ann('welcome');
+
+  </script>
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
+</body>
+</html>
