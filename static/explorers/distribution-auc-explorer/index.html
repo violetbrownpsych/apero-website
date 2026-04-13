@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Distribution Explorer</title>
+  <title>Distribution Area-Under-CurveExplorer</title>
   <link rel="icon" href="distribution-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -291,7 +291,7 @@
 
   <!-- HEADER -->
   <header>
-    <h1>Distribution Explorer</h1>
+    <h1>Distribution Area-Under-Curve Explorer</h1>
     <p>Visualize probability distributions and area under the curve</p>
     <span class="pill">pnorm()</span>
     <span class="pill">pbinom()</span>
@@ -886,8 +886,8 @@
 
       if (c==='welcome') return {cls:'ann-welcome', html:`
         Pick a distribution on the left to get started. Each one models a different kind of random process.<br><br>
-        The <strong>plot</strong> shows the distribution's shape. The <strong>shaded region</strong> is the probability you're calculating —
-        it's the area under the curve (or the heights of the bars for discrete distributions) in that region.
+        The <strong>plot</strong> shows the distribution's shape. The <strong>shaded region</strong> is the probability you're calculating—it's 
+        the area under the curve (or the heights of the bars for discrete distributions) in that region.
         The <strong>Shade area</strong> buttons let you choose: below a value, above it, between two values, or outside two values.<br><br>
         The <strong>cutpoint slider</strong> sets where the boundary is. The R code on the right updates live and shows
         exactly what you'd type to get that probability in R. You can copy it and run it yourself.`};
@@ -923,18 +923,18 @@
       }
 
       if (c==='zscore') {
-        if (S.zscore) return {cls:'ann-normal', html:`<strong>Z-score (standardization)</strong> — converts any Normal value to the <em>standard</em> Normal (mean=0, sd=1) using z = (x \u2212 \u03bc) / \u03c3.<br><br>
-          The code now shows the two-step version: compute z first, then call <code>pnorm(z)</code> without mean or sd arguments (the defaults are 0 and 1). The result is identical to the one-step version — standardizing first just makes the math visible.`};
+        if (S.zscore) return {cls:'ann-normal', html:`<strong>Z-score (standardization)</strong>: Converts any Normal value to the <em>standard</em> Normal (mean=0, sd=1) using z = (x \u2212 \u03bc) / \u03c3.<br><br>
+          The code now shows the two-step version: compute z first, then call <code>pnorm(z)</code> without mean or sd arguments (the defaults are 0 and 1). The result is identical to the one-step version: Standardizing first just makes the math visible.`};
         return distAnn['normal'];
       }
 
-      if (c==='mean') return {cls:'ann-normal', html:`<strong>\u03bc (mean)</strong> is the center of the Normal distribution. Moving it shifts the entire curve without changing its shape. Notice that the probability also shifts — the shaded area moves with the curve.`};
-      if (c==='sd')   return {cls:'ann-normal', html:`<strong>\u03c3 (sd)</strong> controls the spread. A larger \u03c3 flattens and widens the curve; a smaller \u03c3 makes it tall and narrow. The total area always equals 1 — so a wider curve is shorter, not larger.`};
-      if (c==='df' && (d==='t'))     return {cls:'ann-t',     html:`<strong>df (degrees of freedom)</strong> controls how fat the tails are. Low df means more probability in the extremes. As df increases, the t distribution approaches the standard Normal — by df=30 they're nearly identical.`};
+      if (c==='mean') return {cls:'ann-normal', html:`<strong>\u03bc (mean)</strong> is the center of the Normal distribution. Moving it shifts the entire curve without changing its shape. Notice that the probability also shifts: The shaded area moves with the curve.`};
+      if (c==='sd')   return {cls:'ann-normal', html:`<strong>\u03c3 (sd)</strong> controls the spread. A larger \u03c3 flattens and widens the curve; a smaller \u03c3 makes it tall and narrow. The total area always equals 1, so a wider curve is shorter, not larger.`};
+      if (c==='df' && (d==='t'))     return {cls:'ann-t',     html:`<strong>df (degrees of freedom)</strong> controls how fat the tails are. Low df means more probability in the extremes. As df increases, the t distribution approaches the standard Normal; by df=30 they're nearly identical.`};
       if (c==='df' && d==='chisq')   return {cls:'ann-chisq', html:`<strong>df (degrees of freedom)</strong> shifts the chi-square distribution right and makes it more symmetric. The mean of a \u03c7\u00b2 distribution is its df; the variance is 2\u00d7df.`};
       if (c==='df1'||c==='df2')      return {cls:'ann-f',     html:`<strong>df\u2081 and df\u2082</strong> (numerator and denominator degrees of freedom) both affect the shape of the F distribution. In an ANOVA table, these correspond to the "between groups" and "within groups" degrees of freedom.`};
-      if (c==='n'||c==='prob')       return {cls:'ann-binom', html:`<strong>n</strong> is the number of trials; <strong>p</strong> is the success probability per trial. Moving p away from 0.5 skews the distribution. Increasing n makes it wider and more symmetric — with large n it starts to look like a Normal.`};
-      if (c==='lambda')              return {cls:'ann-pois',  html:`<strong>\u03bb (lambda)</strong> is the average number of events. The mean and variance of a Poisson are both equal to \u03bb — so as events get more frequent, the spread grows too.`};
+      if (c==='n'||c==='prob')       return {cls:'ann-binom', html:`<strong>n</strong> is the number of trials; <strong>p</strong> is the success probability per trial. Moving p away from 0.5 skews the distribution. Increasing n makes it wider and more symmetric; with large n it starts to look like a Normal.`};
+      if (c==='lambda')              return {cls:'ann-pois',  html:`<strong>\u03bb (lambda)</strong> is the average number of events. The mean and variance of a Poisson are both equal to \u03bb, so as events get more frequent, the spread grows too.`};
       if (c==='q1'||c==='q1b'||c==='q2') return {cls:`ann-${d}`, html:`The <strong>cutpoint</strong> sets the boundary of the shaded region. This is the <code>q</code> argument passed to <code>${fname}()</code> in R. The probability value in the readout below updates as you drag.`};
 
       return distAnn[d] || {cls:'ann-welcome', html:`Use the controls on the left to explore the ${DIST_LABEL[d]} distribution.`};

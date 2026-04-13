@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distribution Family Explorer</title>
+  <link rel="icon" href="tool_icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0ebe1;
+      --panel:   #fdfcf9;
+      --border:  #dbd3c3;
+      --text:    #1c1811;
+      --muted:   #79705f;
+      --accent:  #b85520;
+      --code-bg: #181826;
+
+      /* Distribution color tokens */
+      --c-bern:  #e8a030;
+      --c-binom: #4eaaec;
+      --c-pois:  #52c97e;
+      --c-norm:  #b87fd4;
+      --c-chi:   #e05c5c;
+      --c-t:     #5b9bd5;
+      --c-f:     #c89850;
+      --c-hi:    #ffe066;
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #ece8de;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+    .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle (horizontal pill) */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Vertical stack (3+ options or long labels) */
+    .mode-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .mbtn {
+      width: 100%; padding: 6px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.79rem; font-weight: 500;
+      color: var(--text); text-align: left; transition: all .1s;
+    }
+    .mbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Copy / reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === TREE PANEL === */
+    .tree-wrap {
+      max-width: 1360px;
+      margin: 0 auto 11px;
+      padding: 0 11px;
+    }
+    .tree-wrap .panel { padding: 14px 14px 10px; }
+    .tree-wrap .panel-label { margin-bottom: 8px; }
+    #tree-svg {
+      display: block;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 860px;
+      height: 295px;
+      cursor: default;
+      overflow: visible;
+    }
+    .tree-node { cursor: pointer; }
+    .tree-node rect { transition: filter 0.12s; rx: 8; }
+    .tree-node:hover rect { filter: brightness(1.12); }
+    .tree-label {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      fill: white;
+      pointer-events: none;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+    .tree-edge-label {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 9.5px;
+      font-style: italic;
+      fill: var(--muted);
+      pointer-events: none;
+      text-anchor: middle;
+    }
+    /* active node highlight ring */
+    .node-active > rect {
+      stroke: var(--c-hi) !important;
+      stroke-width: 3px !important;
+      filter: drop-shadow(0 0 5px rgba(255,224,102,0.65));
+    }
+
+    /* === CONTROLS: dist panels show/hide === */
+    .dist-controls { display: none; }
+    .dist-controls.active { display: block; }
+
+    /* === SLIDERS === */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 3px;
+    }
+    .slider-row input[type=range] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 4px;
+    }
+    .slider-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* === VISUAL PANEL: dist sections show/hide === */
+    .dist-visual { display: none; }
+    .dist-visual.active { display: block; }
+
+    /* SVG charts inside visual panel */
+    .vis-svg {
+      display: block;
+      width: 100%;
+      overflow: visible;
+    }
+
+    /* === SUB-PANELS (chi-square, t, F) === */
+    .subpanel { margin-bottom: 10px; }
+    .subpanel-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .subpanel-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .subpanel-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .subpanel-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px;
+    }
+    .subpanel-box .subpanel-label { margin-bottom: 4px; }
+
+    /* division arrow readout for F */
+    .division-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 6px 0;
+    }
+    .division-row .val { color: var(--text); font-weight: 600; }
+    .division-row .arrow { font-size: 1.1rem; color: var(--border); }
+
+    /* current-draw stat readout */
+    .stat-display {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 5px;
+      min-height: 1.3em;
+    }
+    .stat-display .hi {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .stat-display .hi-gold { color: #b87800; font-weight: 600; }
+
+    /* distribution stat readout (mean, SD, etc.) */
+    .dist-stats {
+      display: flex;
+      gap: 14px;
+      margin-top: 6px;
+      font-size: 0.77rem;
+      color: var(--muted);
+    }
+    .dist-stats .val {
+      font-family: 'Fira Code', monospace;
+      color: var(--text);
+    }
+
+    /* draw buttons row */
+    .draw-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 9px;
+    }
+
+    /* === CHI-SQUARE INGREDIENT ANIMATION === */
+    @keyframes dot-pop {
+      0%   { r: 5; opacity: 1; }
+      35%  { r: 8; opacity: 1; }
+      65%  { r: 8; opacity: 0.9; }
+      100% { r: 5; opacity: 1; }
+    }
+    .chi-dot-anim { animation: dot-pop 0.45s ease-in-out; }
+
+    @keyframes arrow-pulse {
+      0%   { opacity: 0; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    .chi-arrow-anim { animation: arrow-pulse 0.6s ease-out forwards; }
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 1px 6px 1px 9px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+    /* Distribution code line colors — defined after .cl so they win the cascade */
+    .cl-bern  { border-left-color: var(--c-bern); }
+    .cl-binom { border-left-color: var(--c-binom); }
+    .cl-pois  { border-left-color: var(--c-pois); }
+    .cl-norm  { border-left-color: var(--c-norm); }
+    .cl-chi   { border-left-color: var(--c-chi); }
+    .cl-t     { border-left-color: var(--c-t); }
+    .cl-f     { border-left-color: var(--c-f); }
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }
+    .sv { color: #f78c6c; }
+    .sk { color: #89ddff; }
+    .ss { color: #c3e88d; }
+    .sn { color: #f0ab70; }
+    .so { color: #89ddff; }
+    .sb { color: #c3e88d; }
+    .sc { color: #6a7a6a; font-style: italic; }
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      max-width: 1360px; margin: 0 auto 18px;
+      padding: 13px 18px;
+      border-radius: 9px; border: 1.5px solid var(--border);
+      font-size: 0.84rem; line-height: 1.65;
+      background: var(--panel);
+    }
+    .ann.show { display: block; }
+    .ann-welcome { border-color: var(--accent); background: #fdf6f0; }
+    .ann-bern  { border-color: var(--c-bern);  background: #fef9f0; }
+    .ann-binom { border-color: var(--c-binom); background: #f0f6fe; }
+    .ann-pois  { border-color: var(--c-pois);  background: #f0faf4; }
+    .ann-norm  { border-color: var(--c-norm);  background: #f8f0fd; }
+    .ann-chi   { border-color: var(--c-chi);   background: #fdf0f0; }
+    .ann-t     { border-color: var(--c-t);     background: #f0f4fd; }
+    .ann-f     { border-color: var(--c-f);     background: #fdf8f0; }
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #ece8de;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Distribution Family Explorer</h1>
+    <p>How the major statistical distributions are related</p>
+    <span class="pill pill-pkg">stats</span>
+    <span class="pill">pnorm()</span>
+    <span class="pill">pt()</span>
+    <span class="pill">pchisq()</span>
+    <span class="pill">pf()</span>
+  </header>
+
+  <!-- FAMILY TREE PANEL -->
+  <div class="tree-wrap">
+    <div class="panel">
+      <div class="panel-label">Distribution Family: Click any node to explore it</div>
+      <svg id="tree-svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#aaa09c" />
+          </marker>
+        </defs>
+        <!-- EDGES (drawn first, behind nodes) -->
+        <line x1="377" y1="44" x2="304" y2="74" stroke="#c8c0b0" stroke-width="1.5" marker-end="url(#arr)" />
+        <text class="tree-edge-label" x="352" y="52">sum n trials</text>
+        <path d="M332,96 C390,128 450,128 468,96" fill="none" stroke="#c8c0b0" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)" />
+        <text class="tree-edge-label" x="400" y="127">n↑, p↓, np=λ fixed</text>
+        <line x1="280" y1="106" x2="280" y2="134" stroke="#c8c0b0" stroke-width="1.5" marker-end="url(#arr)" />
+        <text class="tree-edge-label" x="224" y="123">n large (CLT)</text>
+        <line x1="280" y1="166" x2="280" y2="194" stroke="#c8c0b0" stroke-width="1.5" marker-end="url(#arr)" />
+        <text class="tree-edge-label" x="208" y="183">sq. &amp; sum k normals</text>
+        <line x1="256" y1="226" x2="198" y2="254" stroke="#c8c0b0" stroke-width="1.5" marker-end="url(#arr)" />
+        <text class="tree-edge-label" x="200" y="248">Z / √(χ²/df)</text>
+        <line x1="304" y1="226" x2="362" y2="254" stroke="#c8c0b0" stroke-width="1.5" marker-end="url(#arr)" />
+        <text class="tree-edge-label" x="360" y="248">χ²/df₁ ÷ χ²/df₂</text>
+        <!-- NODES -->
+        <g class="tree-node" id="tnode-bernoulli" onclick="setDist('bernoulli')">
+          <rect x="350" y="14" width="100" height="32" rx="8" fill="var(--c-bern)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="400" y="30">Bernoulli</text>
+        </g>
+        <g class="tree-node" id="tnode-binomial" onclick="setDist('binomial')">
+          <rect x="228" y="74" width="104" height="32" rx="8" fill="var(--c-binom)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="280" y="90">Binomial</text>
+        </g>
+        <g class="tree-node" id="tnode-poisson" onclick="setDist('poisson')">
+          <rect x="468" y="74" width="104" height="32" rx="8" fill="var(--c-pois)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="520" y="90">Poisson</text>
+        </g>
+        <g class="tree-node" id="tnode-normal" onclick="setDist('normal')">
+          <rect x="228" y="134" width="104" height="32" rx="8" fill="var(--c-norm)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="280" y="150">Normal</text>
+        </g>
+        <g class="tree-node" id="tnode-chisq" onclick="setDist('chisq')">
+          <rect x="220" y="194" width="120" height="32" rx="8" fill="var(--c-chi)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="280" y="210">Chi-square</text>
+        </g>
+        <g class="tree-node" id="tnode-tdist" onclick="setDist('tdist')">
+          <rect x="128" y="254" width="104" height="32" rx="8" fill="var(--c-t)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="180" y="270">t distribution</text>
+        </g>
+        <g class="tree-node" id="tnode-fdist" onclick="setDist('fdist')">
+          <rect x="328" y="254" width="104" height="32" rx="8" fill="var(--c-f)" stroke="transparent" stroke-width="3" />
+          <text class="tree-label" x="380" y="270">F distribution</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL — populated in Stage 3 -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Controls</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <!-- Bernoulli -->
+      <div class="dist-controls" id="ctrl-bernoulli">
+        <div class="cs">
+          <div class="ch">Probability of success (p)</div>
+          <div class="slider-row">
+            <input type="range" min="0.1" max="0.9" step="0.05" value="0.3"
+              id="sl-bern-p" oninput="sliderH('bern_p',this)">
+            <span class="slider-val" id="sv-bern-p">0.30</span>
+          </div>
+          <div class="sub">p = P(X = 1)</div>
+        </div>
+      </div>
+
+      <!-- Binomial -->
+      <div class="dist-controls" id="ctrl-binomial">
+        <div class="cs">
+          <div class="ch">Number of trials (n)</div>
+          <div class="slider-row">
+            <input type="range" min="1" max="100" step="1" value="10"
+              id="sl-binom-n" oninput="sliderH('binom_n',this)">
+            <span class="slider-val" id="sv-binom-n">10</span>
+          </div>
+        </div>
+        <div class="cs">
+          <div class="ch">Probability of success (p)</div>
+          <div class="slider-row">
+            <input type="range" min="0.05" max="0.95" step="0.05" value="0.5"
+              id="sl-binom-p" oninput="sliderH('binom_p',this)">
+            <span class="slider-val" id="sv-binom-p">0.50</span>
+          </div>
+        </div>
+        <div class="cs" id="cs-binom-overlay" style="display:none">
+          <div class="hr"></div>
+          <button class="btn" id="btn-binom-overlay" onclick="toggleH('binom_overlay',this)">Show Normal overlay</button>
+          <div class="sub">n ≥ 20: Normal approximation</div>
+        </div>
+      </div>
+
+      <!-- Poisson -->
+      <div class="dist-controls" id="ctrl-poisson">
+        <div class="cs">
+          <div class="ch">Rate (λ)</div>
+          <div class="slider-row">
+            <input type="range" min="0.5" max="20" step="0.5" value="3"
+              id="sl-pois-lam" oninput="sliderH('pois_lambda',this)">
+            <span class="slider-val" id="sv-pois-lam">3.0</span>
+          </div>
+          <div class="sub">mean = variance = λ</div>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <div class="ch">Overlays</div>
+          <div class="mode-stack">
+            <button class="mbtn" id="btn-pois-binom" onclick="toggleH('pois_binom_overlay',this)">Binomial (same mean)</button>
+            <button class="mbtn" id="btn-pois-norm" style="display:none" onclick="toggleH('pois_norm_overlay',this)">Normal (λ ≥ 10)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Normal -->
+      <div class="dist-controls" id="ctrl-normal">
+        <div class="cs">
+          <div class="ch">Mean (μ)</div>
+          <div class="slider-row">
+            <input type="range" min="-3" max="3" step="0.5" value="0"
+              id="sl-norm-mu" oninput="sliderH('norm_mu',this)">
+            <span class="slider-val" id="sv-norm-mu">0.0</span>
+          </div>
+        </div>
+        <div class="cs">
+          <div class="ch">Std dev (σ)</div>
+          <div class="slider-row">
+            <input type="range" min="0.5" max="3" step="0.5" value="1"
+              id="sl-norm-sigma" oninput="sliderH('norm_sigma',this)">
+            <span class="slider-val" id="sv-norm-sigma">1.0</span>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <div class="mode-stack">
+            <button class="mbtn" id="btn-norm-std" onclick="toggleH('norm_standardize',this)">Show N(0,1) overlay</button>
+            <button class="mbtn" id="btn-norm-area" onclick="toggleH('norm_area',this)">Show tail area</button>
+          </div>
+          <div id="cs-norm-cutoff" style="display:none">
+            <div class="ch">Cutoff (x)</div>
+            <div class="slider-row">
+              <input type="range" min="-4" max="4" step="0.1" value="0"
+                id="sl-norm-cutoff" oninput="sliderH('norm_cutoff',this)">
+              <span class="slider-val" id="sv-norm-cutoff">0.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chi-square -->
+      <div class="dist-controls" id="ctrl-chisq">
+        <div class="cs">
+          <div class="ch">Degrees of freedom (k)</div>
+          <div class="slider-row">
+            <input type="range" min="1" max="20" step="1" value="3"
+              id="sl-chi-df" oninput="sliderH('chi_df',this)">
+            <span class="slider-val" id="sv-chi-df">3</span>
+          </div>
+          <div class="sub">mean = k &nbsp;·&nbsp; variance = 2k</div>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <div class="draw-row">
+            <button class="btn" onclick="chiDrawOne()">Draw one</button>
+            <button class="btn" onclick="chiDraw1000()">Draw 1000</button>
+          </div>
+          <button class="btn" onclick="chiReset()" style="width:100%;margin-top:2px">Reset histogram</button>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <button class="btn" id="btn-chi-overlay" onclick="toggleH('chi_overlay',this)">Show χ²(k) curve</button>
+        </div>
+      </div>
+
+      <!-- t-distribution -->
+      <div class="dist-controls" id="ctrl-tdist">
+        <div class="cs">
+          <div class="ch">Degrees of freedom (n−1)</div>
+          <div class="slider-row">
+            <input type="range" min="1" max="30" step="1" value="10"
+              id="sl-t-df" oninput="sliderH('t_df',this)">
+            <span class="slider-val" id="sv-t-df">10</span>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <div class="draw-row">
+            <button class="btn" onclick="tDrawOne()">Draw one</button>
+            <button class="btn" onclick="tDraw1000()">Draw 1000</button>
+          </div>
+          <button class="btn" onclick="tReset()" style="width:100%;margin-top:2px">Reset</button>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <button class="btn" id="btn-t-norm" onclick="toggleH('t_norm_overlay',this)">Show N(0,1) overlay</button>
+        </div>
+      </div>
+
+      <!-- F-distribution -->
+      <div class="dist-controls" id="ctrl-fdist">
+        <div class="cs">
+          <div class="ch">Numerator df (df₁)</div>
+          <div class="slider-row">
+            <input type="range" min="1" max="20" step="1" value="3"
+              id="sl-f-df1" oninput="sliderH('f_df1',this)">
+            <span class="slider-val" id="sv-f-df1">3</span>
+          </div>
+        </div>
+        <div class="cs">
+          <div class="ch">Denominator df (df₂)</div>
+          <div class="slider-row">
+            <input type="range" min="1" max="40" step="1" value="20"
+              id="sl-f-df2" oninput="sliderH('f_df2',this)">
+            <span class="slider-val" id="sv-f-df2">20</span>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <div class="draw-row">
+            <button class="btn" onclick="fDrawOne()">Draw one</button>
+            <button class="btn" onclick="fDraw1000()">Draw 1000</button>
+          </div>
+          <button class="btn" onclick="fReset()" style="width:100%;margin-top:2px">Reset</button>
+        </div>
+        <div class="hr"></div>
+        <div class="cs">
+          <button class="btn" id="btn-f-overlay" onclick="toggleH('f_overlay',this)">Show F(df₁,df₂) curve</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: MAIN VISUAL PANEL — populated in Stage 3 -->
+    <div class="panel" id="main-panel">
+      <div class="panel-label" id="main-panel-label">Distribution</div>
+
+      <!-- Bernoulli visual -->
+      <div class="dist-visual" id="vis-bernoulli">
+        <svg id="svg-bernoulli" class="vis-svg" height="200"></svg>
+        <div class="dist-stats" id="stats-bernoulli"></div>
+      </div>
+
+      <!-- Binomial visual -->
+      <div class="dist-visual" id="vis-binomial">
+        <svg id="svg-binomial" class="vis-svg" height="200"></svg>
+        <div class="dist-stats" id="stats-binomial"></div>
+      </div>
+
+      <!-- Poisson visual -->
+      <div class="dist-visual" id="vis-poisson">
+        <svg id="svg-poisson" class="vis-svg" height="200"></svg>
+        <div class="dist-stats" id="stats-poisson"></div>
+      </div>
+
+      <!-- Normal visual -->
+      <div class="dist-visual" id="vis-normal">
+        <svg id="svg-normal" class="vis-svg" height="220"></svg>
+        <div class="dist-stats" id="stats-normal"></div>
+      </div>
+
+      <!-- Chi-square visual -->
+      <div class="dist-visual" id="vis-chisq">
+        <div class="subpanel">
+          <div class="subpanel-label">The ingredients: k draws from N(0,1), squared and summed</div>
+          <svg id="svg-chi-ingr" class="vis-svg" height="100"></svg>
+          <div class="stat-display" id="stat-chi-ingr"></div>
+        </div>
+        <div class="subpanel">
+          <div class="subpanel-label">Chi-square histogram (accumulated draws)</div>
+          <svg id="svg-chi-hist" class="vis-svg" height="155"></svg>
+          <div class="stat-display" id="stat-chi-hist"></div>
+        </div>
+      </div>
+
+      <!-- t-distribution visual -->
+      <div class="dist-visual" id="vis-tdist">
+        <div class="subpanel">
+          <div class="subpanel-label">The ingredients</div>
+          <div class="subpanel-row">
+            <div class="subpanel-box">
+              <div class="subpanel-label">Z ~ N(0,1)</div>
+              <svg id="svg-t-z" class="vis-svg" height="72"></svg>
+            </div>
+            <div class="subpanel-box">
+              <div class="subpanel-label">χ²(df) / df</div>
+              <svg id="svg-t-chi" class="vis-svg" height="72"></svg>
+            </div>
+          </div>
+          <div class="stat-display" id="stat-t-ingr"></div>
+        </div>
+        <div class="subpanel">
+          <div class="subpanel-label">t histogram (accumulated draws)</div>
+          <svg id="svg-t-hist" class="vis-svg" height="145"></svg>
+          <div class="stat-display" id="stat-t-hist"></div>
+        </div>
+      </div>
+
+      <!-- F-distribution visual -->
+      <div class="dist-visual" id="vis-fdist">
+        <div class="subpanel">
+          <div class="subpanel-label">The ingredients</div>
+          <div class="subpanel-row">
+            <div class="subpanel-box">
+              <div class="subpanel-label">χ²(df₁) / df₁</div>
+              <svg id="svg-f-chi1" class="vis-svg" height="72"></svg>
+            </div>
+            <div class="subpanel-box">
+              <div class="subpanel-label">χ²(df₂) / df₂</div>
+              <svg id="svg-f-chi2" class="vis-svg" height="72"></svg>
+            </div>
+          </div>
+          <div class="stat-display" id="stat-f-ingr"></div>
+        </div>
+        <div class="subpanel">
+          <div class="subpanel-label">F histogram (accumulated draws)</div>
+          <svg id="svg-f-hist" class="vis-svg" height="145"></svg>
+          <div class="stat-display" id="stat-f-hist"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANNOTATION BOX (below grid) -->
+  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // === MATH HELPERS ===
+    function logC(n,k){let r=0;for(let i=0;i<k;i++)r+=Math.log(n-i)-Math.log(i+1);return r;}
+    function dbinom(k,n,p){
+      if(p===0)return k===0?1:0; if(p===1)return k===n?1:0;
+      return Math.exp(logC(n,k)+k*Math.log(p)+(n-k)*Math.log(1-p));
+    }
+    function dpois(k,lam){
+      if(lam===0)return k===0?1:0;
+      let l=-lam+k*Math.log(lam); for(let i=1;i<=k;i++)l-=Math.log(i); return Math.exp(l);
+    }
+    function dnorm(x,mu=0,sig=1){return Math.exp(-.5*((x-mu)/sig)**2)/(sig*Math.sqrt(2*Math.PI));}
+
+    // === STATE ===
+    const DEFAULTS = {
+      dist:'bernoulli', changed:'welcome',
+      bern_p:0.3,
+      binom_n:10, binom_p:0.5, binom_overlay:false,
+      pois_lambda:3, pois_binom_overlay:false, pois_norm_overlay:false,
+      norm_mu:0, norm_sigma:1, norm_standardize:false, norm_area:false, norm_cutoff:0,
+      chi_df:3, chi_overlay:false,
+      t_df:10, t_norm_overlay:false,
+      f_df1:3, f_df2:20, f_overlay:false,
+    };
+    function freshState(){
+      return Object.assign({},DEFAULTS,{chi_samples:[],chi_last:null,t_samples:[],t_last:null,f_samples:[],f_last:null});
+    }
+    let S = freshState();
+
+    const DIST_LABELS = {bernoulli:'Bernoulli',binomial:'Binomial',poisson:'Poisson',
+      normal:'Normal',chisq:'Chi-square',tdist:'t-Distribution',fdist:'F-Distribution'};
+
+    // === SVG HELPER ===
+    function getSvg(id){
+      const s=document.getElementById(id);
+      while(s.firstChild)s.removeChild(s.firstChild);
+      return{s, W:Math.max(200,s.getBoundingClientRect().width), H:parseInt(s.getAttribute('height'))||200};
+    }
+
+    // === CODE LINE HELPERS ===
+    function cl(css,code){return `<code class="cl ${css}">${code}</code>\n`;}
+    function clc(code){return `<code class="cl cl-setup">${code}</code>\n`;}
+
+    // === RENDER DISPATCHER ===
+    function render(){
+      document.querySelectorAll('.dist-controls').forEach(e=>e.classList.remove('active'));
+      document.querySelectorAll('.dist-visual').forEach(e=>e.classList.remove('active'));
+      document.getElementById('ctrl-'+S.dist)?.classList.add('active');
+      document.getElementById('vis-'+S.dist)?.classList.add('active');
+      document.querySelectorAll('.tree-node').forEach(e=>e.classList.remove('node-active'));
+      document.getElementById('tnode-'+S.dist)?.classList.add('node-active');
+      document.getElementById('main-panel-label').textContent=DIST_LABELS[S.dist]||'Distribution';
+      const vis={bernoulli:renderBernoulli,binomial:renderBinomial,poisson:renderPoisson,
+        normal:renderNormal,chisq:renderChiSq,tdist:renderT,fdist:renderF};
+      vis[S.dist]?.();
+      const cod={bernoulli:codeBernoulli,binomial:codeBinomial,poisson:codePoisson,
+        normal:codeNormal,chisq:codeChiSq,tdist:codeT,fdist:codeF};
+      document.getElementById('code-scroll').innerHTML=cod[S.dist]?.()||'';
+      const {cls,html}=getAnn();
+      const ab=document.getElementById('ann-box');
+      ab.className='ann show '+cls; ab.innerHTML=html;
+    }
+
+    // === EVENT HANDLERS ===
+    function setDist(d){S.dist=d;S.changed='dist';render();}
+
+    function sliderH(key,inp){
+      S[key]=parseFloat(inp.value); S.changed=key;
+      const sv=document.getElementById('sv-'+inp.id.slice(3));
+      if(sv){
+        const intK=new Set(['binom_n','chi_df','t_df','f_df1','f_df2']);
+        const one=new Set(['pois_lambda','norm_mu','norm_sigma','norm_cutoff']);
+        sv.textContent=intK.has(key)?String(Math.round(S[key])):one.has(key)?S[key].toFixed(1):S[key].toFixed(2);
+      }
+      if(key==='binom_n'){
+        document.getElementById('cs-binom-overlay').style.display=S.binom_n>=20?'':'none';
+        if(S.binom_n<20&&S.binom_overlay){S.binom_overlay=false;document.getElementById('btn-binom-overlay').classList.remove('on');}
+      }
+      if(key==='pois_lambda'){
+        document.getElementById('btn-pois-norm').style.display=S.pois_lambda>=10?'':'none';
+        if(S.pois_lambda<10&&S.pois_norm_overlay){S.pois_norm_overlay=false;document.getElementById('btn-pois-norm').classList.remove('on');}
+      }
+      render();
+    }
+
+    function toggleH(key,btn){
+      S[key]=!S[key]; S.changed=key;
+      btn.classList.toggle('on',S[key]);
+      if(key==='norm_area') document.getElementById('cs-norm-cutoff').style.display=S.norm_area?'':'none';
+      render();
+    }
+
+    // === STUBS (Normal / Chi-sq / t / F — filled in Stages 5–6) ===
+    // === ADDITIONAL MATH (Normal CDF, Chi-square density) ===
+    function erf(x){const s=x>=0?1:-1;x=Math.abs(x);const t=1/(1+.3275911*x);
+      return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x));}
+    function pnorm(x,mu=0,sig=1){return .5*(1+erf((x-mu)/(sig*Math.SQRT2)));}
+    function logGamma(z){
+      if(z<.5)return Math.log(Math.PI/Math.sin(Math.PI*z))-logGamma(1-z);
+      z--;let x=.99999999999980993;
+      [676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,
+       12.507343278686905,-.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7
+      ].forEach((c,i)=>x+=c/(z+i+1));
+      const t=z+7.5;return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x);
+    }
+    function dchisq(x,df){
+      if(x<=0)return 0;
+      return Math.exp((df/2-1)*Math.log(x)-x/2-(df/2)*Math.log(2)-logGamma(df/2));
+    }
+    function sampleNormal(){
+      const u1=Math.random(),u2=Math.random();
+      return Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+    }
+
+    // === NORMAL ===
+    function renderNormal(){
+      const{s,W,H}=getSvg('svg-normal');
+      const mu=S.norm_mu,sig=S.norm_sigma;
+      const mL=52,mR=10,mT=22,mB=36,cW=W-mL-mR,cH=H-mT-mB;
+      const span=Math.max(4.5*sig,3);
+      const xMin=mu-span,xMax=mu+span;
+      const xp=x=>mL+(x-xMin)/(xMax-xMin)*cW;
+      const maxY=dnorm(mu,mu,sig)*1.2,sy=v=>mT+cH*(1-v/maxY);
+      let h='';
+      for(let t=0;t<=4;t++){const v=maxY*t/4,yy=sy(v);
+        h+=`<line x1="${mL-3}" y1="${yy}" x2="${mL+cW}" y2="${yy}" stroke="var(--border)" stroke-width="${t===0?1.5:.5}" stroke-dasharray="${t>0?'3,3':''}"/>`;
+        h+=`<text x="${mL-7}" y="${yy+4}" text-anchor="end" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${v.toFixed(2)}</text>`;
+      }
+      h+=`<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      h+=`<line x1="${mL}" y1="${mT+cH}" x2="${mL+cW}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      for(let x=Math.ceil(xMin);x<=Math.floor(xMax);x++){const xx=xp(x);
+        h+=`<line x1="${xx}" y1="${mT+cH}" x2="${xx}" y2="${mT+cH+4}" stroke="var(--border)" stroke-width="1"/>`;
+        h+=`<text x="${xx}" y="${mT+cH+14}" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" fill="var(--muted)">${x}</text>`;
+      }
+      if(S.norm_area){
+        const cx=S.norm_cutoff,xc=xp(cx);
+        let sp=`M${mL},${mT+cH}`;
+        for(let x=xMin;x<=cx;x+=.04)sp+=` L${xp(x)},${sy(dnorm(x,mu,sig))}`;
+        sp+=` L${xc},${mT+cH} Z`;
+        h+=`<path d="${sp}" fill="var(--c-norm)" opacity=".2"/>`;
+        h+=`<line x1="${xc}" y1="${mT}" x2="${xc}" y2="${mT+cH}" stroke="var(--c-norm)" stroke-width="1.5" stroke-dasharray="4,2"/>`;
+        const p=pnorm(cx,mu,sig),lx=Math.min(xc-4,(mL+xc)/2);
+        h+=`<text x="${lx}" y="${mT+cH-10}" text-anchor="middle" font-size="10.5" font-family="DM Sans,sans-serif" fill="var(--c-norm)" font-weight="600">P(X&lt;${cx.toFixed(1)}) = ${p.toFixed(3)}</text>`;
+      }
+      if(S.norm_standardize&&(mu!==0||sig!==1)){
+        let pts='';for(let x=xMin;x<=xMax;x+=.04)pts+=`${pts?'L':'M'}${xp(x)},${sy(dnorm(x,0,1))}`;
+        h+=`<path d="${pts}" fill="none" stroke="var(--c-norm)" stroke-width="1.5" stroke-dasharray="5,3" opacity=".55"/>`;
+        h+=`<text x="${xp(0)+5}" y="${sy(dnorm(0,0,1))-6}" font-size="9.5" font-family="DM Sans,sans-serif" fill="var(--c-norm)" opacity=".75">N(0,1)</text>`;
+      }
+      let pts='';for(let x=xMin;x<=xMax;x+=.04)pts+=`${pts?'L':'M'}${xp(x)},${sy(dnorm(x,mu,sig))}`;
+      h+=`<path d="${pts}" fill="none" stroke="var(--c-norm)" stroke-width="2.5"/>`;
+      h+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" fill="var(--muted)">Normal(μ = ${mu.toFixed(1)}, σ = ${sig.toFixed(1)})</text>`;
+      s.innerHTML=h;
+      document.getElementById('stats-normal').innerHTML=
+        `mean (μ): <span class="val">${mu.toFixed(1)}</span>&emsp;SD (σ): <span class="val">${sig.toFixed(1)}</span>&emsp;variance (σ²): <span class="val">${(sig*sig).toFixed(2)}</span>`;
+    }
+
+    function codeNormal(){
+      const mu=S.norm_mu.toFixed(1),sig=S.norm_sigma.toFixed(1);
+      let out=clc('# Normal: defined entirely by mean and SD')+
+        cl('cl-norm',`mu <- <span class="sn">${mu}</span>; sigma <- <span class="sn">${sig}</span>`)+
+        cl('cl-norm',`<span class="sf">dnorm</span>(x, <span class="sk">mean</span> = mu, <span class="sk">sd</span> = sigma)    <span class="sc"># density at x</span>`)+
+        cl('cl-norm',`<span class="sf">pnorm</span>(q, <span class="sk">mean</span> = mu, <span class="sk">sd</span> = sigma)    <span class="sc"># P(X &lt; q)</span>`)+
+        cl('cl-norm',`<span class="sf">qnorm</span>(p, <span class="sk">mean</span> = mu, <span class="sk">sd</span> = sigma)    <span class="sc"># quantile (inverse)</span>`)+
+        cl('cl-norm',`<span class="sf">rnorm</span>(<span class="sk">n</span> = <span class="sn">100</span>, <span class="sk">mean</span> = mu, <span class="sk">sd</span> = sigma)  <span class="sc"># simulate</span>`);
+      if(S.norm_area){
+        const p=pnorm(S.norm_cutoff,S.norm_mu,S.norm_sigma);
+        out+=clc(`# P(X < ${S.norm_cutoff.toFixed(1)}) = ${p.toFixed(4)}`);
+      }
+      return out;
+    }
+
+    // === CHI-SQUARE DRAW FUNCTIONS ===
+    function chiDrawOne(){
+      const k=S.chi_df,z=Array.from({length:k},()=>sampleNormal());
+      const zsq=z.map(v=>v*v),sum=zsq.reduce((a,b)=>a+b,0);
+      S.chi_last={z,zsq,sum}; S.chi_samples.push(sum); S.changed='chi_draw'; render();
+    }
+    function chiDraw1000(){
+      for(let i=0;i<1000;i++){let s=0;for(let j=0;j<S.chi_df;j++){const z=sampleNormal();s+=z*z;}S.chi_samples.push(s);}
+      S.chi_last=null; S.changed='chi_1000'; render();
+    }
+    function chiReset(){S.chi_samples=[];S.chi_last=null;S.changed='chi_reset';render();}
+
+    // === CHI-SQUARE RENDER ===
+    function renderChiSq(){renderChiIngr();renderChiHist();}
+
+    function renderChiIngr(){
+      const{s,W,H}=getSvg('svg-chi-ingr');
+      const df=S.chi_df;
+      let h='';
+      if(!S.chi_last){
+        h=`<text x="${W/2}" y="${H/2+4}" text-anchor="middle" font-size="12" font-family="DM Sans,sans-serif" fill="var(--muted)">Click "Draw one" to see k = ${df} values from N(0,1)</text>`;
+        s.innerHTML=h; document.getElementById('stat-chi-ingr').innerHTML=''; return;
+      }
+      const{z,zsq,sum}=S.chi_last;
+      const xMin=-3.5,xMax=3.5,mL=28,mR=12,mT=22,cW=W-mL-mR;
+      const xp=v=>mL+(v-xMin)/(xMax-xMin)*cW,lineY=mT+14;
+      h+=`<line x1="${mL}" y1="${lineY}" x2="${mL+cW}" y2="${lineY}" stroke="var(--border)" stroke-width="1.5"/>`;
+      [-3,-2,-1,0,1,2,3].forEach(v=>{const xx=xp(v);
+        h+=`<line x1="${xx}" y1="${lineY-3}" x2="${xx}" y2="${lineY+3}" stroke="var(--border)" stroke-width="1"/>`;
+        h+=`<text x="${xx}" y="${lineY+13}" text-anchor="middle" font-size="9" font-family="DM Sans,sans-serif" fill="var(--muted)">${v}</text>`;
+      });
+      h+=`<text x="${mL+cW+5}" y="${lineY+4}" font-size="9" font-family="DM Sans,sans-serif" fill="var(--muted)">z</text>`;
+      const dotCols=['#e8a030','#4eaaec','#52c97e','#b87fd4','#e05c5c','#5b9bd5','#c89850',
+        '#e67e22','#3498db','#27ae60','#9b59b6','#e74c3c','#2980b9','#f39c12','#1abc9c',
+        '#d35400','#8e44ad','#c0392b','#16a085','#e8a030'];
+      z.forEach((zv,i)=>{
+        const xx=xp(Math.max(xMin+.1,Math.min(xMax-.1,zv))),col=dotCols[i%dotCols.length];
+        h+=`<circle cx="${xx}" cy="${lineY}" r="5" fill="${col}" opacity=".88"/>`;
+        if(df<=10)h+=`<text x="${xx}" y="${lineY-9}" text-anchor="middle" font-size="8" font-family="Fira Code,monospace" fill="${col}">${zv.toFixed(2)}</text>`;
+      });
+      h+=`<text x="${W/2}" y="${H-6}" text-anchor="middle" font-size="11" font-family="Fira Code,monospace" fill="var(--c-hi)" font-weight="600">Σ(z²) = ${sum.toFixed(3)}</text>`;
+      s.innerHTML=h;
+      const ms=Math.min(df,7);
+      document.getElementById('stat-chi-ingr').innerHTML=
+        `z: [${z.slice(0,ms).map(v=>v.toFixed(2)).join(', ')}${df>7?', …':''}]&emsp;`+
+        `z²: [${zsq.slice(0,ms).map(v=>v.toFixed(2)).join(', ')}${df>7?', …':''}]&emsp;sum = <span class="hi-gold">${sum.toFixed(3)}</span>`;
+    }
+
+    function renderChiHist(){
+      const{s,W,H}=getSvg('svg-chi-hist');
+      const df=S.chi_df;
+      if(!S.chi_samples.length){
+        s.innerHTML=`<text x="${W/2}" y="${H/2+4}" text-anchor="middle" font-size="12" font-family="DM Sans,sans-serif" fill="var(--muted)">No draws yet. Press "Draw one" or "Draw 1000"</text>`;
+        document.getElementById('stat-chi-hist').innerHTML=''; return;
+      }
+      const mL=48,mR=10,mT=18,mB=32,cW=W-mL-mR,cH=H-mT-mB;
+      const xMax=Math.max(df*4,Math.max(...S.chi_samples))*1.05;
+      const nBins=Math.max(15,Math.min(40,Math.floor(S.chi_samples.length/8)));
+      const bw=xMax/nBins,bins=Array(nBins).fill(0);
+      S.chi_samples.forEach(v=>{const bi=Math.min(nBins-1,Math.floor(v/bw));if(bi>=0)bins[bi]++;});
+      const dens=bins.map(c=>c/(S.chi_samples.length*bw));
+      const chiPeak=df<=2?dchisq(.5,df):dchisq(Math.max(.1,df-2),df);
+      const maxD=Math.max(...dens,S.chi_overlay?chiPeak:0)*1.15;
+      const sy=v=>mT+cH*(1-v/maxD),xp=v=>mL+v/xMax*cW;
+      let h='';
+      for(let t=0;t<=3;t++){const v=maxD*t/3,yy=sy(v);
+        h+=`<line x1="${mL-3}" y1="${yy}" x2="${mL+cW}" y2="${yy}" stroke="var(--border)" stroke-width="${t===0?1.5:.5}" stroke-dasharray="${t>0?'3,3':''}"/>`;
+        h+=`<text x="${mL-6}" y="${yy+4}" text-anchor="end" font-size="9" font-family="Fira Code,monospace" fill="var(--muted)">${v.toFixed(2)}</text>`;
+      }
+      h+=`<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      h+=`<line x1="${mL}" y1="${mT+cH}" x2="${mL+cW}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      const xStep=Math.ceil(xMax/5);
+      for(let x=0;x<=xMax;x+=xStep){const xx=xp(x);
+        h+=`<line x1="${xx}" y1="${mT+cH}" x2="${xx}" y2="${mT+cH+4}" stroke="var(--border)" stroke-width="1"/>`;
+        h+=`<text x="${xx}" y="${mT+cH+14}" text-anchor="middle" font-size="9.5" font-family="DM Sans,sans-serif" fill="var(--muted)">${Math.round(x)}</text>`;
+      }
+      dens.forEach((d,i)=>{const bh=cH*(d/maxD),x0=xp(i*bw),x1=xp((i+1)*bw);
+        h+=`<rect x="${x0}" y="${sy(d)}" width="${Math.max(1,x1-x0-1)}" height="${bh}" fill="var(--c-chi)" opacity=".82"/>`;
+      });
+      if(S.chi_last){
+        const tx=xp(Math.min(S.chi_last.sum,xMax*.98));
+        h+=`<line x1="${tx}" y1="${mT}" x2="${tx}" y2="${mT+cH+4}" stroke="var(--c-hi)" stroke-width="2.5"/>`;
+        h+=`<circle cx="${tx}" cy="${mT+4}" r="4" fill="var(--c-hi)"/>`;
+        h+=`<text x="${tx+5}" y="${mT+14}" font-size="10" font-family="Fira Code,monospace" fill="var(--c-hi)" font-weight="600">${S.chi_last.sum.toFixed(2)}</text>`;
+      }
+      if(S.chi_overlay){
+        const xStart=df===1?.05:.1;
+        let pts='';
+        for(let x=xStart;x<=xMax;x+=xMax/300){const yd=dchisq(x,df);if(isFinite(yd)&&yd<maxD*2)pts+=`${pts?'L':'M'}${xp(x)},${sy(Math.min(yd,maxD*1.05))}`;}
+        h+=`<path d="${pts}" fill="none" stroke="var(--text)" stroke-width="1.8" opacity=".7"/>`;
+        const mx=df<=2?.5:df-2,lx=xp(mx*1.3),ly=sy(dchisq(mx,df));
+        h+=`<text x="${lx}" y="${Math.max(ly-6,mT+12)}" font-size="9.5" font-family="DM Sans,sans-serif" fill="var(--text)">χ²(${df})</text>`;
+      }
+      const mn=(S.chi_samples.reduce((a,b)=>a+b,0)/S.chi_samples.length).toFixed(2);
+      h+=`<text x="${W/2}" y="${mT-3}" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" fill="var(--muted)">${S.chi_samples.length} draws · df = ${df}</text>`;
+      s.innerHTML=h;
+      document.getElementById('stat-chi-hist').innerHTML=
+        `<span class="hi">${S.chi_samples.length}</span> draw${S.chi_samples.length===1?'':'s'}&emsp;sample mean: <span class="hi">${mn}</span>&emsp;theoretical mean: <span class="hi">${df}</span>`;
+    }
+
+    function codeChiSq(){
+      const k=S.chi_df;
+      return clc('# Chi-square = sum of k squared standard normals')+
+        cl('cl-chi',`k <- <span class="sn">${k}</span>   <span class="sc"># degrees of freedom</span>`)+
+        clc('# Simulate one value from scratch:')+
+        cl('cl-chi',`z <- <span class="sf">rnorm</span>(<span class="sn">${k}</span>, <span class="sk">mean</span> = <span class="sn">0</span>, <span class="sk">sd</span> = <span class="sn">1</span>)`)+
+        cl('cl-chi',`chi_sq_value <- <span class="sf">sum</span>(z<span class="so">^</span><span class="sn">2</span>)   <span class="sc"># this IS χ²(k)</span>`)+
+        clc('# Built-in chi-square functions:')+
+        cl('cl-chi',`<span class="sf">dchisq</span>(x, <span class="sk">df</span> = k)       <span class="sc"># density</span>`)+
+        cl('cl-chi',`<span class="sf">pchisq</span>(q, <span class="sk">df</span> = k)       <span class="sc"># P(X &lt; q)</span>`)+
+        cl('cl-chi',`<span class="sf">rchisq</span>(<span class="sk">n</span> = <span class="sn">100</span>, <span class="sk">df</span> = k)  <span class="sc"># simulate directly</span>`);
+    }
+    function renderT(){}
+    function codeT(){return clc('# select t-distribution in the tree above');}
+    function renderF(){}
+    function codeF(){return clc('# select F-distribution in the tree above');}
+    function chiDrawOne(){} function chiDraw1000(){} function chiReset(){}
+    function tDrawOne(){} function tDraw1000(){} function tReset(){}
+    function fDrawOne(){} function fDraw1000(){} function fReset(){}
+
+    // === BERNOULLI ===
+    function renderBernoulli(){
+      const {s,W,H}=getSvg('svg-bernoulli');
+      const p=S.bern_p,q=1-p;
+      const mL=52,mR=12,mT=22,mB=38,cW=W-mL-mR,cH=H-mT-mB;
+      const sy=v=>mT+cH*(1-v);
+      const bW=Math.min(cW*.22,70);
+      let h='';
+      [0,.25,.5,.75,1].forEach(v=>{const yy=sy(v);
+        h+=`<line x1="${mL-3}" y1="${yy}" x2="${mL+cW}" y2="${yy}" stroke="var(--border)" stroke-width="${v===0?1.5:.5}" stroke-dasharray="${v>0?'3,3':''}"/>`;
+        h+=`<text x="${mL-7}" y="${yy+4}" text-anchor="end" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${v.toFixed(2)}</text>`;
+      });
+      h+=`<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      [[q,'#b4ada4','0'],[p,'var(--c-bern)','1']].forEach(([hh,col,lbl],i)=>{
+        const cx=mL+cW*(i===0?.3:.7),bh=cH*hh;
+        h+=`<rect x="${cx-bW/2}" y="${sy(hh)}" width="${bW}" height="${bh}" fill="${col}" rx="3"/>`;
+        h+=`<text x="${cx}" y="${sy(hh)-7}" text-anchor="middle" font-size="12" font-family="Fira Code,monospace" fill="var(--text)" font-weight="600">${hh.toFixed(2)}</text>`;
+        h+=`<text x="${cx}" y="${mT+cH+18}" text-anchor="middle" font-size="12" font-family="DM Sans,sans-serif" fill="var(--muted)">X = ${lbl}</text>`;
+      });
+      h+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" fill="var(--muted)">P(X=1) = p = ${p.toFixed(2)},   P(X=0) = 1−p = ${q.toFixed(2)}</text>`;
+      s.innerHTML=h;
+      document.getElementById('stats-bernoulli').innerHTML=`mean: <span class="val">${p.toFixed(2)}</span>&emsp;variance: <span class="val">${(p*q).toFixed(3)}</span>`;
+    }
+
+    function codeBernoulli(){
+      const p=S.bern_p.toFixed(2);
+      return clc('# Bernoulli is Binomial with size = 1')+
+        cl('cl-bern',`p <- <span class="sn">${p}</span>`)+
+        cl('cl-bern',`<span class="sf">dbinom</span>(<span class="sn">1</span>, <span class="sk">size</span> = <span class="sn">1</span>, <span class="sk">prob</span> = p)   <span class="sc"># P(X = 1) = p</span>`)+
+        cl('cl-bern',`<span class="sf">dbinom</span>(<span class="sn">0</span>, <span class="sk">size</span> = <span class="sn">1</span>, <span class="sk">prob</span> = p)   <span class="sc"># P(X = 0) = 1−p</span>`)+
+        cl('cl-bern',`<span class="sf">rbinom</span>(<span class="sk">n</span> = <span class="sn">10</span>, <span class="sk">size</span> = <span class="sn">1</span>, <span class="sk">prob</span> = p)  <span class="sc"># 10 coin flips</span>`);
+    }
+
+    // === BINOMIAL ===
+    function renderBinomial(){
+      const {s,W,H}=getSvg('svg-binomial');
+      const n=S.binom_n,p=S.binom_p;
+      const mL=52,mR=10,mT=20,mB=36,cW=W-mL-mR,cH=H-mT-mB;
+      const probs=Array.from({length:n+1},(_,k)=>dbinom(k,n,p));
+      const maxY=Math.max(...probs)*1.15;
+      const sy=v=>mT+cH*(1-v/maxY),bW=Math.max(1.5,cW/(n+2)*.85),xp=k=>mL+(k+.5)*cW/(n+1);
+      let h='';
+      for(let t=0;t<=4;t++){const v=maxY*t/4,yy=sy(v);
+        h+=`<line x1="${mL-3}" y1="${yy}" x2="${mL+cW}" y2="${yy}" stroke="var(--border)" stroke-width="${t===0?1.5:.5}" stroke-dasharray="${t>0?'3,3':''}"/>`;
+        h+=`<text x="${mL-7}" y="${yy+4}" text-anchor="end" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${v<.05?v.toFixed(3):v.toFixed(2)}</text>`;
+      }
+      h+=`<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      h+=`<line x1="${mL}" y1="${mT+cH}" x2="${mL+cW}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      const lstep=n<=20?5:n<=50?10:20;
+      probs.forEach((pr,k)=>{const bh=cH*(pr/maxY);
+        h+=`<rect x="${xp(k)-bW/2}" y="${sy(pr)}" width="${bW}" height="${bh}" fill="var(--c-binom)" rx="${Math.min(2,bW/3)}" opacity=".88"/>`;
+        if(k%lstep===0)h+=`<text x="${xp(k)}" y="${mT+cH+15}" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" fill="var(--muted)">${k}</text>`;
+      });
+      if(S.binom_overlay&&n>=20){
+        const mu=n*p,sig=Math.sqrt(n*p*(1-p));
+        let pts='';for(let x=-.5;x<=n+.5;x+=.15)pts+=`${pts?'L':'M'}${xp(x)},${sy(dnorm(x,mu,sig))}`;
+        h+=`<path d="${pts}" fill="none" stroke="var(--c-norm)" stroke-width="2" opacity=".85"/>`;
+      }
+      const mu=(n*p).toFixed(2),sd=Math.sqrt(n*p*(1-p)).toFixed(2);
+      h+=`<text x="${W/2}" y="13" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" fill="var(--muted)">mean = np = ${mu},   SD = √(np(1−p)) = ${sd}</text>`;
+      s.innerHTML=h;
+      document.getElementById('stats-binomial').innerHTML=`mean: <span class="val">${mu}</span>&emsp;SD: <span class="val">${sd}</span>`;
+    }
+
+    function codeBinomial(){
+      const n=S.binom_n,p=S.binom_p.toFixed(2);
+      return clc('# k successes in n independent Bernoulli trials')+
+        cl('cl-binom',`n <- <span class="sn">${n}</span>; p <- <span class="sn">${p}</span>`)+
+        cl('cl-binom',`<span class="sf">dbinom</span>(k, <span class="sk">size</span> = n, <span class="sk">prob</span> = p)   <span class="sc"># P(X = k)</span>`)+
+        cl('cl-binom',`<span class="sf">pbinom</span>(k, <span class="sk">size</span> = n, <span class="sk">prob</span> = p)   <span class="sc"># P(X ≤ k)</span>`)+
+        cl('cl-binom',`<span class="sf">rbinom</span>(<span class="sk">n</span> = <span class="sn">100</span>, <span class="sk">size</span> = n, <span class="sk">prob</span> = p)  <span class="sc"># simulate</span>`);
+    }
+
+    // === POISSON ===
+    function renderPoisson(){
+      const {s,W,H}=getSvg('svg-poisson');
+      const lam=S.pois_lambda;
+      const kmax=Math.max(10,Math.ceil(lam+4*Math.sqrt(lam)+1));
+      const probs=Array.from({length:kmax+1},(_,k)=>dpois(k,lam));
+      const maxY=Math.max(...probs)*1.15;
+      const mL=52,mR=10,mT=20,mB=36,cW=W-mL-mR,cH=H-mT-mB;
+      const sy=v=>mT+cH*(1-v/maxY),bW=Math.max(2,cW/(kmax+2)*.85),xp=k=>mL+(k+.5)*cW/(kmax+1);
+      let h='';
+      for(let t=0;t<=4;t++){const v=maxY*t/4,yy=sy(v);
+        h+=`<line x1="${mL-3}" y1="${yy}" x2="${mL+cW}" y2="${yy}" stroke="var(--border)" stroke-width="${t===0?1.5:.5}" stroke-dasharray="${t>0?'3,3':''}"/>`;
+        h+=`<text x="${mL-7}" y="${yy+4}" text-anchor="end" font-size="10" font-family="Fira Code,monospace" fill="var(--muted)">${v<.05?v.toFixed(3):v.toFixed(2)}</text>`;
+      }
+      h+=`<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      h+=`<line x1="${mL}" y1="${mT+cH}" x2="${mL+cW}" y2="${mT+cH}" stroke="var(--border)" stroke-width="1.5"/>`;
+      if(S.pois_binom_overlay){
+        const bn=500,bp=lam/500;
+        Array.from({length:kmax+1},(_,k)=>dbinom(k,bn,bp)).forEach((pr,k)=>{
+          const bh=cH*(pr/maxY);
+          h+=`<rect x="${xp(k)-bW*.9}" y="${sy(pr)}" width="${bW*.9}" height="${bh}" fill="var(--c-binom)" opacity=".45" rx="${Math.min(2,bW/3)}"/>`;
+        });
+      }
+      const lstep=kmax<=15?5:kmax<=30?5:10;
+      probs.forEach((pr,k)=>{const bh=cH*(pr/maxY);
+        h+=`<rect x="${xp(k)-bW/2}" y="${sy(pr)}" width="${bW}" height="${bh}" fill="var(--c-pois)" rx="${Math.min(2,bW/3)}" opacity=".88"/>`;
+        if(k%lstep===0)h+=`<text x="${xp(k)}" y="${mT+cH+15}" text-anchor="middle" font-size="10" font-family="DM Sans,sans-serif" fill="var(--muted)">${k}</text>`;
+      });
+      if(S.pois_norm_overlay&&lam>=10){
+        let pts='';for(let x=0;x<=kmax;x+=.2)pts+=`${pts?'L':'M'}${xp(x)},${sy(dnorm(x,lam,Math.sqrt(lam)))}`;
+        h+=`<path d="${pts}" fill="none" stroke="var(--c-norm)" stroke-width="2" opacity=".8"/>`;
+      }
+      h+=`<text x="${W/2}" y="13" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif" fill="var(--muted)">Poisson(λ = ${lam.toFixed(1)})</text>`;
+      s.innerHTML=h;
+      document.getElementById('stats-poisson').innerHTML=`mean: <span class="val">${lam.toFixed(1)}</span>&emsp;variance: <span class="val">${lam.toFixed(1)}</span>&emsp;<em style="font-size:.75rem">mean = variance (Poisson property)</em>`;
+    }
+
+    function codePoisson(){
+      const lam=S.pois_lambda.toFixed(1);
+      return clc('# Count of rare events in a fixed window: mean = variance = λ')+
+        cl('cl-pois',`lambda <- <span class="sn">${lam}</span>`)+
+        cl('cl-pois',`<span class="sf">dpois</span>(k, <span class="sk">lambda</span> = lambda)     <span class="sc"># P(X = k)</span>`)+
+        cl('cl-pois',`<span class="sf">ppois</span>(k, <span class="sk">lambda</span> = lambda)     <span class="sc"># P(X ≤ k)</span>`)+
+        cl('cl-pois',`<span class="sf">rpois</span>(<span class="sk">n</span> = <span class="sn">100</span>, <span class="sk">lambda</span> = lambda)  <span class="sc"># simulate</span>`);
+    }
+
+    // === ANNOTATION ===
+    function getAnn(){
+      const d=S.dist,ch=S.changed,mu=S.norm_mu,sig=S.norm_sigma,df=S.chi_df;
+      if(ch==='welcome') return{cls:'ann-welcome',html:`<strong>Distribution Family Explorer</strong><br><br>
+        Click any node in the family tree above to explore a distribution. Each node shows a live chart,
+        R code, and an explanation of how it connects to the rest of the family.<br><br>
+        The tree traces one chain of relationships: Bernoulli → Binomial → Normal → Chi-square → t and F.
+        Binomial also converges to Poisson when n is large and p is small.<br><br>
+        Start with <strong>Bernoulli</strong>—it is the "Patient 0" everything else is built from.`};
+      if(d==='bernoulli') return{cls:'ann-bern',html:`<strong>Bernoulli: the "Patient 0" of the family</strong><br><br>
+        A Bernoulli trial has exactly two outcomes: success (probability <code>p</code>) and failure
+        (probability <code>1−p</code>). It is the simplest possible random variable representinga single biased coin flip.
+        Every distribution in this family descends from stacking, summing, or transforming Bernoulli trials.<br><br>
+        Move p toward 0 or 1 and watch the two bars trade height. At p = 0.5 the bars are equal, representing maximum uncertainty.`};
+      if(d==='binomial'){
+        if(S.binom_overlay&&S.binom_n>=20) return{cls:'ann-binom',html:`<strong>Binomial → Normal (CLT)</strong><br><br>
+          The purple curve is Normal(μ = np = ${(S.binom_n*S.binom_p).toFixed(1)},
+          σ = √(np(1−p)) = ${Math.sqrt(S.binom_n*S.binom_p*(1-S.binom_p)).toFixed(2)}).
+          At n = ${S.binom_n} the match is nearly exact. This is the Central Limit Theorem:
+          sums of many independent random variables converge to Normal regardless of the shape
+          of the original variable. This is why Normal probabilities can approximate Binomial probabilities at large n.`};
+        if(S.binom_n>=20) return{cls:'ann-binom',html:`<strong>Binomial approaching Normal</strong><br><br>
+          With n = ${S.binom_n} the bars already look bell-shaped. Turn on <em>Show Normal overlay</em>
+          to see how closely Normal(np, np(1−p)) fits. This convergence is the Central Limit Theorem.`};
+        return{cls:'ann-binom',html:`<strong>Binomial distribution</strong><br><br>
+          Each bar shows the probability of exactly that many successes in <code>${S.binom_n}</code>
+          independent Bernoulli trials, each with <code>p = ${S.binom_p.toFixed(2)}</code>.
+          The Binomial is a sum of n Bernoulli trials.<br><br>
+          Crank n up to 50 or 100 and watch the bars become a bell curve; that's the
+          Central Limit Theorem. The Normal overlay (available at n ≥ 20) makes it explicit.`};
+      }
+      if(d==='poisson'){
+        if(S.pois_binom_overlay) return{cls:'ann-pois',html:`<strong>Poisson = limit of Binomial</strong><br><br>
+          Blue bars: Binomial(n = 500, p = λ/500 = ${(S.pois_lambda/500).toFixed(4)}).
+          Green bars: Poisson(λ = ${S.pois_lambda.toFixed(1)}). They are nearly identical.
+          Poisson is what Binomial converges to as n → ∞ and p → 0 with np = λ fixed.
+          Notice that Poisson has no fixed n; that's because it describes events arriving continuously (calls per hour, typos per page).`};
+        return{cls:'ann-pois',html:`<strong>Poisson distribution</strong><br><br>
+          Poisson(λ) counts rare events in a fixed window. λ is both the mean and the variance—this 
+          equality (<code>mean = variance = λ</code>) is a signature of the Poisson and a useful
+          diagnostic when modeling count data.<br><br>
+          It looks like Binomial because it <em>is</em> the limiting case of Binomial(n large, p small, np = λ).
+          Turn on <em>Binomial (same mean)</em> to see the convergence directly.`};
+      }
+      if(d==='normal'){
+        if(S.norm_standardize&&(mu!==0||sig!==1)) return{cls:'ann-norm',html:
+          `<strong>Standardizing to N(0,1)</strong><br><br>
+          The dashed curve is N(0,1). Any Normal value can be standardized: z = (x − μ) / σ.
+          This shifts by μ and scales by σ to produce a standard Normal.
+          Standard Normal tables (z-tables) work for any Normal distribution because you can
+          always standardize first—that's why the z-score is such a central concept.`};
+        if(S.norm_area) return{cls:'ann-norm',html:
+          `<strong>P(X &lt; ${S.norm_cutoff.toFixed(1)}) = ${pnorm(S.norm_cutoff,mu,sig).toFixed(3)}</strong><br><br>
+          The shaded area is the probability that Normal(μ = ${mu.toFixed(1)}, σ = ${sig.toFixed(1)}) falls
+          below the cutoff. In R: <code>pnorm(${S.norm_cutoff.toFixed(1)}, mean = ${mu.toFixed(1)}, sd = ${sig.toFixed(1)})</code>.
+          Move the cutoff slider and watch the area update in real time. This is the
+          foundation of p-values whenever a test statistic follows a Normal distribution.`};
+        return{cls:'ann-norm',html:
+          `<strong>Normal distribution</strong><br><br>
+          The Normal is symmetric and bell-shaped, fully defined by its mean (μ = ${mu.toFixed(1)})
+          and standard deviation (σ = ${sig.toFixed(1)}). It sits at the center of the family tree because
+          the CLT says sums of many random variables converge to Normal regardless of the original shape.<br><br>
+          Move σ to widen or narrow the curve. Move μ to shift it. Try <em>Show N(0,1) overlay</em>
+          to compare. Notice that the shapes are identical; only the scale differs.`};
+      }
+      if(d==='chisq'){
+        if(!S.chi_samples.length) return{cls:'ann-chi',html:
+          `<strong>The Chi-square is built from the Normal</strong><br><br>
+          Chi-square is not a separate invention: square k standard Normal values and add them up.
+          That sum follows χ²(k). Click <em>Draw one</em> to watch it happen: The ingredient panel shows
+          where each z value landed on the N(0,1) line, then they get squared and summed.<br><br>
+          The distribution is right-skewed because squared values are always ≥ 0 but occasionally
+          large. As df grows the mean shifts right (mean = df) and the shape becomes more symmetric.`};
+        if(S.chi_last){const{z,zsq,sum}=S.chi_last;return{cls:'ann-chi',html:
+          `<strong>That χ² value = ${sum.toFixed(3)}</strong><br><br>
+          It came from ${df} draws: [${z.slice(0,5).map(v=>v.toFixed(2)).join(', ')}${df>5?', …':''}].
+          Each was squared (always ≥ 0) and summed. Small draws pile up near zero; large draws
+          create the right tail. The gold tick on the histogram marks exactly where ${sum.toFixed(3)} landed.<br><br>
+          The sample variance s² has a chi-square relationship: (n−1)s²/σ² ~ χ²(n−1). That is
+          why chi-square describes how sample variances vary, just as Normal describes how means vary.`};}
+        return{cls:'ann-chi',html:
+          `<strong>Chi-square histogram (${S.chi_samples.length} draws)</strong><br><br>
+          Each bar counts how often the sum of ${df} squared standard normals fell in that range.
+          Turn on <em>Show χ²(k) curve</em> to overlay the theoretical density; it should match
+          the histogram closely at 1000 draws.<br><br>
+          Watch the sample mean converge to df = ${df} as you add more draws. This is the
+          Law of Large Numbers in action.`};
+      }
+      // t / F — filled in next stage
+      return{cls:'ann-'+d,html:`<strong>${DIST_LABELS[d]}</strong> — coming in the next stage.`};
+    }
+
+    // === RESET ===
+    function resetAll(){
+      S=freshState(); S.changed='welcome';
+      [['sl-bern-p','sv-bern-p',DEFAULTS.bern_p.toFixed(2)],
+       ['sl-binom-n','sv-binom-n',String(DEFAULTS.binom_n)],
+       ['sl-binom-p','sv-binom-p',DEFAULTS.binom_p.toFixed(2)],
+       ['sl-pois-lam','sv-pois-lam',DEFAULTS.pois_lambda.toFixed(1)],
+       ['sl-norm-mu','sv-norm-mu',DEFAULTS.norm_mu.toFixed(1)],
+       ['sl-norm-sigma','sv-norm-sigma',DEFAULTS.norm_sigma.toFixed(1)],
+       ['sl-norm-cutoff','sv-norm-cutoff',DEFAULTS.norm_cutoff.toFixed(1)],
+       ['sl-chi-df','sv-chi-df',String(DEFAULTS.chi_df)],
+       ['sl-t-df','sv-t-df',String(DEFAULTS.t_df)],
+       ['sl-f-df1','sv-f-df1',String(DEFAULTS.f_df1)],
+       ['sl-f-df2','sv-f-df2',String(DEFAULTS.f_df2)],
+      ].forEach(([sid,vid,val])=>{
+        const sl=document.getElementById(sid),sv=document.getElementById(vid);
+        if(sl)sl.value=parseFloat(val); if(sv)sv.textContent=val;
+      });
+      document.querySelectorAll('.btn.on,.mbtn.on').forEach(b=>b.classList.remove('on'));
+      document.getElementById('cs-binom-overlay').style.display='none';
+      document.getElementById('btn-pois-norm').style.display='none';
+      document.getElementById('cs-norm-cutoff').style.display='none';
+      render();
+    }
+
+    // === COPY CODE ===
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // === TOOLTIP ===
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      if (tip.style.display === 'block') {
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+      }
+    });
+
+    // === INIT ===
+    render();
+  </script>
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
+</body>
+</html>
