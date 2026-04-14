@@ -134,6 +134,8 @@
     }
     .mbtn:hover { border-color: var(--accent); color: var(--accent); }
     .mbtn.on { background: var(--accent); border-color: var(--accent); color: white; }
+    .mbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .mbtn:disabled:hover { border-color: var(--border); color: var(--text); }
 
     /* Copy / reset buttons */
     .copy-btn {
@@ -255,7 +257,6 @@
     /* === ANNOTATION BOX === */
     .ann {
       display: none;
-      max-width: 1360px; margin: 0 auto 18px;
       padding: 13px 18px;
       border-radius: 9px; border: 1.5px solid var(--border);
       font-size: 0.84rem; line-height: 1.65;
@@ -408,7 +409,9 @@
           <button class="mbtn" data-val="upper" onclick="setTail(this)">Upper tail: P(X &gt; q)</button>
           <button class="mbtn" data-val="between" onclick="setTail(this)">Between: P(q&#8321; &le; X &le; q&#8322;)</button>
           <button class="mbtn" data-val="outside" onclick="setTail(this)">Outside: P(X &lt; q&#8321; or X &gt; q&#8322;)</button>
+          <button class="mbtn" id="exact-btn" data-val="exact" onclick="setTail(this)" title="For continuous distributions, P(X = x) = 0; only ranges have non-zero probability.">Exact: P(X = k)</button>
         </div>
+        <p class="sub" id="exact-cont-note" style="display:none;margin-top:5px">For continuous distributions, P(X = exact value) = 0; only ranges have non-zero probability. (<code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">dnorm()</code> etc. give density, not probability.)</p>
       </div>
 
       <div class="hr"></div>
@@ -436,6 +439,7 @@
             <span class="param-val" id="v-q2">1.0</span>
           </div>
         </div>
+        <p class="sub" id="discrete-cut-note" style="display:none;margin-top:5px"></p>
       </div>
 
       <div class="hr"></div>
@@ -464,23 +468,24 @@
         <span id="prob-sentence"></span><br>
         <span class="prob-big" id="prob-value"></span>
       </div>
+      <div id="binom-explainer"></div>
     </div>
 
-    <!-- RIGHT: CODE PANEL -->
-    <div class="panel" id="code-panel">
-      <div class="panel-header">
-        <div class="panel-label">R Code</div>
-        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+    <!-- RIGHT: CODE + ANNOTATION COLUMN -->
+    <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+      <div class="panel" id="code-panel">
+        <div class="panel-header">
+          <div class="panel-label">R Code</div>
+          <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+        </div>
+        <div class="code-scroll" id="code-scroll">
+          <!-- populated by JS -->
+        </div>
       </div>
-      <div class="code-scroll" id="code-scroll">
-        <!-- populated by JS -->
-      </div>
+      <div id="ann-box" class="ann"></div>
     </div>
 
   </div>
-
-  <!-- ANNOTATION BOX (below grid) -->
-  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
 
   <div id="code-tip"></div>
 
@@ -644,6 +649,7 @@
     }
 
     function calcProb() {
+      if (S.tail==='exact')   return getPDF(Math.floor(S.q1));
       if (S.tail==='lower')   return getCDF(S.q1);
       if (S.tail==='upper')   return 1 - getCDF(S.q1);
       if (S.tail==='between') {
@@ -675,7 +681,24 @@
     // =====================================================================
     // RENDER
     // =====================================================================
+    function updateDiscreteCutNote() {
+      const note = document.getElementById('discrete-cut-note');
+      if (!note) return;
+      const isDisc = ['binom','pois'].includes(S.dist);
+      if (!isDisc) { note.style.display = 'none'; return; }
+      note.style.display = '';
+      const msgs = {
+        lower:   'P(X \u2264 q): the bar at q is <strong>included</strong>\u2014bars at 0, 1, \u2026, q are all shaded.',
+        upper:   'P(X > q): the bar at q is <strong>not counted</strong>\u2014only bars at q+1, q+2, \u2026 are shaded.',
+        between: 'P(q\u2081 \u2264 X \u2264 q\u2082): <strong>both endpoints are included</strong>\u2014bars from q\u2081 through q\u2082 are shaded.',
+        outside: 'P(X < q\u2081 or X > q\u2082): <strong>both endpoints are excluded</strong>\u2014bars strictly outside the interval are shaded.',
+        exact:   'P(X = k): probability of <strong>exactly k</strong> events\u2014only the single bar at k is shaded.'
+      };
+      note.innerHTML = msgs[S.tail] || '';
+    }
+
     function render() {
+      updateDiscreteCutNote();
       renderMain(); renderCode();
       const {cls, html} = getAnn();
       const a = document.getElementById('ann-box');
@@ -742,6 +765,7 @@
           const inShade =
             (S.tail==='lower'   && k <= Math.floor(S.q1)) ||
             (S.tail==='upper'   && k >  Math.floor(S.q1)) ||
+            (S.tail==='exact'   && k === Math.floor(S.q1)) ||
             (S.tail==='between' && k >= Math.ceil(Math.min(S.q1b,S.q2)) && k <= Math.floor(Math.max(S.q1b,S.q2))) ||
             (S.tail==='outside' && (k < Math.ceil(Math.min(S.q1b,S.q2)) || k > Math.floor(Math.max(S.q1b,S.q2))));
           const bx = (xS(k) - bw/2).toFixed(1);
@@ -757,6 +781,7 @@
                  `<text x="${cx}" y="${yLine+15}" text-anchor="middle" font-size="10" font-family="Fira Code,monospace" fill="${color}">${label} = ${val}</text>`;
         };
         if (S.tail==='lower'||S.tail==='upper') out += cutLineD(Math.floor(S.q1)+0.5, 'q', Math.floor(S.q1));
+        if (S.tail==='exact') out += cutLineD(Math.floor(S.q1), 'k', Math.floor(S.q1));
         if (S.tail==='between'||S.tail==='outside') {
           const qlo=Math.min(S.q1b,S.q2), qhi=Math.max(S.q1b,S.q2);
           out += cutLineD(Math.ceil(qlo)-0.5, 'q\u2081', Math.ceil(qlo));
@@ -797,10 +822,96 @@
         lower:   `P(X \u2264 ${qfmt(S.q1)})`,
         upper:   `P(X > ${qfmt(S.q1)})`,
         between: `P(${qfmt(Math.min(S.q1b,S.q2))} \u2264 X \u2264 ${qfmt(Math.max(S.q1b,S.q2))})`,
-        outside: `P(X < ${qfmt(Math.min(S.q1b,S.q2))} or X > ${qfmt(Math.max(S.q1b,S.q2))})`
+        outside: `P(X < ${qfmt(Math.min(S.q1b,S.q2))} or X > ${qfmt(Math.max(S.q1b,S.q2))})`,
+        exact:   `P(X = ${qfmt(S.q1)})`
       };
       document.getElementById('prob-sentence').innerHTML = `<strong>${DIST_LABEL[S.dist]}</strong> &nbsp; ${sent[S.tail]}`;
       document.getElementById('prob-value').textContent  = `= ${prob.toFixed(4)}`;
+      renderBinomExplainer();
+    }
+
+    function renderBinomExplainer() {
+      const el = document.getElementById('binom-explainer');
+      if (!el) return;
+      if (S.dist !== 'binom') { el.innerHTML = ''; return; }
+
+      const n = S.n, p = S.prob;
+      const isPair = S.tail === 'between' || S.tail === 'outside';
+      // For pair modes, show the mean bar as the example; otherwise use the cutpoint
+      let k = isPair ? Math.round(n * p) : Math.max(0, Math.min(n, Math.floor(S.q1)));
+      k = Math.max(0, Math.min(n, k));
+
+      const chooseNK = Math.round(Math.exp(lchoose(n, k)));
+      const pk       = Math.pow(p, k);
+      const qnk      = Math.pow(1 - p, n - k);
+      const barProb  = chooseNK * pk * qnk;
+
+      // Format a small decimal sensibly
+      const fmt = v => v === 0 ? '0' : v < 0.0001 ? v.toExponential(3) : +v.toPrecision(4);
+
+      // Build the p^k × (1−p)^(n−k) expression string
+      const pDisplay  = p % 1 === 0 ? p : p;
+      const qDisplay  = +(1 - p).toFixed(4);
+      const pkStr     = k === 0   ? `(any p)<sup>0</sup> = 1`
+                                  : `${pDisplay}<sup>${k}</sup> = ${fmt(pk)}`;
+      const qnkStr    = n-k === 0 ? `(any q)<sup>0</sup> = 1`
+                                  : `${qDisplay}<sup>${n-k}</sup> = ${fmt(qnk)}`;
+      const prodStr   = (k === 0 || n-k === 0)
+                        ? `${fmt(pk * qnk)}`
+                        : `${fmt(pk)} &times; ${fmt(qnk)} = <strong>${fmt(pk * qnk)}</strong>`;
+
+      // Explain which k we're showing
+      const kLabel = isPair
+        ? `k = ${k} (the mean: n&thinsp;&times;&thinsp;p = ${n}&thinsp;&times;&thinsp;${p} = ${n*p})`
+        : `k = ${k}`;
+
+      const c = 'var(--c-binom)';
+
+      el.innerHTML = `
+        <div style="border-top:1px solid var(--border);margin-top:11px;padding-top:11px;">
+          <div style="font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:9px;">How do we calculate the probability associated with each bar?</div>
+
+          <div style="font-family:'Fira Code',monospace;font-size:0.83rem;padding:7px 11px;background:#ece8de;border-radius:6px;border-left:3px solid ${c};margin-bottom:9px;">
+            P(X = k) &nbsp;=&nbsp; C(n,&thinsp;k) &nbsp;&times;&nbsp; p<sup>k</sup> &nbsp;&times;&nbsp; (1&minus;p)<sup>n&minus;k</sup>
+          </div>
+
+          <div style="font-size:0.77rem;color:var(--muted);margin-bottom:10px;">
+            Showing <strong style="color:var(--text)">${kLabel}</strong> with n = ${n}, p = ${p}:
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:7px;">
+
+            <div style="padding:8px 11px;border-radius:7px;background:#ece8de;">
+              <div style="font-size:0.75rem;font-weight:700;color:${c};margin-bottom:4px;">&#9312; How many arrangements have exactly ${k} success${k !== 1 ? 'es' : ''}?</div>
+              <div style="font-family:'Fira Code',monospace;font-size:0.8rem;margin-bottom:5px;">
+                C(${n},&thinsp;${k}) = ${n}! &divide; (${k}! &times; ${n-k}!) = <strong>${chooseNK.toLocaleString()}</strong>
+              </div>
+              <div style="font-size:0.76rem;color:var(--muted);line-height:1.55;">
+                ${chooseNK === 1
+                  ? `There is only <strong>1 way</strong> to arrange ${k} success${k!==1?'es':''} in ${n} trials: Every trial ${k===0?'fails':'succeeds'}.`
+                  : `Imagine lining up ${n} trials and marking which ${k} are successes. There are <strong>${chooseNK.toLocaleString()} different orderings</strong>. Every ordering has the same probability, so we count them all and multiply.`}
+              </div>
+            </div>
+
+            <div style="padding:8px 11px;border-radius:7px;background:#ece8de;">
+              <div style="font-size:0.75rem;font-weight:700;color:${c};margin-bottom:4px;">&#9313; What's the probability of one specific ordering?</div>
+              <div style="font-family:'Fira Code',monospace;font-size:0.8rem;margin-bottom:5px;">
+                ${pkStr} &nbsp;&times;&nbsp; ${qnkStr}${k>0&&n-k>0?' = <strong>'+fmt(pk*qnk)+'</strong>':''}
+              </div>
+              <div style="font-size:0.76rem;color:var(--muted);line-height:1.55;">
+                Each success multiplies in p&nbsp;=&nbsp;${p}; each failure multiplies in 1&minus;p&nbsp;=&nbsp;${qDisplay}. Trials are independent, so we multiply—this is the AND rule from probability: P(success&thinsp;&cap;&thinsp;success&thinsp;&cap;&thinsp;failure&thinsp;&cap;&thinsp;&hellip;).
+              </div>
+            </div>
+
+            <div style="padding:8px 11px;border-radius:7px;background:#e6f5ec;border:1px solid #b8ddc4;">
+              <div style="font-size:0.75rem;font-weight:700;color:${c};margin-bottom:4px;">&#9314; Multiply: count &times; probability of one ordering</div>
+              <div style="font-family:'Fira Code',monospace;font-size:0.8rem;">
+                P(X = ${k}) = ${chooseNK.toLocaleString()} &times; ${fmt(pk * qnk)} = <strong>${barProb.toFixed(4)}</strong>
+              </div>
+            </div>
+
+          </div>
+        </div>`;
     }
 
     function renderCode() {
@@ -845,16 +956,13 @@
         lines.push(blank());
       }
 
-      // Probability mass (discrete only, single-cutpoint tails)
-      if (isDisc && isSingle) {
+      // Exact (discrete only): d*() gives point probability, not CDF
+      if (S.tail === 'exact') {
         lines.push(L(cm(`P(X = ${q1f})`)));
         lines.push(L(`${fn(dfns[d])}(${kw('x')} = ${nm(q1f)}${pargs()})`));
-        lines.push(blank());
-      }
-
-      // CDF call(s) — always uses lower.tail default (P(X ≤ q));
-      // upper/outside use 1 - p*() so students learn one convention
-      if (S.tail==='lower') {
+      } else if (S.tail==='lower') {
+        // CDF call(s) — always uses lower.tail default (P(X ≤ q));
+        // upper/outside use 1 - p*() so students learn one convention
         lines.push(L(cm(`P(X \u2264 ${q1f})`)));
         lines.push(L(`${fn(fns[d])}(${kw('q')} = ${qv}${useZ?'':pargs()})`));
       } else if (S.tail==='upper') {
@@ -885,28 +993,29 @@
       const fname = {normal:'pnorm',t:'pt',chisq:'pchisq',f:'pf',binom:'pbinom',pois:'ppois'}[d];
 
       if (c==='welcome') return {cls:'ann-welcome', html:`
-        Pick a distribution on the left to get started. Each one models a different kind of random process.<br><br>
-        The <strong>plot</strong> shows the distribution's shape. The <strong>shaded region</strong> is the probability you're calculating—it's 
-        the area under the curve (or the heights of the bars for discrete distributions) in that region.
-        The <strong>Shade area</strong> buttons let you choose: below a value, above it, between two values, or outside two values.<br><br>
-        The <strong>cutpoint slider</strong> sets where the boundary is. The R code on the right updates live and shows
-        exactly what you'd type to get that probability in R. You can copy it and run it yourself.`};
+        <strong>Here's how this works.</strong><br><br>
+        Pick a <strong>distribution</strong> on the left: Normal, Binomial, Poisson, t, Chi-square, or F. Each one models a different kind of random process, and they each have their own R function.<br><br>
+        The <strong>plot in the middle</strong> shows the distribution's shape. The <strong>shaded region</strong> is the probability you're calculating: the area under the curve for continuous distributions, or the sum of the highlighted bar heights for discrete ones. Use the <strong>Shade area</strong> buttons to choose what region to shade: below a cutpoint, above it, between two values, outside two values, or (for discrete distributions) the probability of one exact value.<br><br>
+        Drag the <strong>cutpoint slider</strong> to move the boundary and watch the shaded area change. The <strong>parameters</strong> (mean, sd, n, &lambda;, df, &hellip;) let you reshape the distribution itself.<br><br>
+        The <strong>R code panel</strong> (top right) updates live and shows exactly what you'd type to get that probability in R...copy it and run it yourself to verify! The colored stripe on the left edge of each line matches the distribution color. This box below the code updates with an explanation each time you click something.`};
 
       const distAnn = {
-        normal: {cls:'ann-normal', html:`<strong>Normal distribution:</strong> the classic bell curve. Describes things that cluster symmetrically around a mean: heights, test scores, measurement error.<br><br>
-          <code>pnorm(q, mean, sd)</code> gives P(X \u2264 q). Two parameters: <code>mean</code> shifts the curve left or right; <code>sd</code> controls how wide it is. Try moving both sliders to see the effect.<br><br>
+        normal: {cls:'ann-normal', html:`<strong>Normal distribution:</strong> the classic bell curve. This distribution describes things that cluster symmetrically around a mean: heights, test scores, measurement error.<br><br>
+          <code>pnorm(q, mean, sd)</code> gives P(X \u2264 q). The function takes two parameters other than the cutoff point: <code>mean</code> shifts the curve left or right; <code>sd</code> controls how wide it is. Try moving both sliders to see the effect.<br><br>
           This is the only distribution here with a <em>Show z-score</em> option below; turn it on to see how standardization works.`},
-        t: {cls:'ann-t', html:`<strong>t distribution</strong> looks like a Normal, but with heavier tails. Used when estimating a population mean from a small sample, where you don't know the true standard deviation.<br><br>
-          <code>pt(q, df)</code> gives P(X \u2264 q). One parameter: <code>df</code> (degrees of freedom). Low df = fatter tails = more probability far from zero. As df grows, the t approaches the standard Normal.
-          Try dragging df up to 20 or 30; the curve will look nearly Normal.`},
-        chisq: {cls:'ann-chisq', html:`<strong>Chi-square (\u03c7\u00b2) distribution:</strong> always positive and right-skewed. Shows up in tests about categorical data (like chi-square goodness-of-fit) and in comparing variances.<br><br>
-          <code>pchisq(q, df)</code> gives P(X \u2264 q). One parameter: <code>df</code>. With small df the distribution is strongly right-skewed. As df increases it shifts right and becomes more symmetric, eventually resembling a Normal.`},
-        f: {cls:'ann-f', html:`<strong>F distribution:</strong> a ratio of two chi-square distributions. Used in ANOVA and regression to test whether variance differs between groups.<br><br>
-          <code>pf(q, df1, df2)</code> gives P(X \u2264 q). Two parameters: <code>df1</code> (numerator) and <code>df2</code> (denominator). Always positive. In ANOVA output, a large F statistic lands in the right tail; that's the region associated with a small p-value.`},
+        t: {cls:'ann-t', html:`<strong>t distribution</strong> looks like a Normal, but with heavier tails. This distribution is used when estimating a population mean from a small sample, where you don't know the true standard deviation.<br><br>
+          <code>pt(q, df)</code> gives P(X \u2264 q). This function takes one parameter other than the cutoff point: <code>df</code> (degrees of freedom). Low df = fatter tails = more probability far from zero. As df grows, the t approaches the standard Normal.
+          Try dragging df up to 20 or 30; the curve will look nearly Normal!`},
+        chisq: {cls:'ann-chisq', html:`<strong>Chi-square (\u03c7\u00b2) distribution:</strong> This distribution is always positive and right-skewed. It shows up in tests about categorical data (chi-square goodness-of-fit, chi-square test of independence) and in tests about variances (like likelihood ratio tests!).<br><br>
+          <code>pchisq(q, df)</code> gives P(X \u2264 q). This function takes one parameter other than the cutoff point: <code>df</code>. With small df the distribution is strongly right-skewed. As df increases it shifts right and becomes more symmetric.<br><br>
+          <strong>Why we almost always use the upper tail:</strong> The \u03c7\u00b2 statistic adds up squared differences between observed and expected counts. When the data fit the model well, those differences are small and \u03c7\u00b2 stays small. When the data diverge from the model, those squared differences balloon and \u03c7\u00b2 gets large. The question we ask is: <em>How likely is a \u03c7\u00b2 this large or larger, just by chance?</em> That is the upper tail: P(X > \u03c7\u00b2). The upper tail is already selected for you. You're welcome ;)`},
+        f: {cls:'ann-f', html:`<strong>F distribution:</strong> a ratio of two variance estimates. Used in ANOVA and regression to test whether groups differ more than chance would explain.<br><br>
+          <code>pf(q, df1, df2)</code> gives P(X \u2264 q). This function takes two parameters other than the cutoff point: <code>df1</code> (numerator degrees of freedom) and <code>df2</code> (denominator degrees of freedom). Degrees of freedom are always positive.<br><br>
+          <strong>Why we almost always use the upper tail:</strong> The F statistic is a ratio: variance <em>between</em> groups divided by variance <em>within</em> groups. When groups differ only by chance, this ratio hovers around 1. When groups truly differ, the between-group variance grows and F gets large. The question we ask is: <em>How likely is an F value this large or larger, just by chance?</em> That is the upper tail: P(X > F). A small p-value means the ratio was surprisingly large. The upper tail is already selected for you. You're welcome ;)`},
         binom: {cls:'ann-binom', html:`<strong>Binomial distribution</strong> counts successes in <em>n</em> independent yes/no trials, each with probability <em>p</em>.<br><br>
-          <code>pbinom(q, size, prob)</code> gives P(X \u2264 q). Probabilities exist only at whole numbers, shown as bars on the plot. The shaded bars are the ones included in your probability. Try n=10, p=0.5 for a fair coin flipped 10 times.`},
+          <code>pbinom(q, size, prob)</code> gives P(X \u2264 q). Probabilities exist only at whole numbers, shown as bars on the plot. The shaded bars are the ones included in your probability. Try n=10, p=0.5 for a fair coin flipped 10 times!`},
         pois: {cls:'ann-pois', html:`<strong>Poisson distribution</strong> counts events that occur at a constant average rate, like emails per hour or cars passing per minute.<br><br>
-          <code>ppois(q, lambda)</code> gives P(X \u2264 q). One parameter: \u03bb (lambda), the average count. Always non-negative. As \u03bb grows the distribution shifts right and looks increasingly bell-shaped.`}
+          <code>ppois(q, lambda)</code> gives P(X \u2264 q). This distribution has one parameter, \u03bb (lambda), which represents the average count over some interval. It's always non-negative. As \u03bb grows the distribution shifts right and looks increasingly bell-shaped.`}
       };
 
       if (c==='dist') return distAnn[d];
@@ -917,7 +1026,8 @@
           lower:   `<strong>Lower tail: P(X \u2264 q)</strong> The probability of getting a value at or below the cutpoint. This is what all <code>p*()</code> functions return by default. Move the cutpoint slider to see it change.`,
           upper:   `<strong>Upper tail: P(X > q)</strong> The probability of getting a value above the cutpoint. In R, add <code>lower.tail = FALSE</code> to the function call. Equivalent to <code>1 - p*(q, ...)</code>.`,
           between: `<strong>Between: P(q\u2081 \u2264 X \u2264 q\u2082)</strong> The probability in an interval. Computed as the difference of two CDF calls: <code>p*(q\u2082) - p*(q\u2081)</code>. Use the two cutpoint sliders to set the interval boundaries.`,
-          outside: `<strong>Outside: P(X < q\u2081 or X > q\u2082)</strong> Both tails combined. Computed as <code>p*(q\u2081) + p*(q\u2082, lower.tail=FALSE)</code>. This is exactly what a two-tailed p-value represents.`
+          outside: `<strong>Outside: P(X < q\u2081 or X > q\u2082)</strong> Both tails combined. Computed as <code>p*(q\u2081) + p*(q\u2082, lower.tail=FALSE)</code>. This is exactly what a two-tailed p-value represents.`,
+          exact:   `<strong>Exact: P(X = k)</strong> Only available for discrete distributions. This gives the probability of getting <em>exactly</em> k\u2014the height of one bar. In R, use <code>dbinom(x = k, ...)</code> or <code>dpois(x = k, ...)</code>.<br><br>For continuous distributions like Normal or t, P(X = exact value) = 0, which is why that button is grayed out. Continuous distributions have infinitely many possible values, so any single one has probability zero\u2014only <em>intervals</em> have nonzero area.`
         }[t];
         return {cls:`ann-${d}`, html:h};
       }
@@ -949,6 +1059,14 @@
       S.dist = btn.dataset.val;
       S.changed = 'dist';
       if (S.dist !== 'normal') S.zscore = false;
+      if (!['binom','pois'].includes(S.dist) && S.tail === 'exact') {
+        S.tail = 'lower';
+        document.querySelectorAll('#tail-stack .mbtn').forEach(b => b.classList.toggle('on', b.dataset.val === 'lower'));
+      }
+      if (['chisq','f'].includes(S.dist)) {
+        S.tail = 'upper';
+        document.querySelectorAll('#tail-stack .mbtn').forEach(b => b.classList.toggle('on', b.dataset.val === 'upper'));
+      }
       syncParamPanels(); syncCutSliders(); syncCutPair();
       render();
     }
@@ -990,21 +1108,31 @@
         if (el) el.style.display = d === S.dist ? '' : 'none';
       });
       document.getElementById('zscore-block').style.display = S.dist === 'normal' ? '' : 'none';
+      const isDisc = ['binom','pois'].includes(S.dist);
+      const exactBtn = document.getElementById('exact-btn');
+      if (exactBtn) exactBtn.disabled = !isDisc;
+      const contNote = document.getElementById('exact-cont-note');
+      if (contNote) contNote.style.display = isDisc ? 'none' : '';
     }
     function syncCutPair() {
       const pair = S.tail === 'between' || S.tail === 'outside';
       document.getElementById('cut-single').style.display = pair ? 'none' : '';
       document.getElementById('cut-pair').style.display   = pair ? '' : 'none';
-      document.getElementById('cut-label').textContent    = pair ? 'Cutpoints' : 'Cutpoint (q)';
+      const lbl = pair ? 'Cutpoints' : S.tail === 'exact' ? 'Exact value (k)' : 'Cutpoint (q)';
+      document.getElementById('cut-label').textContent    = lbl;
+      const cut1lbl = document.getElementById('cut1-lbl');
+      if (cut1lbl) cut1lbl.textContent = S.tail === 'exact' ? 'k' : 'q';
     }
     function syncCutSliders() {
       const [lo, hi] = getRange();
       const isCont = ['normal','t','chisq','f'].includes(S.dist);
       const step = isCont ? 0.1 : 1;
+      const sliderMin = isCont ? lo : 0;
+      const sliderMax = isCont ? hi : Math.max(0, Math.floor(hi - 0.5));
       ['sl-q1','sl-q1b','sl-q2'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.min = lo; el.max = hi; el.step = step;
+        el.min = sliderMin; el.max = sliderMax; el.step = step;
       });
       // Sensible per-distribution defaults
       const p = getParams();

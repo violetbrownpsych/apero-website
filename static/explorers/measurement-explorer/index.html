@@ -565,6 +565,27 @@
       100% { background-color: transparent; }
     }
     .cl-flash { animation: flash 0.7s ease-out; }
+
+    /* === HEATMAP HOVER POPUP === */
+    #hm-hover {
+      position: fixed; z-index: 9998; pointer-events: none; display: none;
+      background: var(--panel); border: 1.5px solid var(--border);
+      border-radius: 9px; padding: 10px 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.14);
+    }
+    .hmh-table {
+      border-collapse: collapse; margin-top: 4px;
+      font-family: 'Fira Code', monospace; font-size: 0.72rem;
+    }
+    .hmh-table th, .hmh-table td {
+      padding: 2px 8px; text-align: center;
+      border: 1px solid var(--border);
+    }
+    .hmh-table thead th { background: #f5f0e8; font-weight: 600; color: var(--text); }
+    .hmh-table td:first-child { color: var(--muted); font-size: 0.65rem; }
+    .hmh-table tbody tr:nth-child(even) { background: #f8f4ed; }
+    .hm-cell[data-i] { cursor: pointer; }
+    .hm-cell[data-i]:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
   </style>
 </head>
 <body>
@@ -646,25 +667,15 @@
     <div class="panel" id="main-panel">
 
       <!-- Inter-item heatmap -->
-      <div class="sec-label">Inter-item correlations</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:0;padding-top:5px;border-top:none;margin-bottom:7px;">
+        <div class="sec-label" style="margin:0;padding:0;border:none;white-space:nowrap;">Inter-item correlations &rarr; Spearman-Brown Correction</div>
+        <div class="sub" style="font-style:italic;max-width:172px;text-align:left;">Hover any cell to see where each correlation comes from</div>
+      </div>
       <div class="heatmap-wrap" id="heatmap-wrap"><!-- populated by JS --></div>
 
-      <!-- Item chips -->
-      <div class="hr" style="margin: 10px 0 11px;"></div>
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 0 7px;">
-        <div class="sec-label" style="margin:0;padding:0;border:none;">Items by half</div>
-        <div style="font-size:0.72rem;color:var(--muted);">Randomly assigned to
-          <span style="color:var(--c-half1);font-weight:600;">Half&nbsp;1</span> or
-          <span style="color:var(--c-half2);font-weight:600;">Half&nbsp;2</span>
-        </div>
-      </div>
-      <div class="item-grid" id="item-grid">
-        <!-- populated by JS -->
-      </div>
-
       <!-- Data table -->
-      <div class="sec-label">Item scores from 10 participants</div>
-      <div class="sub" style="margin-bottom:6px;">The two colored averages are what get correlated in split-half reliability.</div>
+      <div class="sec-label">Split-Half Correlations</div>
+      <div class="sub" style="margin-bottom:6px;">Items were randomly assigned to <strong style="color:var(--c-half1);">Half 1</strong> or <strong style="color:var(--c-half2);">Half 2</strong>. The two colored averages are what get correlated in split-half reliability.</div>
       <div class="data-table-wrap">
         <table class="data-table" id="data-table">
           <thead id="data-thead"></thead>
@@ -947,11 +958,6 @@
         sbEl.style.display = 'none';
       }
 
-      // Item chips
-      document.getElementById('item-grid').innerHTML =
-        Array.from({length: S.k}, (_, j) =>
-          `<div class="item-chip half${SPLIT[j]}">i${j+1}</div>`
-        ).join('');
 
       // Inter-item heatmap (first 6 items)
       const nH  = Math.min(S.k, 6);
@@ -979,7 +985,11 @@
             const bg  = heatColor(r);
             const clr = r > 0.55 ? '#fff' : 'rgba(0,0,0,0.55)';
             const lbl = i === j ? '1' : fmt2(r).replace('0.', '.');
-            mat += `<div class="hm-cell" style="width:${cs}px;height:${cs}px;background:${bg};color:${clr};">${lbl}</div>`;
+            if (i === j) {
+              mat += `<div class="hm-cell" style="width:${cs}px;height:${cs}px;background:${bg};color:${clr};">${lbl}</div>`;
+            } else {
+              mat += `<div class="hm-cell" data-i="${i}" data-j="${j}" style="width:${cs}px;height:${cs}px;background:${bg};color:${clr};">${lbl}</div>`;
+            }
           }
         }
       }
@@ -1003,12 +1013,11 @@
           &nbsp;&nbsp;= ${S.k} &middot; ${fmt2(allAvgR)} / (${denom})<br>
           &nbsp;&nbsp;= <strong>${fmt2(alphaFromData)}</strong>
         </div>
-        ${S.k > 6 ? `<div class="sub" style="margin-top:4px;">r&#772; uses all ${S.k} items; matrix shows first 6 for simplicity</div>` : ''}
       </div>`;
 
-      const note = S.k > 6 ? `<div class="sub" style="margin-top:4px;">matrix shows first 6 of ${S.k} items</div>` : '';
+      const kNote = `<div class="sub" style="margin-top:10px;line-height:1.65;"><strong>What is k?</strong> k is simply the number of items in your scale. Think of r&#772; as the reliability you would get from a single average item on its own. k tells the formula how many such items you are combining: more items means more opportunities for shared signal to accumulate and individual noise to cancel out, which is why &#945; rises as k increases even when r&#772; stays fixed.${S.k > 6 ? ` (r&#772; is computed from all ${S.k} items; the matrix above shows only the first 6.)` : ''}</div>`;
       document.getElementById('heatmap-wrap').innerHTML =
-        `<div class="heatmap-row">${mat}${fml}</div>${note}`;
+        `<div class="heatmap-row">${mat}${fml}</div>${kNote}`;
 
       // Data table — items grouped by half for visual clarity
       const h1idx = SPLIT.map((h,j) => h===1 ? j : -1).filter(j => j>=0);
@@ -1324,16 +1333,85 @@
       });
     }
 
+    // === HEATMAP HOVER ===
+    let hmHoverVisible = false;
+
+    function buildHoverContent(i, j) {
+      const rVal = pearsonR(DATA.map(r => r[i]), DATA.map(r => r[j]));
+      // Table columns with padding:2px 8px + 2px borders:
+      //   P col: "P10" = 3 chars ~21px + 16px pad + 2px border = 39px → 40px
+      //   Data cols: "i6" = 2 chars ~14px + 16px pad + 2px border = 32px → 34px each
+      // SVG margin-left=40px sits exactly over the two data columns (34+34=68px)
+      // midX=34 = SVG center → arc is mathematically symmetric
+      const pW = 40, dW = 34;
+      const svgW = dW * 2, svgH = 34;
+      const lx = 6, rx = svgW - 6, midX = svgW / 2;
+      const baseY = 28, tipY = 5;  // peaky: arc peak ≈ (28+5)/2 = 16.5
+      const svg = `<svg width="${svgW}" height="${svgH}" style="display:block;margin-left:${pW}px;">
+        <defs>
+          <marker id="hmh-r" markerWidth="4" markerHeight="4" refX="4" refY="2" orient="auto">
+            <polygon points="0,0 4,2 0,4" fill="#bbb"/>
+          </marker>
+          <marker id="hmh-l" markerWidth="4" markerHeight="4" refX="0" refY="2" orient="auto">
+            <polygon points="4,0 0,2 4,4" fill="#bbb"/>
+          </marker>
+        </defs>
+        <path d="M${lx},${baseY} Q${midX},${tipY} ${rx},${baseY}" fill="none" stroke="#bbb" stroke-width="1.5" marker-start="url(#hmh-l)" marker-end="url(#hmh-r)"/>
+        <text x="${midX}" y="11" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="var(--accent)" font-weight="600">r<tspan dy="3" font-size="9">${i+1},${j+1}</tspan><tspan dy="-3"> = ${fmt2(rVal)}</tspan></text>
+      </svg>`;
+      let rows = '';
+      for (let p = 0; p < 10; p++) {
+        rows += `<tr><td>P${p+1}</td><td>${DATA[p][i]}</td><td>${DATA[p][j]}</td></tr>`;
+      }
+      return `${svg}<table class="hmh-table">
+        <colgroup><col style="width:${pW}px"><col style="width:${dW}px"><col style="width:${dW}px"></colgroup>
+        <thead><tr><th>P</th><th>i${i+1}</th><th>i${j+1}</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    }
+
+    function positionHover(mx, my) {
+      const el = document.getElementById('hm-hover');
+      const W = window.innerWidth, H = window.innerHeight;
+      const ew = el.offsetWidth || 195, eh = el.offsetHeight || 290;
+      let lft = mx + 16;
+      let top = my - 20;
+      if (lft + ew > W - 8) lft = mx - ew - 10;
+      if (top + eh > H - 8) top = H - eh - 8;
+      if (top < 8) top = 8;
+      el.style.left = lft + 'px';
+      el.style.top  = top + 'px';
+    }
+
+    document.getElementById('main-panel').addEventListener('mouseover', function(e) {
+      const cell = e.target.closest('[data-i]');
+      if (!cell) return;
+      const i = +cell.dataset.i, j = +cell.dataset.j;
+      const el = document.getElementById('hm-hover');
+      el.innerHTML = buildHoverContent(i, j);
+      el.style.display = 'block';
+      hmHoverVisible = true;
+    });
+
+    document.getElementById('main-panel').addEventListener('mouseout', function(e) {
+      if (!e.target.closest('[data-i]')) return;
+      if (e.relatedTarget && e.relatedTarget.closest('[data-i]')) return;
+      document.getElementById('hm-hover').style.display = 'none';
+      hmHoverVisible = false;
+    });
+
     document.addEventListener('mousemove', e => {
       const tip = document.getElementById('code-tip');
       if (tip.style.display === 'block') {
         tip.style.left = (e.clientX + 14) + 'px';
         tip.style.top  = (e.clientY - 10) + 'px';
       }
+      if (hmHoverVisible) positionHover(e.clientX, e.clientY);
     });
 
     render();
   </script>
+  <div id="hm-hover"></div>
   <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
 </body>
 </html>
