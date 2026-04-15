@@ -576,7 +576,7 @@
 
     <!-- RIGHT: ANNOTATION / EXPLANATION -->
     <div class="panel" id="ann-panel">
-      <div style="margin-bottom:11px;"><strong>Here's how this Explorer works.</strong></div>
+      <div id="ann-welcome-title" style="margin-bottom:11px;"><strong>Here's how this Explorer works.</strong></div>
       <div id="p1-ann"></div>
     </div>
 
@@ -1002,7 +1002,9 @@
       }
 
       const annPanel = document.getElementById('ann-panel');
-      if (S.changed === 'welcome') {
+      const isWelcome = S.changed === 'welcome';
+      document.getElementById('ann-welcome-title').style.display = isWelcome ? '' : 'none';
+      if (isWelcome) {
         annPanel.classList.remove('ann-welcome');
         void annPanel.offsetWidth; // force reflow to restart animation
         annPanel.classList.add('ann-welcome');
