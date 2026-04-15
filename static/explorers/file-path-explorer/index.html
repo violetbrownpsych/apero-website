@@ -9,13 +9,13 @@
   <link rel="icon" href="folder-tree.png">
   <style>
     :root {
-      --bg:      #f0ebe1;
-      --panel:   #fdfcf9;
-      --border:  #dbd3c3;
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
       --text:    #1c1811;
-      --muted:   #79705f;
-      --accent:  #b85520;
-      --code-bg: #181826;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
 
       --c-tree:  #4eaaec;
       --c-code:  #52c97e;
@@ -40,7 +40,7 @@
     header p { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
     .pill {
       display:inline-block; padding:2px 9px;
-      background:#ece8de; border:1px solid var(--border); border-radius:20px;
+      background:#e8e3f5; border:1px solid var(--border); border-radius:20px;
       font-family:'Fira Code', monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
     }
 
@@ -127,7 +127,7 @@
       margin-top:10px; padding:8px 10px; border-radius:6px;
       font-size:0.8rem; color:var(--muted); font-style:italic;
       text-align:center; display:none;
-      background:#ece8de; border:1px solid var(--border);
+      background:#e8e3f5; border:1px solid var(--border);
     }
     #tree-msg.show { display:block; }
 
@@ -157,7 +157,7 @@
     #breadcrumb {
       font-family:'Fira Code', monospace; font-size:0.72rem;
       color:var(--muted); margin-bottom:8px; padding:5px 9px;
-      background:#ece8de; border-radius:5px;
+      background:#e8e3f5; border-radius:5px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     #breadcrumb .bc-label {
@@ -178,14 +178,21 @@
     .ann {
       margin-top:11px; padding:11px; border-radius:6px;
       border:1px solid var(--border); border-left:3px solid var(--c-code);
-      background:#faf8f5; color:var(--text); font-size:0.85rem;
+      background:#f5f3fc; color:var(--text); font-size:0.85rem;
       line-height:1.5; display:none;
     }
     .ann.show { display:block; }
-    .ann-welcome { border-left-color:var(--accent); background:#fdf6f0; }
+    .ann-welcome { border-left-color:var(--accent); background:#f0edfb; }
 
     @keyframes flash { 0% { background-color:rgba(255,255,255,0.22); } 100% { background-color:transparent; } }
     .cl-flash { animation:flash 0.7s ease-out; }
+
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
 
     #code-tip {
       position:fixed; z-index:9999; pointer-events:none; display:none;
@@ -424,22 +431,19 @@
       html += `<code class="cl cl-blank"></code>`;
 
       if (hasPenguins) {
-        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"penguins.csv"</span>)</code>`;
-        html += `<code class="cl cl-ok"># this works! it's in your working directory</code>`;
+        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"penguins.csv"</span>)  <span style="opacity:0.7;color:var(--c-code)"># this works! it's in your working directory</span></code>`;
       } else {
         html += `<code class="cl cl-error"><span class="sf">read_csv</span>(<span class="ss">"penguins.csv"</span>)  <span style="opacity:0.7"># this would throw an error</span></code>`;
       }
 
       if (hasGoPhils) {
-        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"go_phils.csv"</span>)</code>`;
-        html += `<code class="cl cl-ok"># this works! it's in your working directory</code>`;
+        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"go_phils.csv"</span>)  <span style="opacity:0.7;color:var(--c-code)"># this works! it's in your working directory</span></code>`;
       } else {
         html += `<code class="cl cl-error"><span class="sf">read_csv</span>(<span class="ss">"go_phils.csv"</span>)  <span style="opacity:0.7"># this would throw an error</span></code>`;
       }
 
       if (hasStarwars) {
-        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"starwars.csv"</span>)</code>`;
-        html += `<code class="cl cl-ok"># this works! it's in your working directory</code>`;
+        html += `<code class="cl cl-readcsv"><span class="sf">read_csv</span>(<span class="ss">"starwars.csv"</span>)  <span style="opacity:0.7;color:var(--c-code)"># this works! it's in your working directory</span></code>`;
       } else {
         html += `<code class="cl cl-error"><span class="sf">read_csv</span>(<span class="ss">"starwars.csv"</span>)  <span style="opacity:0.7"># this would throw an error</span></code>`;
       }
@@ -582,6 +586,10 @@
       // Update annotation
       const { cls, html } = getAnn();
       const annBox = document.getElementById('ann-box');
+      if (cls === 'ann-welcome') {
+        annBox.classList.remove('ann-welcome');
+        void annBox.offsetWidth;
+      }
       annBox.className = 'ann show ' + cls;
       annBox.innerHTML = html;
 

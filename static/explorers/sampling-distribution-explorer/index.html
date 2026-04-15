@@ -10,13 +10,13 @@
   <style>
     /* === CSS VARIABLES === */
     :root {
-      --bg:      #f0ebe1;
-      --panel:   #fdfcf9;
-      --border:  #dbd3c3;
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
       --text:    #1c1811;
-      --muted:   #79705f;
-      --accent:  #b85520;
-      --code-bg: #181826;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
 
       --c-pop:   #e8a030;   /* population fill */
       --c-samp:  #4eaaec;   /* sampling distribution of means */
@@ -55,7 +55,7 @@
     .pill {
       display: inline-block;
       padding: 2px 9px;
-      background: #ece8de;
+      background: #e8e3f5;
       border: 1px solid var(--border);
       border-radius: 20px;
       font-family: 'Fira Code', monospace;
@@ -184,18 +184,6 @@
       transition: all .12s;
     }
     .sample-btn-once:hover { background: var(--c-samp); color: white; }
-    .sample-btn-many {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1.5px solid var(--accent);
-      border-radius: 7px;
-      background: white;
-      color: var(--accent);
-      font-size: 0.83rem;
-      font-weight: 600;
-      transition: all .12s;
-    }
-    .sample-btn-many:hover { background: var(--accent); border-color: var(--accent); color: white; }
 
     /* === PHASE 1 SVG AREA === */
     #main-panel { display: flex; flex-direction: column; gap: 10px; }
@@ -225,7 +213,7 @@
       font-size: 0.84rem;
       line-height: 1.65;
       overflow-y: auto;
-      background: #fdf6f0;
+      background: #f0edfb;
       border-color: var(--accent);
     }
     #ann-panel .ann-inner {
@@ -234,7 +222,7 @@
     #ann-panel code {
       font-family: 'Fira Code', monospace;
       font-size: 0.82em;
-      background: #ece8de;
+      background: #e8e3f5;
       padding: 1px 5px;
       border-radius: 3px;
     }
@@ -390,7 +378,7 @@
     #p2-ann code {
       font-family: 'Fira Code', monospace;
       font-size: 0.82em;
-      background: #ece8de;
+      background: #e8e3f5;
       padding: 1px 5px;
       border-radius: 3px;
     }
@@ -402,7 +390,7 @@
       gap: 6px;
       margin-top: 10px;
       padding: 8px 12px;
-      background: #fdf6f0;
+      background: #f5f3fc;
       border: 1.5px solid var(--accent);
       border-radius: 7px;
       font-size: 0.81rem;
@@ -446,8 +434,8 @@
       padding: 0 11px;
     }
     .intro-band {
-      background: #fdf4e5;
-      border: 1px solid #e8c880;
+      background: #f0edfb;
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 13px 22px;
     }
@@ -480,7 +468,13 @@
       0%   { opacity: 0; transform: translateY(-6px); }
       100% { opacity: 1; transform: translateY(0); }
     }
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
     .bar-new { animation: drop-in 0.25s ease-out; }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
   </style>
 </head>
 <body>
@@ -502,7 +496,7 @@
       <h2>For now, let's assume we know σ: the population standard deviation</h2>
       <p style="font-size:0.79rem;color:var(--muted);margin-top:5px;font-style:italic">That is, <strong>we'll assume our sample SD is a perfect estimator of the population SD</strong>, so the only source of variability is the sample mean itself. This is never actually the case, but let's pretend <span style="font-style:normal">&#128521;.</span></p>
       <p style="margin-top:8px">Watch what happens to the distribution of sample means as you draw more samples. Does the shape of the resulting <strong>sampling distribution</strong> depend on the population shape? Peruse the Explorer to find out!</p>
-      <div style="margin-top:10px;padding:8px 12px;background:#ece8de;border-radius:6px;font-size:0.78rem;color:var(--muted);line-height:1.5">
+      <div style="margin-top:10px;padding:8px 12px;background:#e8e3f5;border-radius:6px;font-size:0.78rem;color:var(--muted);line-height:1.5">
         <strong style="color:var(--text)">Notation reminder:</strong> Greek letters and uppercase N describe the <em>population</em>: μ (mu) = population mean, σ (sigma) = population standard deviation, N = population size. Roman letters and lowercase n describe the <em>sample</em>&thinsp;: x&#773; ("x-bar") = sample mean, <em>s</em> = sample SD, n = sample size.
       </div>
     </div>
@@ -547,7 +541,7 @@
         <div class="sample-btns">
           <button class="sample-btn-once" onclick="sampleOnce()">Sample once</button>
           <button class="sample-btn-once" onclick="sampleFive()">Sample 5</button>
-          <button class="sample-btn-many" onclick="sampleMany()">Sample 1,000</button>
+          <button class="sample-btn-once" onclick="sampleMany()">Sample 1,000</button>
         </div>
         <div class="sub" id="p1-count-label" style="margin-top:7px;text-align:center"></div>
       </div>
@@ -655,7 +649,7 @@
       <div class="p2-sample-btns">
         <button class="sample-btn-once" onclick="p2SampleOnce()" style="width:auto;padding:8px 16px">Sample once</button>
         <button class="sample-btn-once" onclick="p2SampleFive()" style="width:auto;padding:8px 16px">Sample 5</button>
-        <button class="sample-btn-many" onclick="p2SampleMany()" style="width:auto;padding:8px 16px">Sample 1,000</button>
+        <button class="sample-btn-once" onclick="p2SampleMany()" style="width:auto;padding:8px 16px">Sample 1,000</button>
         <button class="copy-btn" onclick="resetP2()" style="align-self:center;margin-left:4px">Reset</button>
       </div>
     </div>
@@ -1007,6 +1001,14 @@
           Now scroll down to see why this picture is incomplete.`;
       }
 
+      const annPanel = document.getElementById('ann-panel');
+      if (S.changed === 'welcome') {
+        annPanel.classList.remove('ann-welcome');
+        void annPanel.offsetWidth; // force reflow to restart animation
+        annPanel.classList.add('ann-welcome');
+      } else {
+        annPanel.classList.remove('ann-welcome');
+      }
       document.getElementById('p1-ann').innerHTML = html;
     }
 

@@ -11,6 +11,9 @@ Below is a collection of the interactive tools I've built for my stats students 
 In most cases, the Explorers consist of three panels: The left one has the controllers, the middle one displays the data or plot, and the right one displays the code (often with comments to help the user understand the function). Short descriptions will pop up if you hover over portions of the code, and detailed descriptions can be found below the code chunks. Be sure to read the welcome message below the code on the right for instructions about how to use each tool! 
 
 
+Note that these are meant to <strong>complement</strong> teaching rather than replace it! That is, they're meant to be warm and accessible, but concise. 
+
+
 Good luck, have fun, and remember: WE ARE ALL MATH PEOPLE.
 
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:1.5rem;">
@@ -46,9 +49,16 @@ Good luck, have fun, and remember: WE ARE ALL MATH PEOPLE.
   </a> 
 
   <a href="/explorers/distribution-auc-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
-    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Distribution Area-Under-Curve Explorer</div>
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Distribution (Area Under the Curve) Explorer</div>
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Adjust the parameters of probability distributions to visualize area under the curve and learn about the p*() family of functions</div>
   </a>
+
+  <!-- Distribution Families Explorer — not ready yet
+  <a href="/explorers/distribution-families-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Distribution Families (They're All Related!)</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Learn about how the Bernoulli, binomial, Poisson, normal, chi-square, t, and F distributions are all part of one big, happy family.</div>
+  </a>
+  -->
 
   <a href="/explorers/sampling-distribution-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Sampling Distribution Explorer</div>

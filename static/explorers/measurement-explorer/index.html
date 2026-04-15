@@ -10,18 +10,18 @@
   <style>
     /* === CSS VARIABLES === */
     :root {
-      --bg:      #f0ebe1;
-      --panel:   #fdfcf9;
-      --border:  #dbd3c3;
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
       --text:    #1c1811;
-      --muted:   #79705f;
-      --accent:  #b85520;
-      --code-bg: #181826;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
 
       --c-half1:    #4eaaec;   /* split half 1 — blue */
       --c-half2:    #52c97e;   /* split half 2 — green */
       --c-alpha:    #e8a030;   /* Cronbach's alpha — amber */
-      --c-sb:       #c89850;   /* Spearman-Brown — warm gold */
+      --c-sb:       #3dbdbd;   /* Spearman-Brown — teal */
       --c-validity: #b87fd4;   /* validity ceiling — purple */
     }
 
@@ -64,7 +64,7 @@
     .pill {
       display: inline-block;
       padding: 2px 9px;
-      background: #ece8de;
+      background: #e8e3f5;
       border: 1px solid var(--border);
       border-radius: 20px;
       font-family: 'Fira Code', monospace;
@@ -184,8 +184,8 @@
     /* === ALPHA READOUT (controls panel) === */
     .alpha-readout {
       text-align: center;
-      background: #fdf6ec;
-      border: 1.5px solid var(--c-alpha);
+      background: #f5f3fc;
+      border: 1.5px solid var(--accent);
       border-radius: 9px;
       padding: 10px 8px 8px;
       margin: 4px 0 10px;
@@ -195,14 +195,14 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: var(--c-alpha);
+      color: var(--accent);
       margin-bottom: 1px;
     }
     .alpha-readout .ar-val {
       font-family: 'Fira Code', monospace;
       font-size: 2.1rem;
       font-weight: 500;
-      color: var(--text);
+      color: var(--c-alpha);
       line-height: 1.1;
     }
     .alpha-readout .ar-interp {
@@ -216,7 +216,7 @@
     .sb-proj-result {
       margin-top: 7px;
       padding: 7px 10px;
-      background: #fdf9f0;
+      background: #f5f3fc;
       border: 1px solid var(--c-sb);
       border-radius: 7px;
       font-size: 0.78rem;
@@ -237,12 +237,20 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--muted);
-      margin: 13px 0 7px;
-      padding-top: 11px;
-      border-top: 1px solid var(--border);
+      margin-bottom: 9px;
     }
-    .sec-label:first-child { margin-top: 0; padding-top: 0; border-top: none; }
-    #main-panel .sec-label:first-child { padding-top: 5px; }
+
+    /* === SECTION CARDS (middle panel) === */
+    .sec-card {
+      border-radius: 8px;
+      padding: 11px 12px;
+      margin-bottom: 8px;
+    }
+    .sec-card:last-child { margin-bottom: 0; }
+    .sc-1 { background: #e6f2fd; }   /* clear sky blue  — heatmap */
+    .sc-2 { background: #f7eef4; }   /* dusty rose      — split-half table */
+    .sc-3 { background: #eae8f8; }   /* periwinkle      — corr flow */
+    .sc-4 { background: #edf4f1; }   /* soft mint-green — validity */
 
     /* === ITEM CHIPS === */
     .item-grid {
@@ -291,13 +299,13 @@
     .data-table td {
       padding: 3px 7px;
       text-align: center;
-      border-bottom: 1px solid #ece8de;
+      border-bottom: 1px solid #e8e3f5;
     }
     .data-table tr:last-child td { border-bottom: none; }
 
     /* Column color classes */
-    .data-table th.col-pid  { color: var(--muted); font-size: 0.65rem; background: #f8f5ef; }
-    .data-table td.col-pid  { color: var(--muted); font-size: 0.68rem; background: #f8f5ef; }
+    .data-table th.col-pid  { color: var(--muted); font-size: 0.65rem; background: #f0edf8; }
+    .data-table td.col-pid  { color: var(--muted); font-size: 0.68rem; background: #f0edf8; }
     .data-table th.col-h1   { color: var(--c-half1); background: #eaf5fd; }
     .data-table td.col-h1   { background: #f4fbff; }
     .data-table th.col-h2   { color: var(--c-half2); background: #edfaf3; }
@@ -317,7 +325,7 @@
       align-items: center;
       gap: 10px;
       padding: 10px 14px;
-      background: #f8f5ef;
+      background: #f0edf8;
       border-radius: 8px;
       border: 1px solid var(--border);
       margin-top: 4px;
@@ -378,7 +386,7 @@
     .vbar-track {
       flex: 1;
       height: 24px;
-      background: #ece8de;
+      background: #e8e3f5;
       border-radius: 5px;
       overflow: hidden;
       position: relative;
@@ -458,7 +466,7 @@
     }
     .hm-formula .hf-block {
       font-family: 'Fira Code', monospace; font-size: 0.73rem;
-      background: #fdf8f0; border-left: 3px solid var(--c-alpha);
+      background: #f5f3fc; border-left: 3px solid var(--accent);
       border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 5px;
       line-height: 1.8; color: var(--text);
     }
@@ -470,7 +478,7 @@
     /* === SB FORMULA STEPS === */
     .sb-formula-steps {
       margin-top: 6px; padding: 5px 8px;
-      background: #fdf9f0; border-left: 2px solid var(--c-sb);
+      background: #f5f3fc; border-left: 2px solid var(--c-sb);
       border-radius: 0 4px 4px 0;
       font-family: 'Fira Code', monospace; font-size: 0.68rem;
       line-height: 1.75; color: var(--text);
@@ -486,7 +494,7 @@
     .alpha-readout .ar-actualr {
       font-size: 0.68rem; color: var(--muted);
       margin-top: 4px; padding-top: 4px;
-      border-top: 1px solid #f0e6d0;
+      border-top: 1px solid var(--border);
       font-family: 'Fira Code', monospace;
     }
 
@@ -539,22 +547,22 @@
     /* === ANNOTATION BOX === */
     .ann {
       display: none;
-      max-width: 1360px; margin: 0 auto 18px;
+      margin-top: 10px;
       padding: 13px 18px;
       border-radius: 9px; border: 1.5px solid var(--border);
       font-size: 0.84rem; line-height: 1.65;
       background: var(--panel);
     }
     .ann.show { display: block; }
-    .ann-welcome  { border-color: var(--accent);      background: #fdf6f0; }
-    .ann-alpha    { border-color: var(--c-alpha);     background: #fdf8f0; }
+    .ann-welcome  { border-color: var(--accent);      background: #f0edfb; }
+    .ann-alpha    { border-color: var(--c-alpha);     background: #f5f3fc; }
     .ann-splithalf { border-color: var(--c-half1);    background: #f0f8fd; }
-    .ann-sb       { border-color: var(--c-sb);        background: #fdf6e8; }
+    .ann-sb       { border-color: var(--c-sb);        background: #edf8f8; }
     .ann-validity { border-color: var(--c-validity);  background: #f8f0fc; }
     .ann code {
       font-family: 'Fira Code', monospace;
       font-size: 0.82em;
-      background: #ece8de;
+      background: #e8e3f5;
       padding: 1px 5px;
       border-radius: 3px;
     }
@@ -565,6 +573,13 @@
       100% { background-color: transparent; }
     }
     .cl-flash { animation: flash 0.7s ease-out; }
+
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
 
     /* === HEATMAP HOVER POPUP === */
     #hm-hover {
@@ -581,9 +596,9 @@
       padding: 2px 8px; text-align: center;
       border: 1px solid var(--border);
     }
-    .hmh-table thead th { background: #f5f0e8; font-weight: 600; color: var(--text); }
+    .hmh-table thead th { background: #e8e3f5; font-weight: 600; color: var(--text); }
     .hmh-table td:first-child { color: var(--muted); font-size: 0.65rem; }
-    .hmh-table tbody tr:nth-child(even) { background: #f8f4ed; }
+    .hmh-table tbody tr:nth-child(even) { background: #f0edf8; }
     .hm-cell[data-i] { cursor: pointer; }
     .hm-cell[data-i]:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
   </style>
@@ -666,26 +681,31 @@
     <!-- MIDDLE: MAIN VISUAL PANEL -->
     <div class="panel" id="main-panel">
 
-      <!-- Inter-item heatmap -->
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:0;padding-top:5px;border-top:none;margin-bottom:7px;">
-        <div class="sec-label" style="margin:0;padding:0;border:none;white-space:nowrap;">Inter-item correlations &rarr; Spearman-Brown Correction</div>
-        <div class="sub" style="font-style:italic;max-width:172px;text-align:left;">Hover any cell to see where each correlation comes from</div>
-      </div>
-      <div class="heatmap-wrap" id="heatmap-wrap"><!-- populated by JS --></div>
-
-      <!-- Data table -->
-      <div class="sec-label">Split-Half Correlations</div>
-      <div class="sub" style="margin-bottom:6px;">Items were randomly assigned to <strong style="color:var(--c-half1);">Half 1</strong> or <strong style="color:var(--c-half2);">Half 2</strong>. The two colored averages are what get correlated in split-half reliability.</div>
-      <div class="data-table-wrap">
-        <table class="data-table" id="data-table">
-          <thead id="data-thead"></thead>
-          <tbody id="data-tbody"></tbody>
-        </table>
+      <!-- Section 1: Inter-item heatmap -->
+      <div class="sec-card sc-1">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px;">
+          <div class="sec-label" style="margin:0;white-space:nowrap;">Inter-item correlations &rarr; Spearman-Brown Correction</div>
+          <div class="sub" style="font-style:italic;max-width:172px;text-align:right;">Hover any cell to see where each correlation comes from</div>
+        </div>
+        <div class="heatmap-wrap" id="heatmap-wrap"><!-- populated by JS --></div>
       </div>
 
-      <!-- Correlation flow -->
-      <div class="sec-label">Split-half &rarr; Spearman-Brown correction</div>
-      <div class="corr-flow">
+      <!-- Section 2: Data table -->
+      <div class="sec-card sc-2">
+        <div class="sec-label">Split-Half Correlations</div>
+        <div class="sub" style="margin-bottom:6px;">Items were randomly assigned to <strong style="color:var(--c-half1);">Half 1</strong> or <strong style="color:var(--c-half2);">Half 2</strong>. The two colored averages are what get correlated in split-half reliability.</div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="data-table">
+            <thead id="data-thead"></thead>
+            <tbody id="data-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 3: Correlation flow -->
+      <div class="sec-card sc-3">
+        <div class="sec-label">Split-half &rarr; Spearman-Brown correction</div>
+        <div class="corr-flow">
         <div class="corr-box">
           <div class="cb-label">r (split-half correlation)</div>
           <div class="cb-val v-half" id="cf-rhalf">—</div>
@@ -709,43 +729,47 @@
         <div class="cd-row"><span class="cd-dot" style="color:var(--c-sb);">●</span><span><strong>r (SB-corrected)</strong> The Spearman-Brown formula adjusts for length of the half-scale, estimating what the full-scale reliability would be if the values used in the correlations were more precise/less noisy (i.e., calculated with twice as many items). The formula below this value is derived by plugging k = 2 into the Spearman-Brown formula.</span></div>
         <div class="cd-row"><span class="cd-dot" style="color:var(--c-alpha);">●</span><span><strong>Cronbach's &alpha;</strong> This value estimates full-scale reliability using a different route than the split-half approach. Here, the avg inter-item r from the slider (the same r&#772; averaged in the heatmap above) is plugged directly into the Spearman-Brown formula. <strong>r&nbsp;(SB-corrected) and &alpha; are estimating the same thing</strong>—full-scale reliability—just via different routes. Small differences are normal: &alpha; uses the slider's r&#772; exactly, while r&nbsp;(SB-corrected) is derived from the actual simulated split-half correlation, which varies due to sampling.</span></div>
       </div>
+      </div><!-- /.sec-card.sc-3 -->
 
-      <!-- Validity ceiling -->
-      <div class="sec-label">Reliability ceiling on validity</div>
-      <div class="vbars-wrap">
-        <div class="vbar-row">
-          <span class="vbar-lbl">Scale reliability (&alpha;)</span>
-          <div class="vbar-track">
-            <div class="vbar-fill vf-reliability" id="vbar-rel" style="width:0%;"><span id="vbar-rel-lbl"></span></div>
+      <!-- Section 4: Validity ceiling -->
+      <div class="sec-card sc-4">
+        <div class="sec-label">Reliability ceiling on validity</div>
+        <div class="vbars-wrap">
+          <div class="vbar-row">
+            <span class="vbar-lbl">Scale reliability (&alpha;)</span>
+            <div class="vbar-track">
+              <div class="vbar-fill vf-reliability" id="vbar-rel" style="width:0%;"><span id="vbar-rel-lbl"></span></div>
+            </div>
+            <span class="vbar-num vn-reliability" id="vbar-rel-num">—</span>
           </div>
-          <span class="vbar-num vn-reliability" id="vbar-rel-num">—</span>
-        </div>
-        <div class="vbar-row">
-          <span class="vbar-lbl">Max possible validity (&radic;&alpha;)</span>
-          <div class="vbar-track">
-            <div class="vbar-fill vf-validity" id="vbar-val" style="width:0%;"><span id="vbar-val-lbl"></span></div>
+          <div class="vbar-row">
+            <span class="vbar-lbl">Max possible validity (&radic;&alpha;)</span>
+            <div class="vbar-track">
+              <div class="vbar-fill vf-validity" id="vbar-val" style="width:0%;"><span id="vbar-val-lbl"></span></div>
+            </div>
+            <span class="vbar-num vn-validity" id="vbar-val-num">—</span>
           </div>
-          <span class="vbar-num vn-validity" id="vbar-val-num">—</span>
         </div>
-      </div>
-      <div class="validity-why" id="validity-why">
-        <!-- populated by JS -->
-      </div>
-      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-top:14px;">
-        <div style="flex-shrink:0;">
-          <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Scale variance breakdown</div>
-          <div id="var-circle-wrap"></div>
+        <div class="validity-why" id="validity-why">
+          <!-- populated by JS -->
         </div>
-        <div style="flex:1;min-width:180px;">
-          <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Reliability of hypothetical outcome variable</div>
-          <div class="br" style="margin-bottom:8px;">
-            <button class="btn ymode-btn on" data-mode="perfect" onclick="setYMode(this)">&alpha;<sub>y</sub> = 1.0</button>
-            <button class="btn ymode-btn" data-mode="same" onclick="setYMode(this)">&alpha;<sub>y</sub> = &alpha;<sub>x</sub></button>
-            <button class="btn ymode-btn" data-mode="low" onclick="setYMode(this)">&alpha;<sub>y</sub> = .45</button>
+        <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-top:14px;">
+          <div style="flex-shrink:0;">
+            <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Scale variance breakdown</div>
+            <div id="var-circle-wrap"></div>
           </div>
-          <div id="var-scatter-wrap"></div>
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Reliability of hypothetical outcome variable</div>
+            <div class="br" style="margin-bottom:8px;">
+              <button class="btn ymode-btn on" data-mode="perfect" onclick="setYMode(this)">&alpha;<sub>y</sub> = 1.0</button>
+              <button class="btn ymode-btn" data-mode="same" onclick="setYMode(this)">&alpha;<sub>y</sub> = &alpha;<sub>x</sub></button>
+              <button class="btn ymode-btn" data-mode="low" onclick="setYMode(this)">&alpha;<sub>y</sub> = .45</button>
+            </div>
+            <div id="var-scatter-wrap"></div>
+          </div>
         </div>
-      </div>
+      </div><!-- /.sec-card.sc-4 -->
+
     </div>
 
     <!-- RIGHT: CODE PANEL -->
@@ -757,12 +781,10 @@
       <div class="code-scroll" id="code-scroll">
         <!-- populated by JS -->
       </div>
+      <div id="ann-box" class="ann"></div>
     </div>
 
   </div>
-
-  <!-- ANNOTATION BOX (below grid) -->
-  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
 
   <div id="code-tip"></div>
 
@@ -863,11 +885,11 @@
       return count > 0 ? sum / count : 0;
     }
 
-    // Heatmap cell color: interpolate from near-white to amber across r = 0→1
+    // Heatmap cell color: interpolate from near-white to accent purple across r = 0→1
     function heatColor(r) {
       const t  = Math.max(0, Math.min(1, r));
-      const from = [248, 244, 237];   // warm near-white
-      const to   = [220, 140,  35];   // deep amber
+      const from = [240, 237, 251];   // cool near-white (purple-tinted)
+      const to   = [108,  95, 199];   // deep purple (#6c5fc7)
       return `rgb(${from.map((f, i) => Math.round(f + t * (to[i] - f))).join(',')})`;
     }
 
@@ -920,6 +942,10 @@
       renderCode(alpha, rHalf, rSB, maxVal);
       const {cls, html} = getAnn(alpha, rHalf, rSB, maxVal);
       const ann = document.getElementById('ann-box');
+      if (cls === 'ann-welcome') {
+        ann.classList.remove('ann-welcome');
+        void ann.offsetWidth;
+      }
       ann.className = 'ann show ' + cls;
       ann.innerHTML = html;
     }
@@ -1234,7 +1260,7 @@
       const lbl = alphaLabel(alpha);
       if (S.changed === 'welcome') return {cls: 'ann-welcome', html:
         `<strong>How this works.</strong><br><br>
-        The <strong>left panel</strong> controls your scale — drag the sliders to set the number of items and their
+        The <strong>left panel</strong> controls your scale (i.e., measurement tool). Drag the sliders to set the number of items and their
         average inter-item correlation. Cronbach's &alpha; updates live.<br><br>
         The <strong>middle panel</strong> shows three things: items color-coded into two random halves;
         simulated scores for ${N_P} participants (the colored averages are what actually get correlated in

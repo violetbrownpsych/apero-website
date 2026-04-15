@@ -141,15 +141,21 @@ Everything else in the template — layout, buttons, code panel, annotation box,
 
 ```css
 :root {
-  --bg:      #f0ebe1;   /* warm off-white page background */
-  --panel:   #fdfcf9;   /* panel card background */
-  --border:  #dbd3c3;   /* all borders and dividers */
+  --bg:      #f0edf8;   /* warm off-white page background */
+  --panel:   #faf9fd;   /* panel card background */
+  --border:  #ddd8f0;   /* all borders and dividers */
   --text:    #1c1811;   /* primary text */
-  --muted:   #79705f;   /* secondary/label text */
-  --accent:  #b85520;   /* active state, CTA, .btn.on */
-  --code-bg: #181826;   /* dark code panel background */
+  --muted:   #7a7098;   /* secondary/label text */
+  --accent:  #6c5fc7;   /* active state, CTA, .btn.on */
+  --code-bg: #1a1828;   /* dark code panel background */
 }
 ```
+
+**`table.dt th` background:** The sticky table header uses `--bg` as its background. Always write it as `background:var(--bg)`, not a hardcoded hex — it has been incorrectly hardcoded in the past and missed during palette updates.
+
+**`.result-badge` background:** Use `#f5f3fc` (the purple-neutral base, same as `.ann`). Any warm/amber variant like `#f5f3ee` or `#f8f5ee` is a stale value from the old palette and will look amber against the purple theme.
+
+**`--accent` rgba tints:** Anywhere `--accent` is used at reduced opacity (e.g. `.cbtn.on` background, `table.dt td.hl-col` background), write the rgba as the RGB breakdown of the current `--accent` value — `rgba(108,95,199,0.xx)` for `#6c5fc7`. These hardcoded rgba values must be updated whenever `--accent` changes; they are easy to miss. Use opacity **0.12** for both the active column-button background and the highlighted table cells — lower values are invisible for purple on white even though they worked for the old orange accent.
 
 Per-tool color tokens (add to `:root` in each tool — pick colors that don't clash):
 
@@ -214,7 +220,7 @@ header {
 header p { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .pill {
   display:inline-block; padding:2px 9px;
-  background:#ece8de; border:1px solid var(--border); border-radius:20px;
+  background:#e8e3f5; border:1px solid var(--border); border-radius:20px;
   font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
 }
 ```
@@ -243,7 +249,7 @@ header p { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   <button class="copy-btn" onclick="resetAll()">Reset</button>
 </div>
 ```
-| `.ann` | Annotation box below code panel — hidden by default |
+| `.ann` | Annotation box — placed **inside the code panel**, after `.code-scroll`. Hidden by default; needs `margin-top:10px`. Do NOT place below the grid. |
 | `.ann.show` | Makes annotation visible |
 | `.code-scroll` | Dark scrollable code area inside the code panel — `font-family:'Fira Code',monospace; font-size:0.79rem; line-height:1.9` |
 | `.cl` | One line of code — add a `border-left` color class for stripe |
@@ -271,18 +277,71 @@ header p { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .mbtn.on { background:var(--accent); border-color:var(--accent); color:white; }
 ```
 
+**Annotation box placement (HTML):** The `#ann-box` div lives inside the right code panel, after `.code-scroll`. It must occupy the **third grid column** — never below the grid, never in a separate full-width row. If you see the annotation only at the bottom of the page after scrolling past the grid, the HTML is wrong.
+
+```html
+<div class="panel" id="code-panel">
+  <div class="panel-header">...</div>
+  <div class="code-scroll" id="code-scroll"></div>
+  <div id="ann-box" class="ann"></div>
+</div>
+```
+
+**Visible on first load — no click required.** The annotation must show the welcome message immediately when the page opens. This happens automatically because `render()` is called during init and `getAnn()` returns `cls:'ann-welcome'` for the default state, which causes `render()` to set `ann.className = 'ann show ann-welcome'`. If students have to click something before any annotation appears, the init call to `render()` is missing or `getAnn()` is not returning a welcome state for the default `S`.
+
+**Annotation CSS baseline:**
+
+```css
+.ann {
+  display:none; margin-top:10px; padding:13px 18px;
+  border-radius:9px; border:1.5px solid var(--border);
+  font-size:0.84rem; line-height:1.65; background:#f5f3fc;
+}
+.ann.show { display:block; }
+```
+
+**Anti-pattern:** Do not write `.ann { margin: 0 auto 18px; }` — that shorthand sets `margin-top:0`, pressing the annotation flush against `.code-scroll`. It also adds centering (`auto` side margins) that only makes sense when the box is outside the grid, which it should never be.
+
 **Annotation box variants** (swap class on the `.ann` element alongside `.show`):
 
 ```css
-.ann-welcome { border-color:var(--accent);    background:#fdf6f0; }
+/* Base .ann background — use for all non-welcome states (background set above) */
+.ann-welcome { border-color:var(--accent); background:#f0edfb; }
 /* Per-tool variants follow the same pattern: border matches the concept's color token */
 ```
+
+**Welcome pulse animation** — fires on load and on Reset (3 pulses, stops automatically). Add to the animations section:
+
+```css
+@keyframes ann-pulse {
+  0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+  100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+}
+.ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
+```
+
+Note: the rgba values are the RGB breakdown of `--accent` (`#6c5fc7` = `108,95,199`). Update them if `--accent` ever changes.
+
+**Wiring the pulse in JS — the reflow trick:** CSS animations don't restart if the same class is re-applied without a reflow. The `render()` function must force one before re-adding `ann-welcome`, so Reset always re-pulses:
+
+```js
+// inside render(), before setting className:
+if (cls === 'ann-welcome') {
+  ann.classList.remove('ann-welcome');
+  void ann.offsetWidth;   // forces reflow — browser treats it as a new animation
+}
+ann.className = 'ann show ' + cls;
+ann.innerHTML = html;
+```
+
+Without the `void ann.offsetWidth` line, the pulse fires on first load but silently skips on subsequent Resets if the state was already `ann-welcome`.
 
 ---
 
 ## Syntax token classes (dark code panel)
 
-All rendered inside `.code-scroll` on a `#181826` background:
+All rendered inside `.code-scroll` on a `#1a1828` background:
 
 | Class | Color | Used for |
 |---|---|---|
@@ -345,6 +404,10 @@ function render() {
   renderCode();   // updates the code panel
   const {cls, html} = getAnn();
   const ann = document.getElementById('ann-box');
+  if (cls === 'ann-welcome') {
+    ann.classList.remove('ann-welcome');
+    void ann.offsetWidth;   // force reflow so animation restarts on Reset
+  }
   ann.className = 'ann show ' + cls;
   ann.innerHTML = html;
 }

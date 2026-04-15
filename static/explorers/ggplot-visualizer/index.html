@@ -10,13 +10,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:       #f0ebe1;
-  --panel:    #fdfcf9;
-  --border:   #dbd3c3;
+  --bg:       #f0edf8;
+  --panel:    #faf9fd;
+  --border:   #ddd8f0;
   --text:     #1c1811;
-  --muted:    #79705f;
-  --accent:   #b85520;
-  --code-bg:  #181826;
+  --muted:    #7a7098;
+  --accent:   #6c5fc7;
+  --code-bg:  #1a1828;
   --c-base:   #f5c540;
   --c-violin: #4eaaec;
   --c-point:  #52c97e;
@@ -40,7 +40,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
 .pill {
   display:inline-block; padding:2px 9px;
-  background:#ece8de; border:1px solid var(--border); border-radius:20px;
+  background:#e8e3f5; border:1px solid var(--border); border-radius:20px;
   font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
 }
 
@@ -57,7 +57,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .cs { margin-bottom:9px; }
 .cs:last-child { margin-bottom:0; }
 .ch { display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:600; margin-bottom:7px; }
-.ch code { font-family:'Fira Code',monospace; font-size:0.77em; background:#ece8de; padding:1px 4px; border-radius:3px; color:var(--muted); }
+.ch code { font-family:'Fira Code',monospace; font-size:0.77em; background:#e8e3f5; padding:1px 4px; border-radius:3px; color:var(--muted); }
 
 .dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
 .d-base   { background:var(--c-base);   }
@@ -124,7 +124,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   background:white; cursor:pointer; font-family:'Fira Code',monospace;
   font-size:0.69rem; color:var(--muted); text-align:center; transition:all .1s;
 }
-.obtn.on { border-color:var(--accent); background:#fff5f0; color:var(--accent); font-weight:600; }
+.obtn.on { border-color:var(--accent); background:#f0edfb; color:var(--accent); font-weight:600; }
 .obtn:hover:not(.on) { border-color:var(--muted); color:var(--text); }
 
 /* ── Plot panel ──────────────────────────── */
@@ -136,7 +136,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .code-scroll {
   background:var(--code-bg); border-radius:8px; padding:14px 16px;
   overflow-x:auto; font-family:'Fira Code',monospace; font-size:0.79rem;
-  line-height:1.9; flex:1;
+  line-height:1.55;
   color:#abb2bf;   /* default: fully visible light grey on dark bg */
 }
 .code-scroll code { display:block; white-space:pre; }
@@ -156,6 +156,13 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   100% { background-color:transparent; }
 }
 .cl-flash { animation:flash 0.7s ease-out; }
+
+@keyframes ann-pulse {
+  0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+  100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+}
+.ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
 
 /* Syntax tokens — all visible on dark bg */
 .sf { color:#c792ea; }    /* function */
@@ -188,7 +195,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .ann-labs  { border-color:var(--c-labs);   background:#fefaf0; }
 .ann-warn    { border-color:#e86060;         background:#fff2f2; }
 .ann-stat    { border-color:var(--c-stat);   background:#fdf8f0; }
-.ann-welcome { border-color:var(--accent);   background:#fdf6f0; }
+.ann-welcome { border-color:var(--accent);   background:#f0edfb; }
 
 .fix-btn {
   display:inline-block; margin-top:10px; padding:7px 14px;
@@ -324,7 +331,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
     <!-- aes() location — stacked, full width -->
     <div class="cs">
       <div class="ch"><span class="dot d-base"></span> Where does <code>aes()</code> live?</div>
-      <div class="sub"><code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 3px;border-radius:2px">aes()</code> tells ggplot which data columns control what you see (x-axis, y-axis, color…)</div>
+      <div class="sub"><code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">aes()</code> tells ggplot which data columns control what you see (x-axis, y-axis, color…)</div>
       <div class="aes-stack">
         <button class="aesbtn on" id="b-global" onclick="setAes('ggplot')"
           title="Write aes() once inside ggplot(). Every layer inherits x and y automatically">
@@ -342,7 +349,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
     <!-- Theme + Labels (both cosmetic finishing layers) -->
     <div class="cs">
       <div class="ch">Appearance</div>
-      <div class="sub" style="margin-bottom:5px">Theme</div>
+      <div class="sub" style="margin-bottom:5px">Pre-built themes</div>
       <div class="br" id="theme-row" style="margin-bottom:9px">
         <button class="btn on" onclick="pick(this,'theme','none')">default</button>
         <button class="btn"    onclick="pick(this,'theme','minimal')">minimal</button>
@@ -351,8 +358,43 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
       </div>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:500">
         <input type="checkbox" id="chk-labs" onchange="toggleLabs(this.checked)">
-        Add <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 4px;border-radius:3px">labs()</code> layer
+        Add <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 4px;border-radius:3px">labs()</code> layer
       </label>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- Customize with theme() -->
+    <div class="cs">
+      <div class="ch"><span class="dot d-theme"></span> Customize with <code>theme()</code></div>
+      <div class="sub" style="margin-bottom:10px">Stack a <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">theme()</code> call on top of any pre-built theme — or use it alone.</div>
+
+      <div class="sub" style="margin-bottom:4px;margin-top:2px">Gridlines</div>
+      <div class="aes-stack" id="grid-stack" style="margin-bottom:9px">
+        <button class="aesbtn on" data-val="all"  onclick="setThemeGrid('all')">All gridlines</button>
+        <button class="aesbtn"    data-val="no-x" onclick="setThemeGrid('no-x')">Y gridlines only</button>
+        <button class="aesbtn"    data-val="none" onclick="setThemeGrid('none')">No gridlines</button>
+      </div>
+
+      <div class="sub" style="margin-bottom:4px">Tick marks</div>
+      <div class="tog" id="ticks-tog" style="margin-bottom:9px">
+        <button class="btn on" data-val="show" onclick="setThemeTicks('show')">Show</button>
+        <button class="btn"    data-val="hide" onclick="setThemeTicks('hide')">Hide</button>
+      </div>
+
+      <div class="sub" style="margin-bottom:4px">Axis label text</div>
+      <div class="tog" id="text-tog" style="margin-bottom:9px">
+        <button class="btn on" data-val="normal" onclick="setThemeText('normal')">Normal</button>
+        <button class="btn"    data-val="large"  onclick="setThemeText('large')">Larger</button>
+      </div>
+
+      <div class="sub" style="margin-bottom:4px">Axis titles</div>
+      <div class="aes-stack" id="title-stack">
+        <button class="aesbtn on" data-val="show"   onclick="setThemeTitle('show')">Show both</button>
+        <button class="aesbtn"    data-val="hide-x" onclick="setThemeTitle('hide-x')">Hide x-axis title</button>
+        <button class="aesbtn"    data-val="hide-y" onclick="setThemeTitle('hide-y')">Hide y-axis title</button>
+        <button class="aesbtn"    data-val="hide"   onclick="setThemeTitle('hide')">Hide both</button>
+      </div>
     </div>
   </div>
 
@@ -360,6 +402,8 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   <div class="panel plot-panel">
     <div class="panel-label">Plot Preview</div>
     <svg id="plot-svg" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="ann-label" class="ann-label" style="margin-top:10px">What just changed:</div>
+    <div id="ann" class="ann"></div>
   </div>
 
   <!-- ══ CODE ════════════════════════════════ -->
@@ -369,8 +413,6 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
       <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy code</button>
     </div>
     <div class="code-scroll"><code id="code-out"></code></div>
-    <div id="ann-label" class="ann-label">What just changed:</div>
-    <div id="ann" class="ann"></div>
     <div class="panel-label" style="margin-bottom:6px;margin-top:2px">Code line colors</div>
     <div class="legend-bar">
       <span class="li"><span class="dot d-base"></span>   ggplot() base</span>
@@ -430,6 +472,10 @@ const S = {
   statHasAes:  false,   // only matters when aesLoc='geom' && showStat
   theme:       'none',
   addLabs:     false,
+  themeGrid:   'all',   // 'all' | 'no-x' | 'none'
+  themeTicks:  'show',  // 'show' | 'hide'
+  themeText:   'normal',// 'normal' | 'large'
+  themeTitle:  'show',  // 'show' | 'hide-x' | 'hide-y' | 'hide'
   changed:     'init',
 };
 
@@ -515,12 +561,39 @@ function fixStatAes() {
 
 function toggleLabs(v) { S.addLabs = v; S.changed = 'addLabs'; render(); }
 
+function setThemeGrid(v) {
+  S.themeGrid = v; S.changed = 'themeGrid';
+  document.querySelectorAll('#grid-stack .aesbtn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === v));
+  render();
+}
+function setThemeTicks(v) {
+  S.themeTicks = v; S.changed = 'themeTicks';
+  document.querySelectorAll('#ticks-tog .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === v));
+  render();
+}
+function setThemeText(v) {
+  S.themeText = v; S.changed = 'themeText';
+  document.querySelectorAll('#text-tog .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === v));
+  render();
+}
+function setThemeTitle(v) {
+  S.themeTitle = v; S.changed = 'themeTitle';
+  document.querySelectorAll('#title-stack .aesbtn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === v));
+  render();
+}
+
 function resetAll() {
   Object.assign(S, {
     showViolin:true, showPoint:true, showStat:false,
     layerOrder:'violin-point', colorMode:'fixed', fixedColor:'purple',
     mappedVar:'species', alpha:0.6, aesLoc:'ggplot', mapApply:'both',
-    statHasAes:false, theme:'none', addLabs:false, changed:'init'
+    statHasAes:false, theme:'none', addLabs:false,
+    themeGrid:'all', themeTicks:'show', themeText:'normal', themeTitle:'show',
+    changed:'init'
   });
   // geom buttons
   document.getElementById('b-violin').classList.add('on');
@@ -557,6 +630,15 @@ function resetAll() {
     b.classList.toggle('on', b.textContent === 'default'));
   // labs checkbox
   document.getElementById('chk-labs').checked = false;
+  // theme customizations
+  document.querySelectorAll('#grid-stack .aesbtn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === 'all'));
+  document.querySelectorAll('#ticks-tog .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === 'show'));
+  document.querySelectorAll('#text-tog .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === 'normal'));
+  document.querySelectorAll('#title-stack .aesbtn').forEach(b =>
+    b.classList.toggle('on', b.dataset.val === 'show'));
   render();
 }
 
@@ -582,6 +664,9 @@ const FN_TIPS = {
   theme_classic: 'white background with axis lines only: traditional journal style',
   theme_bw:      'white background with grey gridlines and a border',
   labs:          'sets the plot title and axis labels: purely cosmetic, no effect on the data',
+  theme:         'fine-tunes individual theme elements — stacks on top of a pre-built theme, or works alone',
+  element_blank: 'removes a theme element entirely — the ggplot2 way to hide gridlines, ticks, text, and more',
+  element_text:  'controls the appearance of text: size, font face (bold/italic), color, angle, and more',
 };
 const fn = s => {
   const tip = FN_TIPS[s];
@@ -608,7 +693,15 @@ const KW_TIPS = {
   size:  'the size of the drawn shape',
   fun:   'the summary function to compute per group (here: mean)',
   geom:  'what shape to use when drawing the computed summary',
-  title: 'the main title displayed above the plot',
+  title:                'the main title displayed above the plot',
+  'panel.grid':         'all gridlines inside the plot panel — major and minor, both axes',
+  'panel.grid.major.x': 'vertical gridlines at each x-axis position; nested inside panel.grid.major, which is inside panel.grid — more specific names win when both are set',
+  'axis.ticks':         'the short tick marks on both axes, showing where the labels are',
+  'axis.text':          'the tick label text on both axes: numbers on y, category names on x',
+  'axis.title':         'the axis title text on both axes (e.g., "species", "body_mass_g")',
+  'axis.title.x':       'the x-axis title only; more specific than axis.title, so it takes priority when both are set',
+  'axis.title.y':       'the y-axis title only; more specific than axis.title, so it takes priority when both are set',
+  size:                 'the font size of the text element in points',
 };
 const kw = s => {
   const tip = KW_TIPS[s];
@@ -641,10 +734,23 @@ function mkAes(extra = '') {
 
 function buildCode() {
   const { showViolin, showPoint, showStat, layerOrder, colorMode,
-      fixedColor, mappedVar, mapApply, alpha, aesLoc, statHasAes, theme, addLabs } = S;
+      fixedColor, mappedVar, mapApply, alpha, aesLoc, statHasAes,
+      theme, addLabs, themeGrid, themeTicks, themeText, themeTitle } = S;
 
   const a = nu(alpha.toFixed(1));
-  const hasMore = theme !== 'none' || addLabs;
+
+  // Compute theme() tweaks
+  const tweaks = [];
+  if (themeGrid === 'no-x') tweaks.push({ k: kw('panel.grid.major.x'), v: `${fn('element_blank')}()` });
+  if (themeGrid === 'none')  tweaks.push({ k: kw('panel.grid'),         v: `${fn('element_blank')}()` });
+  if (themeTicks === 'hide') tweaks.push({ k: kw('axis.ticks'),         v: `${fn('element_blank')}()` });
+  if (themeText === 'large') tweaks.push({ k: kw('axis.text'),          v: `${fn('element_text')}(${kw('size')} = ${nu('14')})` });
+  if (themeTitle === 'hide-x') tweaks.push({ k: kw('axis.title.x'),     v: `${fn('element_blank')}()` });
+  if (themeTitle === 'hide-y') tweaks.push({ k: kw('axis.title.y'),     v: `${fn('element_blank')}()` });
+  if (themeTitle === 'hide')   tweaks.push({ k: kw('axis.title'),       v: `${fn('element_blank')}()` });
+  const hasTweaks = tweaks.length > 0;
+
+  const hasMore = theme !== 'none' || hasTweaks || addLabs;
 
   // Draw order for violin/point; stat always last
   const gBase = (showViolin && showPoint)
@@ -737,7 +843,17 @@ function buildCode() {
 
   // ── theme ──
   if (theme !== 'none') {
-    lines.push({ id:'theme', layer:'theme', t:`  ${fn('theme_'+theme)}()${addLabs ? pl() : ''}` });
+    lines.push({ id:'theme', layer:'theme', t:`  ${fn('theme_'+theme)}()${(hasTweaks || addLabs) ? pl() : ''}` });
+  }
+
+  // ── theme() tweaks ──
+  if (hasTweaks) {
+    lines.push({ id:'tw0', layer:'theme', t:`  ${fn('theme')}(` });
+    tweaks.forEach((tw, i) => {
+      const comma = i < tweaks.length - 1 ? ',' : '';
+      lines.push({ id:`tw${i+1}`, layer:'theme', t:`    ${tw.k} = ${tw.v}${comma}` });
+    });
+    lines.push({ id:`tw${tweaks.length+1}`, layer:'theme', t:`  )${addLabs ? pl() : ''}` });
   }
 
   // ── labs ──
@@ -755,7 +871,8 @@ function buildCode() {
 // ─── ANNOTATIONS ───────────────────────────────────────────────────
 function getAnn() {
   const { changed, showViolin, showPoint, showStat, layerOrder,
-          colorMode, aesLoc, theme, addLabs, fixedColor, mappedVar, alpha, statHasAes } = S;
+          colorMode, aesLoc, theme, addLabs, fixedColor, mappedVar, alpha, statHasAes,
+          themeGrid, themeTicks, themeText, themeTitle } = S;
 
   // Priority: stat warning always shown when condition is met
   if (showStat && aesLoc === 'geom' && !statHasAes) {
@@ -803,6 +920,36 @@ function getAnn() {
   if (changed === 'addLabs' && addLabs)
     return { cls:'ann-labs', html:`<b>labs(): another + layer.</b> Purely cosmetic. Title and axis labels sit at the end of the chain; removing them changes nothing about how data is drawn.` };
 
+  if (changed === 'themeGrid') {
+    if (themeGrid === 'all')
+      return { cls:'ann-theme', html:`<b>All gridlines back.</b> No <code>theme()</code> override needed — this is the default.` };
+    if (themeGrid === 'no-x')
+      return { cls:'ann-theme', html:`<b>Vertical gridlines hidden.</b> <code>panel.grid.major.x = element_blank()</code> removes just the vertical lines (one at each species column).<br><br>Think of the names as a folder hierarchy: <code>panel.grid</code> is the whole folder. Inside it is <code>panel.grid.major</code>. Inside that is <code>panel.grid.major.x</code>. Targeting the specific file leaves everything else untouched.` };
+    return { cls:'ann-theme', html:`<b>All gridlines hidden.</b> <code>panel.grid = element_blank()</code> removes the entire gridline family at once — major, minor, both axes. Targeting the top-level "folder" clears everything inside it.` };
+  }
+
+  if (changed === 'themeTicks') {
+    if (themeTicks === 'hide')
+      return { cls:'ann-theme', html:`<b>Tick marks hidden.</b> Tick marks "live" in <code>axis.ticks</code>. Setting it to <code>element_blank()</code> removes them from both axes at once.<br><br><code>element_blank()</code> is the ggplot2 way to say "remove this entirely" — it works on any theme element: gridlines, ticks, text, borders, and more.` };
+    return { cls:'ann-theme', html:`<b>Tick marks back.</b> Removing the <code>axis.ticks</code> override lets the default take over.` };
+  }
+
+  if (changed === 'themeText') {
+    if (themeText === 'large')
+      return { cls:'ann-theme', html:`<b>Axis label text enlarged.</b> <code>axis.text = element_text(size = 14)</code> resizes the tick labels on both axes.<br><br>Notice the difference from the other controls: instead of <code>element_blank()</code> (remove), this uses <code>element_text()</code> (style). You can use <code>element_text()</code> to control size, bold, italic, color, angle, and more.` };
+    return { cls:'ann-theme', html:`<b>Axis label text back to normal.</b> Removing the <code>axis.text</code> override lets the default size take over.` };
+  }
+
+  if (changed === 'themeTitle') {
+    if (themeTitle === 'show')
+      return { cls:'ann-theme', html:`<b>Both axis titles visible.</b> No override needed — this is the default.` };
+    if (themeTitle === 'hide-x')
+      return { cls:'ann-theme', html:`<b>X-axis title hidden.</b> <code>axis.title.x = element_blank()</code> removes just the x-axis title, leaving the y-axis title in place. It's more specific than <code>axis.title</code>, which would remove both at once.` };
+    if (themeTitle === 'hide-y')
+      return { cls:'ann-theme', html:`<b>Y-axis title hidden.</b> <code>axis.title.y = element_blank()</code> removes just the y-axis title — the x-axis title stays. More specific beats more general: <code>axis.title.y</code> targets exactly one thing.` };
+    return { cls:'ann-theme', html:`<b>Both axis titles hidden.</b> <code>axis.title = element_blank()</code> removes both at once, since <code>axis.title</code> is the parent of both <code>axis.title.x</code> and <code>axis.title.y</code>.` };
+  }
+
   if (changed === 'init')
     return { cls:'ann-welcome', html:`<b>Here's how this works.</b><br><br>
       The code panel above shows real ggplot2 R code you can paste into R. Each <b>colored stripe</b> on the left of a line marks which layer it belongs to; ggplot2 builds plots by stacking layers together with <code>+</code>.<br><br>
@@ -829,6 +976,10 @@ function renderCode() {
   const lbl = document.getElementById('ann-label');
   if (ann) {
     el2.innerHTML = ann.html;
+    if (ann.cls === 'ann-welcome') {
+      el2.classList.remove('ann-welcome');
+      void el2.offsetWidth;
+    }
     el2.className = 'ann show ' + ann.cls;
     lbl.textContent = S.changed === 'init' ? 'How to use:' : 'What just changed:';
     lbl.classList.add('show');
@@ -1010,21 +1161,37 @@ function renderPlot() {
   for(const g of gBase) layerSvg += g==='violin' ? drawViolins(sy,cx) : drawPoints(sy,cx);
   layerSvg += drawStat(sy,cx); // stat always on top
 
-  // Grid
-  const gridSvg=cfg.grid
-    ?ticks.map(v=>`<line x1="0" y1="${sy(v)}" x2="${PW}" y2="${sy(v)}" stroke="${cfg.grid}" stroke-width="${cfg.gw}"/>`).join('')
-    :'';
+  // Grid — horizontal (y) and vertical (x) lines, each independently controlled
+  const showYGrid = cfg.grid !== null && S.themeGrid !== 'none';
+  const showXGrid = cfg.grid !== null && S.themeGrid === 'all';
+  const yGridSvg = showYGrid
+    ? ticks.map(v=>`<line x1="0" y1="${sy(v)}" x2="${PW}" y2="${sy(v)}" stroke="${cfg.grid}" stroke-width="${cfg.gw}"/>`).join('')
+    : '';
+  const xGridSvg = showXGrid
+    ? SP.map((_,i)=>`<line x1="${cx(i)}" y1="0" x2="${cx(i)}" y2="${PH}" stroke="${cfg.grid}" stroke-width="${cfg.gw}"/>`).join('')
+    : '';
+  const gridSvg = xGridSvg + yGridSvg;
 
-  // y-axis ticks
-  const yAxis=ticks.map(v=>`
-    <line x1="-4" y1="${sy(v)}" x2="0" y2="${sy(v)}" stroke="#8a7e6f" stroke-width="1"/>
-    <text x="-7" y="${sy(v)+4}" text-anchor="end" font-size="9.5" fill="#6a6055">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>
+  // Tick marks and label sizes — both respond to theme tweaks
+  const showTicks = S.themeTicks === 'show';
+  const axTextSize = S.themeText === 'large' ? 13 : 9.5;
+  const xTextSize  = S.themeText === 'large' ? 13 : 10.5;
+
+  // y-axis: optional tick marks + labels
+  const yAxis = ticks.map(v=>`
+    ${showTicks ? `<line x1="-4" y1="${sy(v)}" x2="0" y2="${sy(v)}" stroke="#8a7e6f" stroke-width="1"/>` : ''}
+    <text x="-7" y="${sy(v)+4}" text-anchor="end" font-size="${axTextSize}" fill="#6a6055">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>
   `).join('');
 
-  // x-axis species labels
-  const xLabels=SP.map((sp,i)=>
-    `<text x="${cx(i)}" y="15" text-anchor="middle" font-size="10.5" fill="#3c3428">${sp}</text>`
-  ).join('');
+  // x-axis: optional tick marks + species labels (group is translated PH+5 below plot)
+  const xLabels = SP.map((sp,i)=>`
+    ${showTicks ? `<line x1="${cx(i)}" y1="-5" x2="${cx(i)}" y2="-1" stroke="#8a7e6f" stroke-width="1"/>` : ''}
+    <text x="${cx(i)}" y="15" text-anchor="middle" font-size="${xTextSize}" fill="#3c3428">${sp}</text>
+  `).join('');
+
+  // Axis title visibility
+  const showXTitle = S.themeTitle === 'show' || S.themeTitle === 'hide-y';
+  const showYTitle = S.themeTitle === 'show' || S.themeTitle === 'hide-x';
 
   // Stat legend (small note)
   const statNote = S.showStat && (S.aesLoc==='ggplot'||S.statHasAes)
@@ -1034,7 +1201,7 @@ function renderPlot() {
   const box=cfg.box?`<rect width="${PW}" height="${PH}" fill="none" stroke="#8a7e6f" stroke-width="1.2"/>`:'';
 
   document.getElementById('plot-svg').innerHTML=`
-    <rect width="${VW}" height="${VH}" fill="#f8f5ee" rx="8"/>
+    <rect width="${VW}" height="${VH}" fill="#f5f3fc" rx="8"/>
     <g transform="translate(${ML},${MT})">
       <rect width="${PW}" height="${PH}" fill="${cfg.bg}"/>
       ${gridSvg}
@@ -1044,8 +1211,8 @@ function renderPlot() {
       <line x1="0" y1="0"    x2="0"    y2="${PH}" stroke="#8a7e6f" stroke-width="1.5"/>
       <g transform="translate(0,${PH+5})">${xLabels}</g>
       <g>${yAxis}</g>
-      <text x="${PW/2}" y="${PH+46}" text-anchor="middle" font-size="11.5" fill="#1c1811" font-weight="600">${S.addLabs ? 'Species' : 'species'}</text>
-      <text transform="rotate(-90)" x="${-PH/2}" y="-46" text-anchor="middle" font-size="11.5" fill="#1c1811" font-weight="600">${S.addLabs ? 'Body Mass (g)' : 'body_mass_g'}</text>
+      ${showXTitle ? `<text x="${PW/2}" y="${PH+46}" text-anchor="middle" font-size="11.5" fill="#1c1811" font-weight="600">${S.addLabs ? 'Species' : 'species'}</text>` : ''}
+      ${showYTitle ? `<text transform="rotate(-90)" x="${-PH/2}" y="-46" text-anchor="middle" font-size="11.5" fill="#1c1811" font-weight="600">${S.addLabs ? 'Body Mass (g)' : 'body_mass_g'}</text>` : ''}
       ${drawLegend(cx)}
       ${statNote}
     </g>

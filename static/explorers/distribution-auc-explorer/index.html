@@ -10,17 +10,17 @@
   <style>
     /* === CSS VARIABLES === */
     :root {
-      --bg:      #f0ebe1;
-      --panel:   #fdfcf9;
-      --border:  #dbd3c3;
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
       --text:    #1c1811;
-      --muted:   #79705f;
-      --accent:  #b85520;
-      --code-bg: #181826;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
 
       /* Per-tool color tokens — one per distribution */
       --c-normal: #4eaaec;
-      --c-binom:  #52c97e;
+      --c-binom:  #26c4bc;
       --c-pois:   #c89850;
       --c-t:      #b87fd4;
       --c-chisq:  #e8a030;
@@ -66,7 +66,7 @@
     .pill {
       display: inline-block;
       padding: 2px 9px;
-      background: #ece8de;
+      background: #e8e3f5;
       border: 1px solid var(--border);
       border-radius: 20px;
       font-family: 'Fira Code', monospace;
@@ -191,7 +191,7 @@
     #prob-readout {
       margin-top: 10px;
       padding: 9px 13px;
-      background: #ece8de;
+      background: #e8e3f5;
       border-radius: 7px;
       font-size: 0.83rem;
       line-height: 1.6;
@@ -260,22 +260,22 @@
       padding: 13px 18px;
       border-radius: 9px; border: 1.5px solid var(--border);
       font-size: 0.84rem; line-height: 1.65;
-      background: var(--panel);
+      background: #f5f3fc;
     }
     .ann.show { display: block; }
-    .ann-welcome { border-color: var(--accent); background: #fdf6f0; }
-    .ann-normal  { border-color: var(--c-normal); background: #f0f6fd; }
-    .ann-binom   { border-color: var(--c-binom);  background: #f0fdf5; }
-    .ann-pois    { border-color: var(--c-pois);   background: #fdf8f0; }
-    .ann-t       { border-color: var(--c-t);      background: #f8f0fd; }
-    .ann-chisq   { border-color: var(--c-chisq);  background: #fdf5e8; }
-    .ann-f       { border-color: var(--c-f);      background: #fdf0f4; }
+    .ann-welcome { border-color: var(--accent); background: #f0edfb; }
+    .ann-normal  { border-color: var(--c-normal); }
+    .ann-binom   { border-color: var(--c-binom);  }
+    .ann-pois    { border-color: var(--c-pois);   }
+    .ann-t       { border-color: var(--c-t);      }
+    .ann-chisq   { border-color: var(--c-chisq);  }
+    .ann-f       { border-color: var(--c-f);      }
 
     /* inline code in annotations */
     .ann code {
       font-family: 'Fira Code', monospace;
       font-size: 0.82em;
-      background: #ece8de;
+      background: #e8e3f5;
       padding: 1px 5px;
       border-radius: 3px;
     }
@@ -286,6 +286,12 @@
       100% { background-color: transparent; }
     }
     .cl-flash { animation: flash 0.7s ease-out; }
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
   </style>
 </head>
 <body>
@@ -411,7 +417,7 @@
           <button class="mbtn" data-val="outside" onclick="setTail(this)">Outside: P(X &lt; q&#8321; or X &gt; q&#8322;)</button>
           <button class="mbtn" id="exact-btn" data-val="exact" onclick="setTail(this)" title="For continuous distributions, P(X = x) = 0; only ranges have non-zero probability.">Exact: P(X = k)</button>
         </div>
-        <p class="sub" id="exact-cont-note" style="display:none;margin-top:5px">For continuous distributions, P(X = exact value) = 0; only ranges have non-zero probability. (<code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">dnorm()</code> etc. give density, not probability.)</p>
+        <p class="sub" id="exact-cont-note" style="display:none;margin-top:5px">For continuous distributions, P(X = exact value) = 0; only ranges have non-zero probability. (<code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">dnorm()</code> etc. give density, not probability.)</p>
       </div>
 
       <div class="hr"></div>
@@ -419,7 +425,7 @@
       <!-- Cutpoint slider(s) — label and range set by JS -->
       <div class="cs" id="cutpoint-block">
         <div class="ch" id="cut-label">Cutpoint (q)</div>
-        <p class="sub" id="cut-desc" style="margin-bottom:6px">The value that bounds the shaded region (passed to the <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">q</code> argument of the R function)</p>
+        <p class="sub" id="cut-desc" style="margin-bottom:6px">The value that bounds the shaded region (passed to the <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">q</code> argument of the R function)</p>
         <div id="cut-single">
           <div class="param-row">
             <label id="cut1-lbl">q</label>
@@ -674,7 +680,7 @@
       if (d==='pois')   return [-0.5, Math.max(p.lambda+5*Math.sqrt(p.lambda)+0.5, 10)];
     }
 
-    const DIST_COLORS = {normal:'#4eaaec', t:'#b87fd4', chisq:'#e8a030', f:'#e06b8b', binom:'#52c97e', pois:'#c89850'};
+    const DIST_COLORS = {normal:'#4eaaec', t:'#b87fd4', chisq:'#e8a030', f:'#e06b8b', binom:'#26c4bc', pois:'#c89850'};
     const DIST_LABEL  = {normal:'Normal',t:'t',chisq:'Chi-square (\u03c7\u00b2)',f:'F',binom:'Binomial',pois:'Poisson'};
     function distColor() { return DIST_COLORS[S.dist]; }
 
@@ -702,6 +708,10 @@
       renderMain(); renderCode();
       const {cls, html} = getAnn();
       const a = document.getElementById('ann-box');
+      if (cls === 'ann-welcome') {
+        a.classList.remove('ann-welcome');
+        void a.offsetWidth;
+      }
       a.className = 'ann show ' + cls;
       a.innerHTML = html;
     }
@@ -871,7 +881,7 @@
         <div style="border-top:1px solid var(--border);margin-top:11px;padding-top:11px;">
           <div style="font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:9px;">How do we calculate the probability associated with each bar?</div>
 
-          <div style="font-family:'Fira Code',monospace;font-size:0.83rem;padding:7px 11px;background:#ece8de;border-radius:6px;border-left:3px solid ${c};margin-bottom:9px;">
+          <div style="font-family:'Fira Code',monospace;font-size:0.83rem;padding:7px 11px;background:#e8e3f5;border-radius:6px;border-left:3px solid ${c};margin-bottom:9px;">
             P(X = k) &nbsp;=&nbsp; C(n,&thinsp;k) &nbsp;&times;&nbsp; p<sup>k</sup> &nbsp;&times;&nbsp; (1&minus;p)<sup>n&minus;k</sup>
           </div>
 
@@ -881,7 +891,7 @@
 
           <div style="display:flex;flex-direction:column;gap:7px;">
 
-            <div style="padding:8px 11px;border-radius:7px;background:#ece8de;">
+            <div style="padding:8px 11px;border-radius:7px;background:#e8e3f5;">
               <div style="font-size:0.75rem;font-weight:700;color:${c};margin-bottom:4px;">&#9312; How many arrangements have exactly ${k} success${k !== 1 ? 'es' : ''}?</div>
               <div style="font-family:'Fira Code',monospace;font-size:0.8rem;margin-bottom:5px;">
                 C(${n},&thinsp;${k}) = ${n}! &divide; (${k}! &times; ${n-k}!) = <strong>${chooseNK.toLocaleString()}</strong>
@@ -893,7 +903,7 @@
               </div>
             </div>
 
-            <div style="padding:8px 11px;border-radius:7px;background:#ece8de;">
+            <div style="padding:8px 11px;border-radius:7px;background:#e8e3f5;">
               <div style="font-size:0.75rem;font-weight:700;color:${c};margin-bottom:4px;">&#9313; What's the probability of one specific ordering?</div>
               <div style="font-family:'Fira Code',monospace;font-size:0.8rem;margin-bottom:5px;">
                 ${pkStr} &nbsp;&times;&nbsp; ${qnkStr}${k>0&&n-k>0?' = <strong>'+fmt(pk*qnk)+'</strong>':''}

@@ -10,13 +10,13 @@
   <style>
     /* === CSS VARIABLES === */
     :root {
-      --bg:      #f0ebe1;
-      --panel:   #fdfcf9;
-      --border:  #dbd3c3;
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
       --text:    #1c1811;
-      --muted:   #79705f;
-      --accent:  #b85520;
-      --code-bg: #181826;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
 
       --c-filter:    #4eaaec;
       --c-select:    #52c97e;
@@ -66,7 +66,7 @@
     .pill {
       display: inline-block;
       padding: 2px 9px;
-      background: #ece8de;
+      background: #e8e3f5;
       border: 1px solid var(--border);
       border-radius: 20px;
       font-family: 'Fira Code', monospace;
@@ -160,14 +160,14 @@
     .dtable th {
       font-family: 'Fira Code', monospace; font-size: 0.73rem; font-weight: 500;
       padding: 5px 10px; border-bottom: 2px solid var(--border);
-      background: #f5f0e8; text-align: left; white-space: nowrap;
+      background: #eeebf8; text-align: left; white-space: nowrap;
     }
     .dtable td {
       padding: 4px 10px; border-bottom: 1px solid var(--border);
       font-family: 'Fira Code', monospace; font-size: 0.77rem;
       white-space: nowrap; color: var(--text);
     }
-    .dtable tbody tr:hover td { background: #f5f0e8; }
+    .dtable tbody tr:hover td { background: #eeebf8; }
     /* group-by row shading — alternating tints per group */
     .dtable .grp-0 td { background: rgba(184,127,212,0.06); }
     .dtable .grp-1 td { background: rgba(184,127,212,0.14); }
@@ -203,7 +203,7 @@
       background: white; cursor: pointer; transition: all .1s;
     }
     .pstep:hover { border-color: var(--accent); }
-    .pstep.active { border-color: var(--accent); background: #fdf6f0; }
+    .pstep.active { border-color: var(--accent); background: #f0edfb; }
     .pstep-verb {
       font-family: 'Fira Code', monospace; font-weight: 500;
       font-size: 0.72rem; padding: 1px 6px; border-radius: 4px;
@@ -227,7 +227,7 @@
 
     /* === TOOL-SPECIFIC: VERB CONFIGURATOR === */
     .verb-config {
-      background: #f5f0e8; border-radius: 7px;
+      background: #eeebf8; border-radius: 7px;
       padding: 10px 10px 8px; margin-bottom: 8px;
     }
     .verb-config .ch { margin-bottom: 7px; }
@@ -322,20 +322,20 @@
     /* === ANNOTATION BOX === */
     .ann {
       display: none;
-      max-width: 1360px; margin: 0 auto 18px;
+      margin-top: 14px;
       padding: 13px 18px;
       border-radius: 9px; border: 1.5px solid var(--border);
       font-size: 0.84rem; line-height: 1.65;
       background: var(--panel);
     }
     .ann.show { display: block; }
-    .ann-welcome { border-color: var(--accent); background: #fdf6f0; }
+    .ann-welcome { border-color: var(--accent); background: #f0edfb; }
 
     /* inline code in annotations */
     .ann code {
       font-family: 'Fira Code', monospace;
       font-size: 0.82em;
-      background: #ece8de;
+      background: #e8e3f5;
       padding: 1px 5px;
       border-radius: 3px;
     }
@@ -346,6 +346,12 @@
       100% { background-color: transparent; }
     }
     .cl-flash { animation: flash 0.7s ease-out; }
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
   </style>
 </head>
 <body>
@@ -592,12 +598,10 @@
       <div class="code-scroll" id="code-scroll">
         <!-- populated by JS -->
       </div>
+      <div id="ann-box" class="ann"></div>
     </div>
 
   </div>
-
-  <!-- ANNOTATION BOX (below grid) -->
-  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
 
   <div id="code-tip"></div>
 
@@ -1101,6 +1105,10 @@
       document.getElementById('code-scroll').innerHTML = buildCode();
       const {cls, html} = getAnn();
       const ann = document.getElementById('ann-box');
+      if (cls === 'ann-welcome') {
+        ann.classList.remove('ann-welcome');
+        void ann.offsetWidth;
+      }
       ann.className = 'ann show ' + cls;
       ann.innerHTML = html;
     }

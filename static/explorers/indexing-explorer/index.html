@@ -10,13 +10,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:      #f0ebe1;
-  --panel:   #fdfcf9;
-  --border:  #dbd3c3;
+  --bg:      #f0edf8;
+  --panel:   #faf9fd;
+  --border:  #ddd8f0;
   --text:    #1c1811;
-  --muted:   #79705f;
-  --accent:  #b85520;
-  --code-bg: #181826;
+  --muted:   #7a7098;
+  --accent:  #6c5fc7;
+  --code-bg: #1a1828;
   --c-dollar:  #4eaaec;
   --c-bracket: #52c97e;
   --c-filter:  #c89850;
@@ -35,7 +35,7 @@ header h1 { font-family:'Lora',Georgia,serif; font-size:1.45rem; font-weight:600
 header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .pill {
   display:inline-block; padding:2px 9px;
-  background:#ece8de; border:1px solid var(--border); border-radius:20px;
+  background:#e8e3f5; border:1px solid var(--border); border-radius:20px;
   font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); margin:0 2px;
 }
 
@@ -52,7 +52,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .cs { margin-bottom:9px; }
 .cs:last-child { margin-bottom:0; }
 .ch { display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:600; margin-bottom:7px; }
-.ch code { font-family:'Fira Code',monospace; font-size:0.77em; background:#ece8de; padding:1px 4px; border-radius:3px; color:var(--muted); }
+.ch code { font-family:'Fira Code',monospace; font-size:0.77em; background:#e8e3f5; padding:1px 4px; border-radius:3px; color:var(--muted); }
 .sub { font-size:0.73rem; color:var(--muted); margin-bottom:5px; margin-top:2px; }
 .hr  { height:1px; background:var(--border); margin:8px 0; }
 .br  { display:flex; flex-wrap:wrap; gap:5px; }
@@ -96,7 +96,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   text-align:left;
 }
 .cbtn:hover { border-color:var(--muted); color:var(--text); }
-.cbtn.on { border-color:var(--accent); background:rgba(184,85,32,0.07); color:var(--text); font-weight:600; }
+.cbtn.on { border-color:var(--accent); background:rgba(108,95,199,0.12); color:var(--text); font-weight:600; }
 
 /* Index selector buttons */
 .idx-row { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; }
@@ -145,7 +145,7 @@ table.dt {
   font-family:'DM Sans',sans-serif;
 }
 table.dt th {
-  background:#f0ebe1; padding:5px 8px; text-align:left;
+  background:var(--bg); padding:5px 8px; text-align:left;
   font-family:'Fira Code',monospace; font-size:0.7rem; font-weight:500;
   color:var(--muted); border-bottom:2px solid var(--border);
   white-space:nowrap; position:sticky; top:0; z-index:2;
@@ -162,7 +162,7 @@ table.dt tr:last-child td { border-bottom:none; }
 
 /* Highlight states */
 table.dt th.hl-col { background:var(--accent); color:white !important; opacity:1 !important; }
-table.dt td.hl-col { background:rgba(184,85,32,0.09); opacity:1 !important; }
+table.dt td.hl-col { background:rgba(108,95,199,0.12); opacity:1 !important; }
 table.dt th.dim    { opacity:0.28; }
 table.dt td.dim    { opacity:0.28; }
 
@@ -183,7 +183,7 @@ table.dt.all-selected { outline:2px solid var(--c-bracket); outline-offset:2px; 
 /* Result badge */
 .result-badge {
   margin-top:9px; padding:7px 12px; border-radius:7px;
-  background:#f5f3ee; border:1px solid var(--border);
+  background:#f5f3fc; border:1px solid var(--border);
   font-size:0.76rem; color:var(--muted); line-height:1.55;
 }
 .result-badge b { color:var(--text); font-weight:700; }
@@ -222,6 +222,13 @@ table.dt.all-selected { outline:2px solid var(--c-bracket); outline-offset:2px; 
 }
 .cl-flash { animation:flash 0.7s ease-out; }
 
+@keyframes ann-pulse {
+  0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+  100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+}
+.ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
+
 /* Syntax tokens */
 .sf { color:#c792ea; }   /* function */
 .sv { color:#f78c6c; }   /* data frame */
@@ -245,7 +252,7 @@ table.dt.all-selected { outline:2px solid var(--c-bracket); outline-offset:2px; 
 .ann-dollar  { border-color:var(--c-dollar);  background:#f0f6ff; }
 .ann-bracket { border-color:var(--c-bracket); background:#f0fdf5; }
 .ann-filter  { border-color:var(--c-filter);  background:#fdf8f0; }
-.ann-welcome { border-color:var(--accent);    background:#fdf6f0; }
+.ann-welcome { border-color:var(--accent);    background:#f0edfb; }
 
 /* Code tooltip */
 #code-tip {
@@ -292,17 +299,17 @@ table.dt.all-selected { outline:2px solid var(--c-bracket); outline-offset:2px; 
     </div>
 
     <!-- ── Dollar sub-panel ── -->
-    <div id="panel-dollar">
+    <div id="panel-dollar" style="display:none">
       <div class="ch">Which column?</div>
       <div class="col-stack" id="dollar-cols">
-        <button class="cbtn on" data-col="species"          onclick="pickDollarCol(this)">$species</button>
+        <button class="cbtn"    data-col="species"          onclick="pickDollarCol(this)">$species</button>
         <button class="cbtn"    data-col="island"           onclick="pickDollarCol(this)">$island</button>
         <button class="cbtn"    data-col="bill_length_mm"   onclick="pickDollarCol(this)">$bill_length_mm</button>
         <button class="cbtn"    data-col="flipper_length_mm" onclick="pickDollarCol(this)">$flipper_length_mm</button>
         <button class="cbtn"    data-col="body_mass_g"      onclick="pickDollarCol(this)">$body_mass_g</button>
         <button class="cbtn"    data-col="sex"              onclick="pickDollarCol(this)">$sex</button>
       </div>
-      <div class="sub" style="margin-top:8px">The <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 3px;border-radius:2px">$</code> operator always returns all rows as a vector.</div>
+      <div class="sub" style="margin-top:8px">The <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">$</code> operator always returns all rows as a vector.</div>
     </div>
 
     <!-- ── Bracket sub-panel ── -->
@@ -328,7 +335,7 @@ table.dt.all-selected { outline:2px solid var(--c-bracket); outline-offset:2px; 
     <!-- ── Filter sub-panel ── -->
     <div id="panel-filter" style="display:none">
       <div class="ch">Subsetting rows <span style="font-weight:400;color:var(--muted)">(base R filter)</span></div>
-      <div class="sub" style="margin-bottom:8px">Equivalent to dplyr's <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#ece8de;padding:0 3px;border-radius:2px">filter()</code>; it keeps rows where a condition is TRUE</div>
+      <div class="sub" style="margin-bottom:8px">Equivalent to dplyr's <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">filter()</code>; it keeps rows where a condition is TRUE</div>
 
       <div class="sub">Column:</div>
       <div class="br" id="f1-col-row" style="margin-bottom:6px">
@@ -483,7 +490,7 @@ function resetAll() {
   document.getElementById('panel-bracket').style.display = 'none';
   document.getElementById('panel-filter').style.display  = 'none';
   // reset dollar cols
-  document.querySelectorAll('#dollar-cols .cbtn').forEach(b=>b.classList.toggle('on', b.dataset.col==='species'));
+  document.querySelectorAll('#dollar-cols .cbtn').forEach(b=>b.classList.remove('on'));
   // reset bracket btns
   document.querySelectorAll('#bracket-rows .ibtn').forEach(b=>b.classList.toggle('on', b.dataset.val==='all'));
   document.querySelectorAll('#bracket-cols .ibtn').forEach(b=>b.classList.toggle('on', b.dataset.val==='all'));
@@ -692,6 +699,7 @@ function renderTable() {
   const tbl = document.getElementById('dt');
 
   // clear all classes
+  document.querySelectorAll('#dt tr').forEach(el => { el.className = ''; });
   document.querySelectorAll('#dt td, #dt th').forEach(el => {
     el.className = el.tagName==='TH' && el.classList.contains('row-hd') ? 'row-hd' : '';
   });
@@ -924,6 +932,10 @@ function render() {
   attachTips();
   const {cls, html} = getAnn();
   const ann = document.getElementById('ann-box');
+  if (cls === 'ann-welcome') {
+    ann.classList.remove('ann-welcome');
+    void ann.offsetWidth;
+  }
   ann.className = 'ann show ' + cls;
   ann.innerHTML = html;
 }

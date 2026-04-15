@@ -10,20 +10,20 @@
   <style>
     /* === CSS VARIABLES === */
     :root {
-      --bg:       #f0ebe1;
-      --panel:    #fdfcf9;
-      --border:   #dbd3c3;
+      --bg:       #f0edf8;
+      --panel:    #faf9fd;
+      --border:   #ddd8f0;
       --text:     #1c1811;
-      --muted:    #79705f;
-      --accent:   #b85520;
-      --code-bg:  #181826;
+      --muted:    #7a7098;
+      --accent:   #6c5fc7;
+      --code-bg:  #1a1828;
 
       /* pivot-specific color tokens */
       --c-cols:   #4eaaec;   /* cols argument / pivoted columns */
       --c-names:  #c89850;   /* names_to / names_from */
       --c-values: #52c97e;   /* values_to / values_from */
-      --c-id:     #b87fd4;   /* id columns (not pivoted) */
-      --c-adv:    #e8a030;   /* advanced options */
+      --c-id:     #d44f7f;   /* id columns (not pivoted) */
+      --c-adv:    #8a6fd4;   /* advanced options */
     }
 
     /* === RESET & BASE === */
@@ -66,7 +66,7 @@
     .pill {
       display: inline-block;
       padding: 2px 9px;
-      background: #ece8de;
+      background: #e8e3f5;
       border: 1px solid var(--border);
       border-radius: 20px;
       font-family: 'Fira Code', monospace;
@@ -188,7 +188,7 @@
       border: 1.5px solid transparent; cursor: pointer;
       font-weight: 500; transition: all .1s;
     }
-    .col-pill.role-id     { background: #f3eeff; border-color: var(--c-id);     color: var(--c-id); }
+    .col-pill.role-id     { background: #fce8f2; border-color: var(--c-id);     color: var(--c-id); }
     .col-pill.role-pivot  { background: #edf6ff; border-color: var(--c-cols);   color: var(--c-cols); }
     .col-pill.role-id.selectable:hover    { filter: brightness(0.93); }
     .col-pill.role-pivot.selectable:hover { filter: brightness(0.93); }
@@ -209,7 +209,7 @@
       font-family: 'Fira Code', monospace;
     }
     th {
-      background: #ece8de;
+      background: #e8e3f5;
       border: 1px solid var(--border);
       padding: 5px 10px;
       font-weight: 600;
@@ -236,7 +236,7 @@
     td.hi-4  { background: #f0d4ff; }
     td.hi-5  { background: #ffd4d4; }
     td.hi-6  { background: #d4ffee; }
-    td.hi-id { background: #f3eeff; }
+    td.hi-id { background: #fce8f2; }
 
     .arrow-row {
       display: flex; align-items: center; justify-content: center;
@@ -293,26 +293,26 @@
     /* === ANNOTATION BOX === */
     .ann {
       display: none;
-      max-width: 1360px; margin: 0 auto 18px;
+      margin-top: 10px;
       padding: 13px 18px;
       border-radius: 9px; border: 1.5px solid var(--border);
       font-size: 0.84rem; line-height: 1.65;
-      background: var(--panel);
+      background: #f5f3fc;
     }
     .ann.show { display: block; }
-    .ann-welcome  { border-color: var(--accent);  background: #fdf6f0; }
+    .ann-welcome  { border-color: var(--accent);  background: #f0edfb; }
     .ann-cols     { border-color: var(--c-cols);  background: #edf6ff; }
     .ann-names    { border-color: var(--c-names); background: #fdf5e4; }
     .ann-values   { border-color: var(--c-values);background: #edfaf3; }
-    .ann-id       { border-color: var(--c-id);    background: #f3eeff; }
-    .ann-mode     { border-color: var(--accent);  background: #fdf6f0; }
-    .ann-adv      { border-color: var(--c-adv);   background: #fdf8ee; }
+    .ann-id       { border-color: var(--c-id);    background: #fce8f2; }
+    .ann-mode     { border-color: var(--accent);  background: #f0edfb; }
+    .ann-adv      { border-color: var(--c-adv);   background: #f0edfb; }
 
     /* inline code in annotations */
     .ann code {
       font-family: 'Fira Code', monospace;
       font-size: 0.82em;
-      background: #ece8de;
+      background: #e8e3f5;
       padding: 1px 5px;
       border-radius: 3px;
     }
@@ -323,6 +323,13 @@
       100% { background-color: transparent; }
     }
     .cl-flash { animation: flash 0.7s ease-out; }
+
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
 
     @keyframes cell-flash {
       0%   { filter: brightness(0.8); }
@@ -370,7 +377,7 @@
           <div class="ch">Which columns to pivot?</div>
           <div class="sub" style="margin-bottom:6px">
             <span style="color:var(--c-cols);font-weight:600">Blue</span> columns will be collapsed into rows: Their names become values in a new column, and their numbers move to another new column. Click a blue column to exclude it.<br><br>
-            <span style="color:var(--c-id);font-weight:600">Purple</span> columns stay as-is. <span style="color:var(--c-id)">child_id</span> and <span style="color:var(--c-id)">name</span> can't be pivoted; they identify each child, so R needs them to repeat on every row. Measurement columns you exclude turn purple and stay as their own column in the result.
+            <span style="color:var(--c-id);font-weight:600">Pink</span> columns stay as-is. <span style="color:var(--c-id)">child_id</span> and <span style="color:var(--c-id)">name</span> can't be pivoted; they identify each child, so R needs them to repeat on every row. Measurement columns you exclude turn pink and stay as their own column in the result.
           </div>
           <div class="br" id="col-pills">
             <!-- populated by JS -->
@@ -404,7 +411,7 @@
 
           <div class="cs" style="margin-top:8px">
             <div class="ch" style="color:var(--c-adv)">names_prefix</div>
-            <div class="sub">Strip a repeated prefix from column names before putting them in <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">names_to</code></div>
+            <div class="sub">Strip a repeated prefix from column names before putting them in <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">names_to</code></div>
             <input class="ctrl-input" id="input-names-prefix" type="text" value=""
                    placeholder="e.g. reading_age" oninput="onNamesPrefix(this.value)"
                    style="border-color:var(--c-adv)">
@@ -412,7 +419,7 @@
 
           <div class="cs">
             <div class="ch" style="color:var(--c-adv)">values_drop_na</div>
-            <div class="sub">Drop rows where the value is <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">NA</code>?</div>
+            <div class="sub">Drop rows where the value is <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">NA</code>?</div>
             <div class="tog2" style="margin-top:4px">
               <button class="btn on" id="btn-dropna-false" onclick="onDropNA(false)">FALSE</button>
               <button class="btn"    id="btn-dropna-true"  onclick="onDropNA(true)">TRUE</button>
@@ -448,11 +455,11 @@
 
         <div class="cs">
           <div class="ch" style="color:var(--c-adv)">names_prefix</div>
-          <div class="sub">Add a prefix to the new column names. Bare numbers (like <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">6</code>, <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">7</code>, <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">8</code>) make awkward column names in R; a prefix fixes that.</div>
+          <div class="sub">Add a prefix to the new column names. Bare numbers (like <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">6</code>, <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">7</code>, <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">8</code>) make awkward column names in R; a prefix fixes that.</div>
           <input class="ctrl-input" id="input-wider-names-prefix" type="text" value="reading_age"
                  oninput="onWiderNamesPrefix(this.value)" style="border-color:var(--c-adv)">
-          <div class="sub" id="wider-prefix-warn" style="color:#b85520;display:none;margin-top:4px">
-            &#9888; Without a prefix, column names will be bare numbers. In R, you'd need backticks to use them: <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#ece8de;padding:1px 4px;border-radius:3px">df$`6`</code>
+          <div class="sub" id="wider-prefix-warn" style="color:var(--c-adv);display:none;margin-top:4px">
+            &#9888; Without a prefix, column names will be bare numbers. In R, you'd need backticks to use them: <code style="font-family:'Fira Code',monospace;font-size:0.8em;background:#e8e3f5;padding:1px 4px;border-radius:3px">df$`6`</code>
           </div>
         </div>
 
@@ -498,6 +505,8 @@
         <!-- populated by JS -->
       </div>
 
+      <div id="ann-box" class="ann"></div>
+
       <div style="margin-top:10px">
         <div class="panel-label" style="margin-bottom:6px">Color key</div>
         <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem">
@@ -526,9 +535,6 @@
     </div><!-- /code-panel -->
 
   </div><!-- /grid -->
-
-  <!-- ANNOTATION BOX (below grid) -->
-  <div id="ann-box" class="ann" style="padding-left:22px;padding-right:22px"></div>
 
   <div id="code-tip"></div>
 
@@ -588,6 +594,10 @@
       renderWiderControls();
       const {cls, html} = getAnn();
       const ann = document.getElementById('ann-box');
+      if (cls === 'ann-welcome') {
+        ann.classList.remove('ann-welcome');
+        void ann.offsetWidth;
+      }
       ann.className = 'ann show ' + cls;
       ann.innerHTML = html;
     }
@@ -954,7 +964,7 @@
         <strong>cols</strong> tells R which columns to pivot; that is, which ones should stop being their own columns
         and instead become <em>values</em> in a single column.<br><br>
         In the tables, <span style="color:var(--c-cols);font-weight:600">blue cells</span> are the ones being
-        pivoted. <span style="color:var(--c-id);font-weight:600">Purple cells</span> are the id columns;
+        pivoted. <span style="color:var(--c-id);font-weight:600">Pink cells</span> are the id columns;
         they stay in place and simply repeat for each new row. Try toggling columns on and off to see how
         the long table changes.`
       };
