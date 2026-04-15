@@ -895,7 +895,7 @@ function buildCode() {
 
 /* ── Annotation ─────────────────────────────── */
 function getAnn() {
-  if (S.mode===null || S.changed==='welcome') return {cls:'ann-welcome', html:`Here's how this works.<br><br>The code panel above shows real R code you can paste into R. The colored stripe on the left of each line marks which indexing concept it belongs to — blue for <code>$</code>, green for <code>[ , ]</code>, amber for Boolean subsetting.<br><br>The data table in the middle highlights exactly what gets selected: which rows, which columns, or which cells. Use the controls on the left to change the method and options. The code, the table, and this explanation all update instantly each time you click something.`};
+  if (S.mode===null || S.changed==='welcome') return {cls:'ann-welcome', html:`Here's how this Explorer works.<br><br>The code panel above shows real R code you can paste into R. The colored stripe on the left of each line marks which indexing concept it belongs to — blue for <code>$</code>, green for <code>[ , ]</code>, amber for Boolean subsetting.<br><br>The data table in the middle highlights exactly what gets selected: which rows, which columns, or which cells. Use the controls on the left to change the method and options. The code, the table, and this explanation all update instantly each time you click something.`};
   if (S.mode==='dollar') {
     return {cls:'ann-dollar', html:`The <code>$</code> operator <b>always returns a vector</b>—one dimension, all rows. Think of pulling the <code>${S.dollarCol}</code> column out of the data frame and laying it flat. You cannot select a subset of rows this way.`};
   }
