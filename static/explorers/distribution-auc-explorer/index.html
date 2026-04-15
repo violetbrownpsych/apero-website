@@ -1003,7 +1003,7 @@
       const fname = {normal:'pnorm',t:'pt',chisq:'pchisq',f:'pf',binom:'pbinom',pois:'ppois'}[d];
 
       if (c==='welcome') return {cls:'ann-welcome', html:`
-        <strong>Here's how this works.</strong><br><br>
+        <strong>Here's how this Explorer works.</strong><br><br>
         Pick a <strong>distribution</strong> on the left: Normal, Binomial, Poisson, t, Chi-square, or F. Each one models a different kind of random process, and they each have their own R function.<br><br>
         The <strong>plot in the middle</strong> shows the distribution's shape. The <strong>shaded region</strong> is the probability you're calculating: the area under the curve for continuous distributions, or the sum of the highlighted bar heights for discrete ones. Use the <strong>Shade area</strong> buttons to choose what region to shade: below a cutpoint, above it, between two values, outside two values, or (for discrete distributions) the probability of one exact value.<br><br>
         Drag the <strong>cutpoint slider</strong> to move the boundary and watch the shaded area change. The <strong>parameters</strong> (mean, sd, n, &lambda;, df, &hellip;) let you reshape the distribution itself.<br><br>
