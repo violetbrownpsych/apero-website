@@ -11,7 +11,7 @@ Below is a collection of the interactive tools I've built for my stats students 
 In most cases, the Explorers consist of three panels: The left one has the controllers, the middle one displays the data or plot, and the right one displays the code (often with comments to help the user understand the function). Short descriptions will pop up if you hover over portions of the code, and detailed descriptions can be found below the code chunks. Be sure to read the welcome message below the code on the right for instructions about how to use each tool! 
 
 
-Note that these are meant to <strong>complement</strong> teaching rather than replace it! That is, they're meant to be warm and accessible, but concise. 
+Note that these are meant to <strong>complement</strong> teaching rather than replace it! They're meant to be warm and accessible, but rather concise. Be sure to seek additional resources for more in-depth explorations of each topic.
 
 
 Good luck, have fun, and remember: WE ARE ALL MATH PEOPLE.
