@@ -1056,7 +1056,7 @@
     function getAnn() {
       if (!S.pipeline.length || S.changed === 'welcome') {
         return {cls:'ann-welcome', html:`
-          Here's how this works.<br><br>
+          <strong>Here's how this works.</strong><br><br>
           The code panel shows real R code you can copy into R. The colored stripe on the left of each line marks which verb it belongs to: blue for <code>filter()</code>, green for <code>select()</code>, orange for <code>mutate()</code>, purple for <code>group_by()+summarize()</code>, teal for <code>arrange()</code>, and salmon for <code>separate()</code>/<code>unite()</code>.<br><br>
           Use <b>+ Add a step</b> to build up a pipeline one verb at a time. The table updates after each step so you can see exactly what each verb does to the data. The code panel builds the <code>%&gt;%</code> chain as you go.`};
       }
