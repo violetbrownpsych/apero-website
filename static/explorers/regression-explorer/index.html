@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regression Explorer</title>
+  <link rel="icon" href="regression-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
+      --text:    #1c1811;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
+
+      --c-line:  #6c5fc7;
+      --c-resid: #e05a5a;
+      --c-point: #4eaaec;
+      --c-mean:  #52c97e;
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* === LAYOUT === */
+    .grid {
+      display: grid;
+      grid-template-columns: 244px 1fr 420px;
+      gap: 10px;
+      padding: 0 11px 15px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 15px 20px 9px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 11px;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: #e8e3f5;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin: 0 2px;
+    }
+    .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
+
+    /* === PANELS === */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 11px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 11px;
+      min-height: 27px;
+    }
+    .panel-header .panel-label { margin-bottom: 0; }
+
+    /* === BUTTONS & CONTROLS === */
+    .btn {
+      padding: 5px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all .1s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    .br { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cs { margin-bottom: 9px; }
+    .ch { font-size: 0.8rem; font-weight: 600; margin-bottom: 7px; }
+    .sub { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .r2-hint {
+      margin-top: 9px; padding: 8px 11px;
+      background: #edf5f0; border: 1.5px solid #a8d5bc; border-radius: 8px;
+      font-size: 0.78rem; color: #2e6e4e; line-height: 1.5;
+    }
+    .hr { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Segmented 2-option toggle */
+    .tog2 { display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .tog2 .btn { flex: 1; border: none; border-radius: 0; text-align: center; border-right: 1.5px solid var(--border); }
+    .tog2 .btn:last-child { border-right: none; }
+    .tog2 .btn.on { background: var(--accent); color: white; }
+
+    /* Copy / Reset buttons */
+    .copy-btn {
+      padding: 4px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* === TOOL-SPECIFIC: SLIDERS === */
+    .slider-row { margin-bottom: 11px; }
+    .slider-row label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.79rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .slider-row label span {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.76rem;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    input[type=range]:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* === TOOL-SPECIFIC: SVG SCATTERPLOT === */
+    #plot-svg { display: block; width: 100%; height: auto; }
+    .axis-label {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 12px;
+      fill: var(--muted);
+    }
+    .tick-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      fill: var(--muted);
+    }
+
+    /* === TOOL-SPECIFIC: STATS BLOCK === */
+    .stats-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 10px;
+      text-align: center;
+    }
+    .stat-card .stat-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 2px;
+      font-family: 'Fira Code', monospace;
+    }
+    .stat-card .stat-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .stat-card .stat-formula {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.4;
+      min-height: 1em;
+    }
+    .stat-card .stat-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.5;
+      text-align: left;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    .stat-card.err { background: rgba(224,90,90,0.10); border-color: rgba(224,90,90,0.4); }
+    [data-tip] { cursor: help; text-decoration: underline dotted var(--muted); }
+    .xbar {
+      display: inline-block;
+      position: relative;
+    }
+    .xbar::after {
+      content: '';
+      position: absolute;
+      left: 0px;
+      right: 0px;
+      top: 3px;
+      border-top: 1px solid currentColor;
+    }
+
+    /* === MATH WALKTHROUGH === */
+    .mw-block { margin-top: 14px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; font-size: 0.82rem; line-height: 1.6; }
+    .mw-title { font-size: 0.79rem; font-weight: 700; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1.5px solid var(--border); }
+    .mw-title-err { border-bottom-color: var(--c-resid); color: var(--c-resid); }
+    .mw-title-tot { border-bottom-color: var(--c-mean); color: var(--c-mean); }
+    .mw-intro { margin-bottom: 9px; color: var(--text); }
+    .mw-connector { margin: 12px 0; padding: 9px 13px; background: #f5f3fc; border-left: 3px solid var(--c-line); border-radius: 0 6px 6px 0; font-size: 0.8rem; }
+    .mw-table { width: 100%; border-collapse: collapse; font-family: 'Fira Code', monospace; font-size: 0.74rem; margin-bottom: 8px; }
+    .mw-table th { text-align: right; padding: 4px 8px; color: var(--muted); font-weight: 600; font-size: 0.68rem; border-bottom: 1px solid var(--border); background: var(--panel); }
+    .mw-table th:first-child, .mw-table td:first-child { text-align: center; }
+    .mw-table td { text-align: right; padding: 3px 8px; border-bottom: 1px solid #edeaf6; }
+    .mw-sum-row td { font-weight: 700; border-top: 1.5px solid var(--border) !important; border-bottom: none !important; }
+    .mw-sum-label { text-align: right !important; padding-right: 10px; }
+    .mw-pt { color: var(--muted); font-size: 0.7rem; }
+    .mw-pred-ols { color: var(--c-line); font-weight: 600; }
+    .mw-mean-val { color: var(--c-mean); font-weight: 600; }
+    .mw-resid { color: var(--c-resid); }
+    .mw-dev { color: var(--text); }
+    .mw-sq { color: var(--c-resid); font-weight: 700; }
+    .mw-sq-tot { color: var(--c-mean); font-weight: 700; }
+    .mw-footer { margin-top: 8px; font-size: 0.79rem; color: var(--muted); font-style: italic; }
+    .mw-r2-box { margin-top: 14px; padding: 12px 16px; background: #f0edfb; border: 1.5px solid var(--accent); border-radius: 8px; font-size: 0.82rem; line-height: 1.7; }
+    .mw-r2-val { color: var(--accent); font-size: 1.1em; font-weight: 700; }
+
+    /* === CODE PANEL === */
+    .code-scroll {
+      background: var(--code-bg);
+      border-radius: 7px;
+      padding: 12px 10px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.9;
+      min-height: 120px;
+    }
+    .cl {
+      display: block;
+      padding: 1px 6px 1px 9px;
+      border-radius: 3px;
+      border-left: 3px solid transparent;
+      color: #cdd3de;
+      white-space: pre;
+    }
+    .cl-setup { border-left-color: #3a3a4a; color: #6a7a6a; font-style: italic; }
+    /* color stripe classes — defined AFTER .cl so border-left-color overrides */
+    .cl-line  { border-left-color: var(--c-line);  }
+    .cl-resid { border-left-color: var(--c-resid); }
+    .cl-mean  { border-left-color: var(--c-mean);  }
+
+    /* Syntax tokens */
+    .sf { color: #c792ea; }
+    .sv { color: #f78c6c; }
+    .sk { color: #89ddff; }
+    .ss { color: #c3e88d; }
+    .sn { color: #f0ab70; }
+    .so { color: #89ddff; }
+    .sb { color: #c3e88d; }
+    .sc { color: #6a7a6a; font-style: italic; }
+
+    /* Tooltip */
+    #code-tip {
+      position: fixed; z-index: 9999; pointer-events: none; display: none;
+      background: #2d2d42; color: #e0ddd5; border: 1px solid #4a4860;
+      padding: 5px 10px; border-radius: 6px; font-size: 0.73rem;
+      font-family: 'DM Sans', sans-serif; line-height: 1.4;
+      max-width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    }
+
+    /* === ANNOTATION BOX === */
+    .ann {
+      display: none;
+      margin-top: 10px;
+      padding: 13px 18px;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      font-size: 0.84rem;
+      line-height: 1.65;
+      background: #f5f3fc;
+    }
+    .ann.show { display: block; }
+    .ann code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #e8e3f5;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .ann-welcome { border-color: var(--accent); background: #f0edfb; }
+    .ann-line     { border-color: var(--c-line);  }
+    .ann-resid    { border-color: var(--c-resid); }
+    .ann-mean     { border-color: var(--c-mean);  }
+    .ann-centroid { border-color: var(--accent);  }
+
+    /* === ANIMATIONS === */
+    @keyframes flash {
+      0%   { background-color: rgba(255,255,255,0.22); }
+      100% { background-color: transparent; }
+    }
+    .cl-flash { animation: flash 0.7s ease-out; }
+
+    @keyframes ann-pulse {
+      0%   { box-shadow: 0 0 0 2px rgba(108,95,199,0.55); }
+      70%  { box-shadow: 0 0 0 9px rgba(108,95,199,0); }
+      100% { box-shadow: 0 0 0 0   rgba(108,95,199,0); }
+    }
+    .ann-welcome { animation: ann-pulse 1.0s ease-out 3; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Regression Explorer</h1>
+    <p>Fit a line, move the slope and intercept, and watch residuals and error statistics update live</p>
+    <span class="pill">lm()</span>
+    <span class="pill">resid()</span>
+    <span class="pill">fitted()</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CONTROLS PANEL -->
+    <div class="panel" id="controls-panel">
+      <div class="panel-header">
+        <div class="panel-label">Controls</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <div class="cs">
+        <button class="btn" style="width:100%" onclick="newData()">New data</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs slider-row" id="intercept-row">
+        <label>
+          Intercept
+          <span id="intercept-val">—</span>
+        </label>
+        <input type="range" id="sl-intercept" min="10" max="90" step="0.5"
+               oninput="sliderMove('intercept')" onchange="sliderRelease('intercept')">
+      </div>
+
+      <div class="cs slider-row" id="slope-row">
+        <label>
+          Slope
+          <span id="slope-val">—</span>
+        </label>
+        <input type="range" id="sl-slope" min="-3" max="10" step="0.5"
+               oninput="sliderMove('slope')" onchange="sliderRelease('slope')">
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs">
+        <div class="ch">Show residuals</div>
+        <div class="tog2">
+          <button class="btn" id="resid-off" onclick="setResiduals(false)">Off</button>
+          <button class="btn" id="resid-on"  onclick="setResiduals(true)">On</button>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs">
+        <div class="ch">Lock to centroid</div>
+        <div class="tog2">
+          <button class="btn" id="centroid-off" onclick="setCentroid(false)">Off</button>
+          <button class="btn" id="centroid-on"  onclick="setCentroid(true)">On</button>
+        </div>
+        <div class="sub">This toggle forces the line through the point (<span class="xbar">x</span>, ȳ), the intersection of the mean study hours and mean exam score. <strong>All lines that pass through this point have zero average prediction error</strong> (i.e., the sum of the residuals will always be zero). The OLS line always passes through this point, which is why the sum of the raw (unsquared) residuals is zero.</div>
+      </div>
+
+      <div class="cs">
+        <div class="ch">Reference lines</div>
+        <div class="br">
+          <button class="btn" id="btn-mean" onclick="setModel('mean')">Mean line</button>
+          <button class="btn" id="btn-ols"  onclick="setModel('ols')">OLS line</button>
+        </div>
+        <div class="r2-hint">Select both the Mean Line and OLS Line to see how <strong>R²</strong> is calculated. This value tells us how much of the variation in exam scores is described by study time (i.e, rather than being random error).</div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: SCATTERPLOT PANEL -->
+    <div class="panel" id="main-panel">
+      <div class="panel-header">
+        <div class="panel-label" id="plot-label">Scatterplot</div>
+      </div>
+      <svg id="plot-svg" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="plot-clip">
+            <rect x="52" y="18" width="410" height="240"/>
+          </clipPath>
+        </defs>
+        <!-- axes, points, lines drawn by JS -->
+        <g id="g-grid"></g>
+        <g id="g-axes"></g>
+        <g id="g-mean-line" clip-path="url(#plot-clip)"></g>
+        <g id="g-reg-line"  clip-path="url(#plot-clip)"></g>
+        <g id="g-squares"   clip-path="url(#plot-clip)"></g>
+        <g id="g-residuals" clip-path="url(#plot-clip)"></g>
+        <g id="g-points"    clip-path="url(#plot-clip)"></g>
+        <g id="g-centroid"></g>
+        <g id="g-labels"></g>
+        <g id="g-eq-label"></g>
+      </svg>
+      <div class="stats-block">
+        <div class="stat-card">
+          <div class="stat-label" id="stat1-label">SS<sub>error</sub></div>
+          <div class="stat-val"   id="stat1-val">—</div>
+          <div class="stat-formula" id="stat1-formula"></div>
+          <div class="stat-desc"  id="stat1-desc"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" id="stat2-label">MSE</div>
+          <div class="stat-val"   id="stat2-val">—</div>
+          <div class="stat-formula" id="stat2-formula"></div>
+          <div class="stat-desc"  id="stat2-desc"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" id="stat3-label">RMSE</div>
+          <div class="stat-val"   id="stat3-val">—</div>
+          <div class="stat-formula" id="stat3-formula"></div>
+          <div class="stat-desc"  id="stat3-desc"></div>
+        </div>
+      </div>
+      <div id="math-walkthrough"></div>
+    </div>
+
+    <!-- RIGHT: CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-scroll">
+        <!-- populated by JS -->
+      </div>
+      <div id="ann-box" class="ann"></div>
+    </div>
+
+  </div>
+
+  <div id="code-tip"></div>
+
+  <script>
+    // === RNG ===
+    function mulberry32(seed) {
+      return function() {
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function randn(rng) {
+      let u, v;
+      do { u = rng(); } while (u === 0);
+      do { v = rng(); } while (v === 0);
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    // === DATA ===
+    let DATA = { pts: [], xbar: 0, ybar: 0, olsSlope: 0, olsIntercept: 0, n: 0 };
+    let _seed = Math.floor(Math.random() * 1e9);
+
+    function genData(seed) {
+      const rng = mulberry32(seed);
+      const pts = [];
+      for (let i = 0; i < 7; i++) {
+        const x = +(1 + rng() * 9).toFixed(1);
+        const y = Math.max(40, Math.min(100, +(40 + 5 * x + randn(rng) * 13).toFixed(1)));
+        pts.push([x, y]);
+      }
+      pts.sort((a, b) => a[0] - b[0]);
+      const n    = pts.length;
+      const xbar = pts.reduce((a, p) => a + p[0], 0) / n;
+      const ybar = pts.reduce((a, p) => a + p[1], 0) / n;
+      const num  = pts.reduce((a, p) => a + (p[0] - xbar) * (p[1] - ybar), 0);
+      const den  = pts.reduce((a, p) => a + (p[0] - xbar) ** 2, 0);
+      const olsSlope     = num / den;
+      const olsIntercept = ybar - olsSlope * xbar;
+      DATA = { pts, xbar, ybar, olsSlope, olsIntercept, n };
+    }
+
+    // === STATE ===
+    const DEFAULTS = {
+      slope: 0, intercept: 0,   // seeded from DATA after genData()
+      centroid: false,
+      showMean: false,
+      snapOLS: false,
+      showResiduals: true,
+      changed: 'welcome',
+    };
+    let S = Object.assign({}, DEFAULTS);
+
+    // === SLIDER INIT ===
+    function initSliders() {
+      const b0 = DATA.olsIntercept;
+      const si = document.getElementById('sl-intercept');
+      si.min   = (b0 - 40).toFixed(1);
+      si.max   = (b0 + 40).toFixed(1);
+      si.step  = 0.5;
+      si.value = S.intercept;
+      document.getElementById('intercept-val').textContent = S.intercept.toFixed(1);
+      const ss = document.getElementById('sl-slope');
+      ss.value = S.slope;
+      document.getElementById('slope-val').textContent = S.slope.toFixed(1);
+    }
+
+    // === BUTTON SYNC ===
+    function syncButtons() {
+      const r2Active = S.showMean && S.snapOLS;
+      const manualMode = !S.showMean && !S.snapOLS;
+      document.getElementById('centroid-off').classList.toggle('on', !S.centroid);
+      document.getElementById('centroid-on').classList.toggle('on',   S.centroid);
+      const lockDisabled = S.snapOLS || S.showMean;
+      document.getElementById('centroid-off').disabled = lockDisabled;
+      document.getElementById('centroid-on').disabled  = lockDisabled;
+      document.getElementById('btn-mean').classList.toggle('on', S.showMean);
+      document.getElementById('btn-ols').classList.toggle('on',  S.snapOLS);
+      document.getElementById('resid-off').classList.toggle('on', !S.showResiduals);
+      document.getElementById('resid-on').classList.toggle('on',   S.showResiduals);
+      const hideVals = S.showMean && !S.snapOLS;
+      document.getElementById('intercept-val').style.visibility = hideVals ? 'hidden' : '';
+      document.getElementById('slope-val').style.visibility     = hideVals ? 'hidden' : '';
+      document.getElementById('sl-intercept').disabled = !manualMode || S.centroid;
+      document.getElementById('sl-slope').disabled     = !manualMode;
+      // color stat1 card red when it's showing SS_error (default and r2 modes)
+      const stat1Card = document.getElementById('stat1-label').closest('.stat-card');
+      const showingErr = !S.showMean || r2Active;
+      stat1Card.classList.toggle('err', showingErr);
+    }
+
+    // === STATS ===
+    function calcStats() {
+      const { pts, ybar, n } = DATA;
+      const fittedLine = pts.map(p => S.intercept + S.slope * p[0]);
+      const residLine  = pts.map((p, i) => p[1] - fittedLine[i]);
+      const ss_err = residLine.reduce((a, r) => a + r * r, 0);
+      const ss_tot = pts.reduce((a, p) => a + (p[1] - ybar) ** 2, 0);
+      const mse  = ss_err / (n - 2);
+      const varY = ss_tot / (n - 1);
+      // In mean-only mode, residuals drawn from mean line
+      const meanMode = S.showMean && !S.snapOLS;
+      const fitted = meanMode ? pts.map(() => ybar) : fittedLine;
+      const resids = meanMode ? pts.map(p => p[1] - ybar) : residLine;
+      return { ss_err, ss_tot, mse, rmse: Math.sqrt(mse), varY, sdY: Math.sqrt(varY),
+               r2: 1 - ss_err / ss_tot, resids, fitted };
+    }
+
+    // === RENDER (drawing filled in step 4b) ===
+    function render() {
+      syncButtons();
+      initSliders();
+      renderMain();
+      renderCode();
+      const { cls, html } = getAnn();
+      const ann = document.getElementById('ann-box');
+      if (cls === 'ann-welcome') {
+        ann.classList.remove('ann-welcome');
+        void ann.offsetWidth;
+      }
+      ann.className = 'ann show ' + cls;
+      ann.innerHTML = html;
+    }
+    function renderMain() {
+      const PAD = {l:52, r:18, t:18, b:42};
+      const W = 480, H = 300;
+      const PW = W - PAD.l - PAD.r, PH = H - PAD.t - PAD.b;
+      const xDom = [0, 11], yDom = [30, 105];
+      const px = x => PAD.l + (x - xDom[0]) / (xDom[1] - xDom[0]) * PW;
+      const py = y => H - PAD.b - (y - yDom[0]) / (yDom[1] - yDom[0]) * PH;
+      function el(tag, attrs, txt) {
+        const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+        if (txt !== undefined) e.textContent = txt;
+        return e;
+      }
+      function setG(id, kids) {
+        const g = document.getElementById(id);
+        g.innerHTML = '';
+        kids.forEach(k => g.appendChild(k));
+      }
+
+      const stats = calcStats();
+
+      setG('g-grid', [
+        ...[0,2,4,6,8,10].map(x => el('line', {x1:px(x),y1:PAD.t,x2:px(x),y2:H-PAD.b,stroke:'#ddd8f0','stroke-width':0.5})),
+        ...[30,45,60,75,90,105].map(y => el('line', {x1:PAD.l,y1:py(y),x2:W-PAD.r,y2:py(y),stroke:'#ddd8f0','stroke-width':0.5}))
+      ]);
+
+      const axKids = [
+        el('line', {x1:PAD.l,y1:H-PAD.b,x2:W-PAD.r,y2:H-PAD.b,stroke:'#c0b8d8','stroke-width':1}),
+        el('line', {x1:PAD.l,y1:PAD.t,  x2:PAD.l,  y2:H-PAD.b,stroke:'#c0b8d8','stroke-width':1}),
+      ];
+      [0,2,4,6,8,10].forEach(x => {
+        axKids.push(el('line', {x1:px(x),y1:H-PAD.b,x2:px(x),y2:H-PAD.b+4,stroke:'#c0b8d8','stroke-width':1}));
+        axKids.push(el('text', {x:px(x),y:H-PAD.b+15,'text-anchor':'middle',class:'tick-label'}, String(x)));
+      });
+      [30,45,60,75,90,105].forEach(y => {
+        axKids.push(el('line', {x1:PAD.l-4,y1:py(y),x2:PAD.l,y2:py(y),stroke:'#c0b8d8','stroke-width':1}));
+        axKids.push(el('text', {x:PAD.l-8,y:py(y)+4,'text-anchor':'end',class:'tick-label'}, String(y)));
+      });
+      setG('g-axes', axKids);
+
+      setG('g-labels', [
+        el('text', {x:PAD.l+PW/2, y:H-4, 'text-anchor':'middle', class:'axis-label'}, 'Study Hours'),
+        el('text', {x:0, y:0, transform:`translate(13,${PAD.t+PH/2}) rotate(-90)`, 'text-anchor':'middle', class:'axis-label'}, 'Exam Score'),
+      ]);
+
+      { /* equation label box */
+        const ns = 'http://www.w3.org/2000/svg';
+        const meanOnly = S.showMean && !S.snapOLS;
+        const sign = S.slope >= 0 ? '+' : '\u2212';
+        const eqStr = meanOnly
+          ? `Exam Score\u00a0=\u00a0y\u0304\u00a0=\u00a0${DATA.ybar.toFixed(1)}`
+          : `Exam Score\u00a0=\u00a0${S.intercept.toFixed(1)}\u00a0${sign}\u00a0${Math.abs(S.slope).toFixed(1)}\u00a0\u00d7\u00a0Study Hours`;
+        const bx = PAD.l + 6, by = PAD.t + 6, boxW = meanOnly ? 138 : 213, boxH = 26;
+        const tx = bx + 7, ty = by + 17;
+        const bg = document.createElementNS(ns, 'rect');
+        Object.entries({x:bx,y:by,width:boxW,height:boxH,rx:4,fill:'rgba(250,249,253,0.88)',stroke:'#ddd8f0','stroke-width':1}).forEach(([k,v])=>bg.setAttribute(k,v));
+        const geq = document.getElementById('g-eq-label');
+        geq.innerHTML = '';
+        geq.appendChild(bg);
+        if (!meanOnly) {
+          // "Exam Score" = 10 chars; Fira Code ~5.4px/char at 9px font-size
+          const hatW = 10 * 9 * 0.601;
+          const hat = document.createElementNS(ns, 'path');
+          hat.setAttribute('d', `M ${tx},${by+7} L ${tx+hatW/2},${by+3} L ${tx+hatW},${by+7}`);
+          hat.setAttribute('stroke', '#6c5fc7'); hat.setAttribute('stroke-width', '0.7'); hat.setAttribute('fill', 'none');
+          geq.appendChild(hat);
+        }
+        const txt = document.createElementNS(ns, 'text');
+        Object.entries({x:tx,y:ty,'font-family':'Fira Code, monospace','font-size':9,fill: meanOnly ? '#52c97e' : '#6c5fc7'}).forEach(([k,v])=>txt.setAttribute(k,v));
+        txt.textContent = eqStr;
+        geq.appendChild(txt);
+      }
+
+      setG('g-mean-line', S.showMean
+        ? [el('line', {x1:PAD.l,y1:py(DATA.ybar),x2:W-PAD.r,y2:py(DATA.ybar),stroke:'#52c97e','stroke-width':2.5,'stroke-dasharray':'6 3'})]
+        : []);
+
+      // show purple line in manual mode, OLS mode, and R² mode (all except mean-only)
+      const showRegLine = !S.showMean || S.snapOLS;
+      setG('g-reg-line', showRegLine ? [
+        el('line', {x1:px(xDom[0]),y1:py(S.intercept+S.slope*xDom[0]),
+                    x2:px(xDom[1]),y2:py(S.intercept+S.slope*xDom[1]),
+                    stroke:'#6c5fc7','stroke-width':2.5})
+      ] : []);
+
+      setG('g-squares', S.showResiduals
+        ? DATA.pts.map((p, i) => {
+            const side = Math.abs(py(p[1]) - py(stats.fitted[i]));
+            if (side < 2) return null;
+            return el('rect', {
+              x: px(p[0]), y: Math.min(py(p[1]), py(stats.fitted[i])),
+              width: side, height: side,
+              fill: '#e05a5a', opacity: 0.13,
+              stroke: '#e05a5a', 'stroke-width': 0.8, 'stroke-opacity': 0.3
+            });
+          }).filter(Boolean)
+        : []);
+
+      setG('g-residuals', S.showResiduals
+        ? DATA.pts.map((p,i) => el('line', {x1:px(p[0]),y1:py(p[1]),x2:px(p[0]),y2:py(stats.fitted[i]),
+            stroke:'#e05a5a','stroke-width':1.5,'stroke-dasharray':'3 2'}))
+        : []);
+
+      setG('g-points', DATA.pts.map(p =>
+        el('circle', {cx:px(p[0]),cy:py(p[1]),r:5,fill:'#4eaaec',stroke:'white','stroke-width':1.5})));
+
+      if (S.centroid) {
+        const cx = px(DATA.xbar), cy = py(DATA.ybar), s = 7;
+        setG('g-centroid', [
+          el('line', {x1:cx-s, y1:cy, x2:cx+s, y2:cy, stroke:'#6c5fc7', 'stroke-width':1.5, opacity:0.7}),
+          el('line', {x1:cx, y1:cy-s, x2:cx, y2:cy+s, stroke:'#6c5fc7', 'stroke-width':1.5, opacity:0.7}),
+          el('circle', {cx, cy, r:4, fill:'none', stroke:'#6c5fc7', 'stroke-width':1.5, opacity:0.7}),
+        ]);
+      } else {
+        setG('g-centroid', []);
+      }
+
+      const meanMode = S.showMean && !S.snapOLS;
+      const r2Mode   = S.showMean && S.snapOLS;
+      if (meanMode) {
+        document.getElementById('stat1-label').innerHTML = 'SS<sub>total</sub>';
+        document.getElementById('stat2-label').innerHTML = 'Variance(Y)';
+        document.getElementById('stat3-label').innerHTML = 'SD(Y)';
+        document.getElementById('stat1-val').textContent = stats.ss_tot.toFixed(2);
+        document.getElementById('stat2-val').textContent = stats.varY.toFixed(2);
+        document.getElementById('stat3-val').textContent = stats.sdY.toFixed(2);
+        document.getElementById('stat1-formula').innerHTML = `<span data-tip="sum over all data points">Σ</span>(<span data-tip="observed y minus the mean ȳ">y<sub>i</sub>&nbsp;−&nbsp;ȳ</span>)<sup>2</sup>`;
+        document.getElementById('stat2-formula').innerHTML = `SS<sub>total</sub>&thinsp;/&thinsp;<span data-tip="n minus 1: one degree of freedom used by the mean">(n&nbsp;−&nbsp;1)</span>`;
+        document.getElementById('stat3-formula').innerHTML = `√<span data-tip="variance of Y">Var(Y)</span>`;
+        document.getElementById('stat1-desc').innerHTML = `SS<sub>total</sub> = total sum of squares: This is <strong>all</strong> the variance we're trying to account for in the system. The question we're trying to answer with regression is: We know people vary around the mean y-value (e.g., exam score)...but WHY?? Is it random or systematic? Watch the error (SS<sub>error</sub>) decrease relative to the maximum error (SS<sub>total</sub>) as you shift the regression line—you're improving your model's prection (i.e., decreasing residual error) by taking study time into account!<br><br>Make sure only the <strong>Mean line</strong> button in the Control panel is selected if you want to visualize SS<sub>total</sub>.`;
+        document.getElementById('stat2-desc').innerHTML = `Variance(Y): This is a single number that summarizes the total [squared] variability around the mean. It's an average! So far we have a measure of the total squared error around the predicted value (SSerror), so to get the average, we just divide that sum by the number of numbers (minus the number of parameters we estimated, which in this case is just one: the intercept/mean). This is the variance of the residuals, and when our model is just the mean, we simply call that the <strong>variance</strong>. `;
+        document.getElementById('stat3-desc').innerHTML = `SD(Y): The variance tells us the average <strong>squared</strong> error in the model, but dealing with squared units is tricky, so we take the square root so the units are easier to deal with. This represents the <strong>standard deviation</strong> of the residuals, and when our model is the mean, we simply call that the <strong>standard deviation</strong>. `;
+      } else if (r2Mode) {
+        document.getElementById('stat1-label').innerHTML = 'SS<sub>error</sub>';
+        document.getElementById('stat2-label').innerHTML = 'SS<sub>total</sub>';
+        document.getElementById('stat3-label').innerHTML = 'R²';
+        document.getElementById('stat1-val').textContent = stats.ss_err.toFixed(2);
+        document.getElementById('stat2-val').textContent = stats.ss_tot.toFixed(2);
+        document.getElementById('stat3-val').textContent = stats.r2.toFixed(3);
+        document.getElementById('stat1-formula').innerHTML = `<span data-tip="sum over all data points">Σ</span>(<span data-tip="observed y minus predicted ŷ">y<sub>i</sub>&nbsp;−&nbsp;ŷ<sub>i</sub></span>)<sup>2</sup>`;
+        document.getElementById('stat2-formula').innerHTML = `<span data-tip="sum over all data points">Σ</span>(<span data-tip="observed y minus the mean ȳ">y<sub>i</sub>&nbsp;−&nbsp;ȳ</span>)<sup>2</sup>`;
+        document.getElementById('stat3-formula').innerHTML = `<span data-tip="1 minus the ratio of error to total variance">1&nbsp;−&nbsp;SS<sub>error</sub>/SS<sub>total</sub></span>`;
+        document.getElementById('stat1-desc').innerHTML = `SS<sub>error</sub> = sum of squared error: Take each <strong>observed</strong> y-value, subtract the <strong>predicted</strong> y-value (whether that's the mean, the OLS solution, or some other regression line), square it, and add up those squared deviations. See why it's called sum of squares?`;
+        document.getElementById('stat2-desc').innerHTML = `SS<sub>total</sub> = total sum of squares: This is <strong>all</strong> the variance we're trying to account for in the system. The question we're trying to answer with regression is: We know people vary around the mean y-value (e.g., exam score)...but WHY?? Is it random or systematic? Watch the error (SS<sub>error</sub>) decrease relative to the maximum error (SS<sub>total</sub>) as you shift the regression line—you're improving your model's prection (i.e., decreasing residual error) by taking study time into account!<br><br>Make sure only the <strong>Mean line</strong> button in the Control panel is selected if you want to visualize SS<sub>total</sub>.`;
+        document.getElementById('stat3-desc').innerHTML = `R²: This is the proportion of the total variance in the system (i.e., around the mean) that is described by the model. In other words, this value tells us the proportion of the total variability around the mean that is <strong>not</strong> random error. We have SS<sub>total</sub> from our mean (intercept-only) model and SS<sub>error</sub> from our OLS model. <strong>The error in the mean model will always be greater than the error in the OLS model</strong> because adding predictors can only "suck up" error variance. R² tells us the proportion of that total variance we're trying to account for that got "sucked up" (i.e., accounted for) when we added the predictor. Some of that SS<sub>total</sub> wasn't random after all!<br><br>
+        SS<sub>error</sub>/SS<sub>total</sub> tells us the proportion of the total error around the mean that still exists in the regression model, so subtracting that from 1 gives us the proportion of the total error that the regression model was able to account for. This is the same as (SS<sub>total</sub>-SS<sub>error</sub>)/SS<sub>total</sub>.`;
+      } else {
+        document.getElementById('stat1-label').innerHTML = 'SS<sub>error</sub>';
+        document.getElementById('stat2-label').innerHTML = 'MSE';
+        document.getElementById('stat3-label').innerHTML = 'RMSE';
+        document.getElementById('stat1-val').textContent = stats.ss_err.toFixed(2);
+        document.getElementById('stat2-val').textContent = stats.mse.toFixed(2);
+        document.getElementById('stat3-val').textContent = stats.rmse.toFixed(2);
+        document.getElementById('stat1-formula').innerHTML = `<span data-tip="sum over all data points">Σ</span>(<span data-tip="observed y minus predicted ŷ">y<sub>i</sub>&nbsp;−&nbsp;ŷ<sub>i</sub></span>)<sup>2</sup>`;
+        document.getElementById('stat2-formula').innerHTML = `SS<sub>error</sub>&thinsp;/&thinsp;<span data-tip="n minus 2: We lost one degree of freedom for the intercept, one for the slope">(n&nbsp;−&nbsp;2)</span>`;
+        document.getElementById('stat3-formula').innerHTML = `√<span data-tip="mean squared error">MSE</span>`;
+        document.getElementById('stat1-desc').innerHTML = `SS<sub>error</sub> = sum of squared error: Take each <strong>observed</strong> y-value, subtract the <strong>predicted</strong> y-value (whether that's the mean, the OLS solution, or some other regression line), square it, and add up those squared deviations. See why it's called sum of squares?`;
+        document.getElementById('stat2-desc').innerHTML = `MSE = mean square error: So far we have a measure of the total squared error around the predicted value (SS<sub>error</sub>), but if we want to summarize that spread we need to get the average by dividing by the number of numbers (minus the number of parameters we estimated, which in this case is just two: the intercept and the slope). This is the <strong>variance</strong> of the residuals.`;
+        document.getElementById('stat3-desc').innerHTML = `RMSE = <strong>root</strong> mean square error: The MSE tells us the average <strong>squared</strong> error in the model, but dealing with squared units is tricky, so we take the square root so the units are easier to deal with. This represents the <strong>standard deviation</strong> of the residuals.`;
+      }
+      renderMathWalkthrough();
+    }
+
+    function renderMathWalkthrough() {
+      const container = document.getElementById('math-walkthrough');
+      if (!container) return;
+      const { pts, ybar } = DATA;
+      const meanMode = S.showMean && !S.snapOLS;
+      const r2Mode   = S.showMean && S.snapOLS;
+      const fitted   = pts.map(p => S.intercept + S.slope * p[0]);
+      const ss_tot   = pts.reduce((a, p) => a + (p[1] - ybar) ** 2, 0);
+      const ss_err   = pts.reduce((a, p, i) => a + (p[1] - fitted[i]) ** 2, 0);
+      const r2       = 1 - ss_err / ss_tot;
+
+      function errRows() {
+        return pts.map((p, i) => {
+          const r = p[1] - fitted[i], sq = r * r, sign = r >= 0 ? '+' : '';
+          return `<tr><td class="mw-pt">${i+1}</td><td>${p[0].toFixed(1)}</td><td>${p[1].toFixed(1)}</td><td class="mw-pred-ols">${fitted[i].toFixed(2)}</td><td class="mw-resid">${sign}${r.toFixed(2)}</td><td class="mw-sq">${sq.toFixed(2)}</td></tr>`;
+        }).join('');
+      }
+
+      function totRows() {
+        return pts.map((p, i) => {
+          const d = p[1] - ybar, sq = d * d, sign = d >= 0 ? '+' : '';
+          return `<tr><td class="mw-pt">${i+1}</td><td>${p[1].toFixed(1)}</td><td class="mw-mean-val">${ybar.toFixed(2)}</td><td class="mw-dev">${sign}${d.toFixed(2)}</td><td class="mw-sq-tot">${sq.toFixed(2)}</td></tr>`;
+        }).join('');
+      }
+
+      if (meanMode) {
+        container.innerHTML = `<div class="mw-block">
+          <div class="mw-title mw-title-tot"><strong>SS<sub>total</sub></strong> step-by-step</div>
+          <p class="mw-intro">The green line sits at ȳ = <strong>${ybar.toFixed(2)}</strong>, the mean exam score. Without knowing anything about study hours, your best guess for every student is just the class average. The table below shows how far each student's actual score falls from that average—their <em>deviation</em>.</p>
+          <table class="mw-table"><thead><tr><th>#</th><th>Observed score</th><th>Mean ȳ</th><th>Deviation (obs − mean)</th><th>Deviation²</th></tr></thead><tbody>
+          ${totRows()}
+          <tr class="mw-sum-row"><td colspan="4" class="mw-sum-label">SS<sub>total</sub> =</td><td class="mw-sq-tot"><strong>${ss_tot.toFixed(2)}</strong></td></tr>
+          </tbody></table>
+          <p class="mw-footer">SS<sub>total</sub> = <strong>${ss_tot.toFixed(2)}</strong> is the total spread of exam scores around the class mean; this is all the variability that exists in the system before we try to explain any of it. Students vary around that average, but why? Is it purely random, or could some of it be systematically related to how much they studied? That's exactly what adding a predictor lets us find out.</p>
+        </div>`;
+      } else if (r2Mode) {
+        container.innerHTML = `<div class="mw-block">
+          <div class="mw-title mw-title-tot"><strong>Step 1: SS<sub>total</sub>:</strong> (all the variability we're trying to explain)</div>
+          <p class="mw-intro">The green line is ȳ = <strong>${ybar.toFixed(2)}</strong>. Without study hours as a predictor, our only guess for every student's score is the class average. Some students score higher, some lower. That spread is SS<sub>total</sub>, which represents full "pool" of variation we want to understand.</p>
+          <table class="mw-table"><thead><tr><th>#</th><th>Score</th><th>Mean ȳ</th><th>Deviation (score − mean)</th><th>Deviation²</th></tr></thead><tbody>
+          ${totRows()}
+          <tr class="mw-sum-row"><td colspan="4" class="mw-sum-label">SS<sub>total</sub> =</td><td class="mw-sq-tot"><strong>${ss_tot.toFixed(2)}</strong></td></tr>
+          </tbody></table>
+          <p class="mw-connector">Now we add study hours as a predictor. The purple OLS line has equation: ŷ = ${S.intercept.toFixed(2)} + ${S.slope.toFixed(2)} × hours. It makes a specific prediction for each student based on how long they studied. How much of that total variation can the line explain?</p>
+          <div class="mw-title mw-title-err" style="margin-top:4px"><strong>Step 2: SS<sub>error</sub>:</strong> (what's left over after accounting for the predictor in the model)</div>
+          <p class="mw-intro">Even the best-fit line isn't perfect. The <strong>residual</strong> = observed score − predicted score. It's what the model got wrong for that student. SS<sub>error</sub> is the total unexplained variation that remains after fitting the line.</p>
+          <table class="mw-table"><thead><tr><th>#</th><th>Hours</th><th>Observed</th><th>Predicted ŷ</th><th>Residual (obs − pred)</th><th>Residual²</th></tr></thead><tbody>
+          ${errRows()}
+          <tr class="mw-sum-row"><td colspan="5" class="mw-sum-label">SS<sub>error</sub> =</td><td class="mw-sq"><strong>${ss_err.toFixed(2)}</strong></td></tr>
+          </tbody></table>
+          <div class="mw-r2-box"><strong>R² = 1 − SS<sub>error</sub> / SS<sub>total</sub> = 1 − ${ss_err.toFixed(2)} / ${ss_tot.toFixed(2)} = <span class="mw-r2-val">${r2.toFixed(3)}</span></strong><br><br>
+          Study hours explains <strong>${Math.round(r2 * 100)}%</strong> of the variation in exam scores. The remaining <strong>${Math.round((1 - r2) * 100)}%</strong> comes from things the model can't see—sleep the night before, prior knowledge, test anxiety, or just randomness. R² = 1 would be perfect prediction; R² = 0 would mean our regression line does no better than just guessing ȳ for everyone.</div>
+        </div>`;
+      } else {
+        const isOLS = S.snapOLS;
+        container.innerHTML = `<div class="mw-block">
+          <div class="mw-title mw-title-err"><strong>SS<sub>error</sub></strong> step-by-step</div>
+          <p class="mw-intro"><strong>Where do predicted values come from?</strong> The purple line has equation ŷ = ${S.intercept.toFixed(2)} + ${S.slope.toFixed(2)} × hours. Plug in any student's study hours and you get their predicted score: That's what the line "expects" they should score. For example, a student who studied ${pts[0][0].toFixed(1)} hour(s) gets a predicted score of ${fitted[0].toFixed(2)}.</p>
+          <p class="mw-intro">The <strong>residual</strong> = observed − predicted. A positive residual means the model underestimated the student's performance (i.e., the student did better than expected); negative means it overestimated their performance. We <em>square</em> each residual for two reasons. First, the over- and under-predictions don't cancel each other out (otherwise the sum of the residuals would be 0 every time, provided that the line goes through the centroid). Second, large misses are penalized more heavily than small ones. So to get SS<sub>error</sub>, we square each residual and add them all up.</p>
+          <table class="mw-table"><thead><tr><th>#</th><th>Study hrs</th><th>Observed score</th><th>Predicted ŷ</th><th>Residual (obs − pred)</th><th>Residual²</th></tr></thead><tbody>
+          ${errRows()}
+          <tr class="mw-sum-row"><td colspan="5" class="mw-sum-label">SS<sub>error</sub> =</td><td class="mw-sq"><strong>${ss_err.toFixed(2)}</strong></td></tr>
+          </tbody></table>
+          <p class="mw-footer">${isOLS
+            ? 'This is the <em>minimum</em> possible SS<sub>error</sub> for any straight line through this data. OLS finds the exact slope and intercept that minimize it—no other line can do better.'
+            : 'Try adjusting the sliders to reduce SS<sub>error</sub>. Can you beat the current fit? Click <strong>OLS line</strong> button in the Control panel to see the intercept-slope combination that minimizes SS<sub>error</sub> (i.e., the line of best fit).'}</p>
+        </div>`;
+      }
+    }
+
+    function renderCode() {
+      const r2Mode   = S.showMean && S.snapOLS;
+      const meanMode = S.showMean && !S.snapOLS;
+      const flash = c => (S.changed==='meanModel'||S.changed==='olsModel'||S.changed==='r2') ? c+' cl-flash' : c;
+      const L = [];
+      const cl = (cls, inner) => `<code class="cl ${cls}">${inner}</code>`;
+      const stats = calcStats();
+      const n = DATA.n;
+      const sgn = v => v >= 0 ? ' ' : '';
+      const vec = arr => `<span class="sc"># [1] ${arr.map(v => `${sgn(v)}${v.toFixed(2)}`).join('  ')}  (note that there are ${arr.length} values)</span>`;
+      const scalar = v => `<span class="sc"># [1] ${v.toFixed(3)}  (one value)</span>`;
+      const stored = (name, v) => `<span class="sc">#     ${name} = ${v.toFixed(3)}  (stored silently; no output printed)</span>`;
+
+      L.push(cl('cl-setup', `<span class="sc"># this assumes you have a dataframe called df</span>`));
+      L.push(cl('cl-setup', ``));
+
+      if (r2Mode) {
+        L.push(cl(flash('cl-line'), `<span class="sc"># fit both models</span>`));
+        L.push(cl(flash('cl-line'), `<span class="sv">fit_ols</span>  <span class="so">&lt;-</span> <span class="sf">lm</span>(<span class="sv">score</span> <span class="so">~</span> <span class="sv">hours</span>, <span class="sk">data</span> <span class="so">=</span> <span class="sv">df</span>)`));
+        L.push(cl(flash('cl-mean'), `<span class="sv">fit_mean</span> <span class="so">&lt;-</span> <span class="sf">lm</span>(<span class="sv">score</span> <span class="so">~</span> <span class="sn">1</span>,     <span class="sk">data</span> <span class="so">=</span> <span class="sv">df</span>)`));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-resid', `<span class="sc"># sums of squares</span>`));
+        L.push(cl('cl-line',  `<span class="sv">ss_error</span> <span class="so">&lt;-</span> <span class="sf">sum</span>(<span class="sf">resid</span>(<span class="sv">fit_ols</span>)<span class="so">^</span><span class="sn">2</span>)`));
+        L.push(cl('cl-setup', stored('ss_error', stats.ss_err)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-mean',  `<span class="sv">ss_total</span> <span class="so">&lt;-</span> <span class="sf">sum</span>(<span class="sf">resid</span>(<span class="sv">fit_mean</span>)<span class="so">^</span><span class="sn">2</span>)`));
+        L.push(cl('cl-setup', stored('ss_total', stats.ss_tot)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-line',  `<span class="sc"># R-squared</span>`));
+        L.push(cl('cl-line',  `<span class="sn">1</span> <span class="so">-</span> <span class="sv">ss_error</span> <span class="so">/</span> <span class="sv">ss_total</span>`));
+        L.push(cl('cl-setup', scalar(stats.r2)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-mean',  `<span class="sc"># or directly from the model summary:</span>`));
+        L.push(cl('cl-mean',  `<span class="sf">summary</span>(<span class="sv">fit_ols</span>)<span class="so">$</span><span class="sv">r.squared</span>`));
+        L.push(cl('cl-setup', scalar(stats.r2)));
+      } else if (meanMode) {
+        L.push(cl(flash('cl-mean'), `<span class="sc"># mean-only model—no predictor</span>`));
+        L.push(cl(flash('cl-mean'), `<span class="sv">fit</span> <span class="so">&lt;-</span> <span class="sf">lm</span>(<span class="sv">score</span> <span class="so">~</span> <span class="sn">1</span>, <span class="sk">data</span> <span class="so">=</span> <span class="sv">df</span>)`));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-resid', `<span class="sc"># residuals = deviations from ȳ</span>`));
+        L.push(cl('cl-resid', `<span class="sf">resid</span>(<span class="sv">fit</span>)`));
+        L.push(cl('cl-setup', vec(stats.resids)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-mean', `<span class="sc"># SS_total</span>`));
+        L.push(cl('cl-mean', `<span class="sf">sum</span>(<span class="sf">resid</span>(<span class="sv">fit</span>)<span class="so">^</span><span class="sn">2</span>)`));
+        L.push(cl('cl-setup', scalar(stats.ss_tot)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-mean', `<span class="sf">var</span>(<span class="sv">df</span><span class="so">$</span><span class="sv">score</span>)   <span class="sc"># Variance(Y)</span>`));
+        L.push(cl('cl-setup', scalar(stats.varY)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-mean', `<span class="sf">sd</span>(<span class="sv">df</span><span class="so">$</span><span class="sv">score</span>)    <span class="sc"># SD(Y)</span>`));
+        L.push(cl('cl-setup', scalar(stats.sdY)));
+      } else {
+        L.push(cl(flash('cl-line'), `<span class="sc"># fit the model</span>`));
+        L.push(cl(flash('cl-line'), `<span class="sv">fit</span> <span class="so">&lt;-</span> <span class="sf">lm</span>(<span class="sv">score</span> <span class="so">~</span> <span class="sv">hours</span>, <span class="sk">data</span> <span class="so">=</span> <span class="sv">df</span>)`));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-resid', `<span class="sc"># residuals</span>`));
+        L.push(cl('cl-resid', `<span class="sf">resid</span>(<span class="sv">fit</span>)`));
+        L.push(cl('cl-setup', vec(stats.resids)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-resid', `<span class="sc"># sum of squared residuals (SS<sub>error</sub>) </span>`));
+        L.push(cl('cl-resid', `<span class="sf">sum</span>(<span class="sf">resid</span>(<span class="sv">fit</span>)<span class="so">^</span><span class="sn">2</span>)`));
+        L.push(cl('cl-setup', scalar(stats.ss_err)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-line', `<span class="sc"># variance and SD around the line</span>`));
+        L.push(cl('cl-line', `<span class="sf">sum</span>(<span class="sf">resid</span>(<span class="sv">fit</span>)<span class="so">^</span><span class="sn">2</span>) <span class="so">/</span> (<span class="sv">n</span> <span class="so">-</span> <span class="sn">2</span>)          <span class="sc"># MSE</span>`));
+        L.push(cl('cl-setup', scalar(stats.mse)));
+        L.push(cl('cl-setup', `&nbsp;`));
+        L.push(cl('cl-line', `<span class="sf">sqrt</span>(<span class="sf">sum</span>(<span class="sf">resid</span>(<span class="sv">fit</span>)<span class="so">^</span><span class="sn">2</span>) <span class="so">/</span> (<span class="sv">n</span> <span class="so">-</span> <span class="sn">2</span>))  <span class="sc"># RMSE</span>`));
+        L.push(cl('cl-setup', scalar(stats.rmse)));
+      }
+
+      document.getElementById('code-scroll').innerHTML = L.join('\n');
+    }
+
+    function getAnn() {
+      const { changed, showMean, snapOLS, showResiduals, centroid } = S;
+      const xb = `<span class="xbar">x</span>`;
+
+      if (changed === 'welcome') return {cls:'ann-welcome', html:`
+        <strong>Here's how this works.</strong><br><br>
+        The code panel shows real R code you can copy and run. The plot shows 7 randomly
+        generated data points plotting exam score (the y-variable/outcome) against study hours (the x-variable/predictor). These are the data you observe.
+        You'll also see a regression line overlaid that you can control using the <strong>Intercept</strong> and <strong>Slope</strong> sliders.<br><br>
+        The colored stripe on each code line marks the concept:
+        <span style="color:var(--c-line);font-weight:600">purple</span> for the model fit,
+        <span style="color:var(--c-resid);font-weight:600">red</span> for residuals,
+        <span style="color:var(--c-mean);font-weight:600">green</span> for the mean-only model.
+        Move the sliders and watch the sum of squared error (SS<sub>error</sub>) change.
+        Try to get it as small as possible, then click the <strong>OLS line</strong> button—which reveals the "correct" solution—to see how you did! Click the <strong>Mean line</strong> button to view the unconditional mean (i.e., the overall mean, not taking study time into account), total sum of squares (SS<sub>total</sub>), variance, and standard deviation. <br><br>
+        Below the plot, you'll see detailed descriptions of the most important terms and concepts in regression, including the total sum of squares (SS<sub>total</sub>(), the sum of squared error from the model prediction (SS<sub>error</sub>), R², variance, standard deviation, mean square error (MSE), and root mean square error (RMSE).<br><br>
+        `};
+
+      if (changed === 'centroid') return {cls:'ann-centroid', html: centroid ? `
+        <strong>Lock to centroid: ON.</strong><br><br>
+        Here's a neat fact: No matter what slope you choose, the best regression line
+        always passes through one special point: (${xb}, ȳ), the "center of gravity"
+        of your data. ${xb} is the average of all the x values, and ȳ is the average
+        of all the y values.<br><br>
+        Try dragging the <strong>Slope</strong> slider now, and you'll find that line pivots around that
+        center point. No matter where you put the slope, the positive and negative
+        residuals (errors) always cancel out and add up to exactly zero.<br><br>
+        This locking isn't a restriction—it's what OLS does automatically. The
+        algorithm finds the one slope that minimizes SS<sub>error</sub> while passing
+        through (${xb}, ȳ).` :
+        `<strong>Lock to centroid: OFF.</strong><br><br>
+        The intercept is free again. Try moving the line away from (${xb}, ȳ) and notice
+        that SS<sub>error</sub> always gets larger. The OLS solution is the unique regression equation
+        that minimizes SS<sub>error</sub> (i.e., it makes SS<sub>error</sub> as small as it can possibly be).`};
+
+      if (changed === 'meanModel') return {cls:'ann-mean', html: showMean ? `
+        <strong>Mean line on.</strong><br><br>
+        This green horizontal line sits at ȳ—the average exam score. It represents the
+        simplest possible model: Your best guess for every student's exam grade is just the class
+        average, regardless of how much they studied.<br><br>
+        The residuals from this line are just each student's deviation from the mean.
+        SS<sub>total</sub> is the total spread of Y around ȳ, and this represents the "starting point" of
+        variability before any predictor is added. Watch SS<sub>error</sub> decrease as you adjust the 
+        regression line and take the predictor into account!` :
+        `<strong>Mean line off.</strong>`};
+
+      if (changed === 'olsModel') return {cls:'ann-line', html: snapOLS ? `
+        <strong>OLS line on.</strong><br><br>
+        This is the line of best-fit: the one that minimizes SS<sub>error</sub>. No other
+        straight line through this data produces a smaller SS<sub>error</sub>. That's
+        exactly what Ordinary Least Squares (OLS) does: it finds the intercept and slope
+        that make the total squared error as small as mathematically possible.<br><br>
+        The sliders are locked to the OLS values. Try turning the OLS line off and
+        adjusting the sliders manually—any deviation from these values will increase
+        SS<sub>error</sub>.` :
+        `<strong>OLS line off.</strong><br><br>
+        Back to manual mode. Adjust the sliders to place the line wherever you like.`};
+
+      if (changed === 'r2') return {cls:'ann-line', html: (showMean && snapOLS) ? `
+        <strong>R² shown.</strong><br><br>
+        Both lines are visible so you can see the two pieces of R² directly:<br><br>
+        R² = 1 − SS<sub>error</sub> / SS<sub>total</sub><br><br>
+        SS<sub>total</sub> is the spread around the mean line (green). SS<sub>error</sub>
+        is the remaining spread after fitting the OLS line (purple). R² is the proportion
+        of SS<sub>total</sub> explained by the predictor. R² = 1 means perfect prediction;
+        R² = 0 means the regression line is no better than guessing ȳ for everyone.` :
+        `<strong>R² hidden.</strong>`};
+
+      if (changed === 'residuals') return {cls:'ann-resid', html: showResiduals ? `
+        <strong>Residuals shown.</strong><br><br>
+        Each red vertical line is a <em>residual</em>: how far the observed data point is from
+        the line's prediction. A residual above zero means the model under-predicted the student's exam score,
+        and below zero means the model over-predicted the exam score.<br><br>
+        The shaded squares show you why it's called "sum of <em>squared</em>" residuals:
+        Each square's area equals that residual squared (residual²). SS<sub>error</sub>
+        is the total shaded area—it penalizes large misses much more than small ones,
+        which is why a single outlier can dominate the sum.` :
+        `<strong>Residuals hidden.</strong>`};
+
+      if (changed === 'slider') {
+        const stats = calcStats();
+        return {cls:'ann-line', html:`
+          <strong>Intercept ${S.intercept.toFixed(1)}, slope ${S.slope.toFixed(1)}.</strong><br><br>
+          SS<sub>error</sub> = ${stats.ss_err.toFixed(1)}. Can you beat this fit? Adjust
+          the sliders and try to push SS<sub>error</sub> lower, then hit Reset to restore
+          the OLS solution (which minimizes the sum of squared error, SS<sub>error</sub>).<br><br>
+          MSE = SS<sub>error</sub> ÷ (n − 2) = ${stats.ss_err.toFixed(1)} ÷ ${DATA.n - 2} = ${stats.mse.toFixed(2)}.
+          The denominator is n − 2 because fitting a line uses up 2 degrees of freedom:
+          one for the intercept and one for the slope. That leaves n − 2 independent
+          pieces of information left to estimate variability around the line.`};
+      }
+
+      return {cls:'ann-welcome', html:``};
+    }
+
+    // === HANDLERS ===
+    function newData() {
+      _seed = Math.floor(Math.random() * 1e9);
+      genData(_seed);
+      S.slope     = +DATA.olsSlope.toFixed(1);
+      S.intercept = +DATA.olsIntercept.toFixed(1);
+      S.changed   = 'welcome';
+      render();
+    }
+
+    function sliderMove(which) {
+      if (which === 'slope') {
+        S.slope = +document.getElementById('sl-slope').value;
+        if (S.centroid) {
+          S.intercept = +(DATA.ybar - S.slope * DATA.xbar).toFixed(1);
+          document.getElementById('intercept-val').textContent = S.intercept.toFixed(1);
+        }
+        document.getElementById('slope-val').textContent = S.slope.toFixed(1);
+      } else {
+        S.intercept = +document.getElementById('sl-intercept').value;
+        document.getElementById('intercept-val').textContent = S.intercept.toFixed(1);
+      }
+      renderMain();
+    }
+
+    function sliderRelease(which) {
+      sliderMove(which);
+      S.changed = 'slider';
+      render();
+    }
+
+    function setCentroid(val) {
+      S.centroid = val;
+      if (val) S.intercept = +(DATA.ybar - S.slope * DATA.xbar).toFixed(1);
+      S.changed = 'centroid';
+      render();
+    }
+
+    function setModel(which) {
+      if (which === 'mean') {
+        S.showMean = !S.showMean;
+        S.changed  = 'meanModel';
+      } else if (which === 'ols') {
+        S.snapOLS = !S.snapOLS;
+        if (S.snapOLS) {
+          S.centroid  = false;
+          S.slope     = +DATA.olsSlope.toFixed(1);
+          S.intercept = +DATA.olsIntercept.toFixed(1);
+        }
+        S.changed = 'olsModel';
+      } else if (which === 'r2') {
+        const r2On = S.showMean && S.snapOLS;
+        S.showMean = !r2On;
+        S.snapOLS  = !r2On;
+        if (!r2On) {
+          S.centroid  = false;
+          S.slope     = +DATA.olsSlope.toFixed(1);
+          S.intercept = +DATA.olsIntercept.toFixed(1);
+        }
+        S.changed = 'r2';
+      }
+      render();
+    }
+
+    function setResiduals(val) {
+      S.showResiduals = val;
+      S.changed = 'residuals';
+      render();
+    }
+
+    // === RESET ===
+    function resetAll() {
+      S = Object.assign({}, DEFAULTS);
+      S.slope     = +DATA.olsSlope.toFixed(1);
+      S.intercept = +DATA.olsIntercept.toFixed(1);
+      S.changed   = 'welcome';
+      render();
+    }
+
+    // === COPY CODE ===
+    function copyCode() {
+      const el = document.getElementById('code-scroll');
+      navigator.clipboard.writeText(el.innerText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // === TOOLTIP ===
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      const target = e.target.closest('[data-tip]');
+      if (target) {
+        tip.innerHTML = target.dataset.tip;
+        tip.style.display = 'block';
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+      } else {
+        tip.style.display = 'none';
+      }
+    });
+
+    // === INIT ===
+    genData(_seed);
+    S.slope     = +DATA.olsSlope.toFixed(1);
+    S.intercept = +DATA.olsIntercept.toFixed(1);
+    render();
+  </script>
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
+</body>
+</html>
