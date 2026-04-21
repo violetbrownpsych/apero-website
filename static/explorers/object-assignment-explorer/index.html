@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment Explorer</title>
+  <link rel="icon" href="assignment.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #f0edf8;
+      --panel:   #faf9fd;
+      --border:  #ddd8f0;
+      --text:    #1c1811;
+      --muted:   #7a7098;
+      --accent:  #6c5fc7;
+      --code-bg: #1a1828;
+      /* per-tool tokens */
+      --c-assign: #4eaaec;
+      --c-fn:     #52c97e;
+      --c-pipe:   #c89850;
+      --c-error:  #e05c5c;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'DM Sans',system-ui,sans-serif; font-size:0.92rem; min-height:100vh; }
+
+    /* Header */
+    header { text-align:center; padding:15px 20px 9px; border-bottom:1px solid var(--border); background:var(--panel); margin-bottom:11px; }
+    header h1 { font-family:'Lora',Georgia,serif; font-size:1.45rem; font-weight:600; margin-bottom:4px; }
+    header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
+    .pill { display:inline-block; padding:2px 9px; background:#e8e3f5; border:1px solid var(--border); border-radius:20px; font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); margin:0 2px; font-variant-ligatures:none; }
+    .pill-pkg { background:#e2ecf4; border-color:#b8cedd; color:#3a6278; }
+
+    /* Grid */
+    .grid { display:grid; grid-template-columns:244px 1fr 420px; gap:10px; padding:0 11px 15px; max-width:1360px; margin:0 auto; }
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+    .panel-label { font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:11px; }
+    .panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:11px; }
+    .panel-header .panel-label { margin-bottom:0; }
+
+    /* Controls */
+    .cs { margin-bottom:9px; }
+    .ch { font-size:0.8rem; font-weight:600; margin-bottom:7px; }
+    .hr { height:1px; background:var(--border); margin:8px 0; }
+    .sub { font-size:0.73rem; color:var(--muted); margin-top:3px; }
+    .br { display:flex; flex-wrap:wrap; gap:5px; }
+    .btn { background:white; border:1.5px solid var(--border); border-radius:7px; padding:5px 11px; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:500; color:var(--text); cursor:pointer; transition:border-color 0.15s, background 0.15s, color 0.15s; }
+    .btn:hover { border-color:var(--accent); }
+    .btn.on { background:var(--accent); color:white; border-color:var(--accent); }
+    .btn.err.on { background:var(--c-error); border-color:var(--c-error); color:white; }
+    .copy-btn { background:white; border:1.5px solid var(--border); border-radius:6px; padding:4px 11px; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:600; color:var(--muted); cursor:pointer; transition:background 0.15s, color 0.15s; }
+    .copy-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .copy-btn.copied { background:var(--accent); color:white; border-color:var(--accent); }
+
+    /* Segmented toggle */
+    .tog2 { display:flex; border:1.5px solid var(--border); border-radius:7px; overflow:hidden; }
+    .tog2 .btn { flex:1; border:none; border-radius:0; text-align:center; border-right:1.5px solid var(--border); padding:6px 8px; }
+    .tog2 .btn:last-child { border-right:none; }
+    .tog2 .btn.on { background:var(--accent); color:white; }
+    .tog2 .btn.err.on { background:var(--c-error); color:white; }
+    .tog2 .btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+    /* Three-way target toggle — only shown for dplyr scenarios */
+    #target-section { display:none; }
+
+    /* Middle panel — RStudio sim */
+    .rstudio-sim { display:flex; flex-direction:column; gap:10px; }
+    .rs-pane { border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+    .rs-pane-header { background:#e8e3f5; padding:6px 12px; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:7px; }
+    .rs-dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+    .rs-dot-r { background:#ff6057; }
+    .rs-dot-y { background:#febc2e; }
+    .rs-dot-g { background:#29c940; }
+    .rs-pane-body { padding:11px 14px; font-family:'Fira Code',monospace; font-size:0.8rem; min-height:80px; background:#fdfdff; font-variant-ligatures:none; }
+
+    /* Environment pane */
+    .env-empty { color:var(--muted); font-style:italic; font-size:0.82rem; font-family:'DM Sans',sans-serif; padding:6px 0; }
+    .env-object { display:flex; align-items:baseline; gap:10px; padding:5px 0; border-bottom:1px solid var(--border); }
+    .env-object:last-child { border-bottom:none; }
+    .env-name { color:#4eaaec; font-weight:500; min-width:80px; }
+    .env-type { color:#c89850; font-size:0.75rem; }
+    .env-dims { color:var(--muted); font-size:0.75rem; margin-left:auto; }
+    .env-pane-body { padding:8px 14px; font-family:'Fira Code',monospace; font-size:0.8rem; min-height:90px; background:#fdfdff; font-variant-ligatures:none; }
+
+    /* Console pane */
+    .console-body { padding:11px 14px; font-family:'Fira Code',monospace; font-size:0.79rem; line-height:1.7; background:#1e1e2e; min-height:160px; border-radius:0 0 8px 8px; color:#cdd3de; font-variant-ligatures:none; }
+    .con-prompt { color:#6c5fc7; user-select:none; }
+    .con-cmd { color:#cdd3de; }
+    .con-output { color:#a6da95; display:block; margin:1px 0; }
+    .con-error  { color:#ed8796; display:block; margin:1px 0; }
+    .con-warn   { color:#eed49f; display:block; margin:1px 0; }
+    .con-muted  { color:#6e738d; display:block; }
+    .con-line   { display:block; margin-bottom:2px; }
+    .con-assign-hl { background:#edfaf3; color:#1a7a45; border-radius:3px; padding:0 3px; }
+
+    /* Result badge */
+    .result-badge { display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:6px 12px; border-radius:8px; font-size:0.82rem; font-weight:600; background:#f5f3fc; border:1px solid var(--border); }
+    .result-badge.ok   { background:#edfaf3; border-color:#b2e6cb; color:#1a7a45; }
+    .result-badge.fail { background:#fdf0f0; border-color:#f0b8b8; color:#a02020; }
+
+    /* Code panel */
+    .code-panel { display:flex; flex-direction:column; }
+    .code-scroll { background:var(--code-bg); border-radius:8px; padding:10px 4px; font-family:'Fira Code',monospace; font-size:0.79rem; line-height:1.9; overflow-x:auto; flex:1; font-variant-ligatures:none; }
+    .cl { display:block; padding:1px 6px 1px 9px; border-radius:3px; border-left:3px solid transparent; color:#cdd3de; white-space:pre; }
+    .cl-setup  { color:#6a7a6a; }
+    .cl-assign { border-left-color:var(--c-assign); }
+    .cl-fn     { border-left-color:var(--c-fn); }
+    .cl-pipe   { border-left-color:var(--c-pipe); }
+    .cl-error  { border-left-color:var(--c-error); }
+    @keyframes flash { 0% { background-color:rgba(255,255,255,0.22); } 100% { background-color:transparent; } }
+    .cl-flash { animation:flash 0.7s ease-out; }
+
+    /* Syntax tokens */
+    .sf { color:#c792ea; }
+    .sv { color:#f78c6c; }
+    .sk { color:#89ddff; }
+    .ss { color:#c3e88d; }
+    .sn { color:#f0ab70; }
+    .so { color:#89ddff; }
+    .sb { color:#c3e88d; }
+    .sc { color:#6a7a6a; font-style:italic; }
+
+    /* Annotation box */
+    .ann { display:none; margin-top:10px; background:#f5f3fc; border:1px solid var(--border); border-radius:8px; padding:11px 13px; font-size:0.82rem; line-height:1.6; color:var(--text); }
+    .ann.show { display:block; }
+    .ann strong { color:var(--accent); }
+    .ann .ann-error { color:var(--c-error); font-weight:600; }
+    .ann code { font-family:'Fira Code',monospace; font-size:0.78rem; background:#e8e3f5; padding:1px 5px; border-radius:3px; font-variant-ligatures:none; }
+
+    /* Tooltip */
+    #code-tip { position:fixed; z-index:9999; pointer-events:none; display:none; background:#2d2d42; color:#e0ddd5; border:1px solid #4a4860; padding:5px 10px; border-radius:6px; font-size:0.73rem; font-family:'DM Sans',sans-serif; line-height:1.4; max-width:300px; box-shadow:0 2px 8px rgba(0,0,0,0.45); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Assignment Explorer</h1>
+    <p>Why does R seem to ignore what I just did?</p>
+    <span class="pill pill-pkg">tidyverse</span>
+    <span class="pill pill-pkg">dplyr</span>
+    <span class="pill">read_csv()</span>
+    <span class="pill">as.numeric()</span>
+    <span class="pill">filter()</span>
+    <span class="pill">mutate()</span>
+    <span class="pill">&lt;-</span>
+  </header>
+
+  <!-- GRID -->
+  <div class="grid">
+
+    <!-- LEFT: Controls panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-label">Controls</div>
+        <button class="copy-btn" onclick="resetAll()">Reset</button>
+      </div>
+
+      <div class="cs">
+        <div class="ch">Scenario</div>
+        <div class="br" id="scenario-btns">
+          <button class="btn" data-val="read"    onclick="setScenario(this)">Read in data</button>
+          <button class="btn" data-val="numeric" onclick="setScenario(this)">Convert to numeric</button>
+          <button class="btn" data-val="filter"  onclick="setScenario(this)">Filter rows</button>
+          <button class="btn" data-val="select"  onclick="setScenario(this)">Select columns</button>
+          <button class="btn" data-val="mutate"  onclick="setScenario(this)">Mutate / add column</button>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="cs" id="assign-section">
+        <div class="ch">Did you assign it?</div>
+        <div class="tog2" id="assign-tog">
+          <button class="btn" data-val="no"  onclick="setAssign(this)">No assignment</button>
+          <button class="btn" data-val="yes" onclick="setAssign(this)">Yes, assigned</button>
+        </div>
+      </div>
+
+      <div class="cs" id="target-section">
+        <div class="hr"></div>
+        <div class="ch">Assigned to what?</div>
+        <div class="tog2" id="target-tog">
+          <button class="btn" data-val="df"  onclick="setTarget(this)">mydata</button>
+          <button class="btn err" data-val="col" onclick="setTarget(this)">mydata$col</button>
+        </div>
+        <div class="sub" id="target-sub"></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: RStudio simulation panel -->
+    <div class="panel">
+      <div class="panel-label">What RStudio shows you</div>
+      <div class="rstudio-sim">
+
+        <!-- Environment pane -->
+        <div class="rs-pane">
+          <div class="rs-pane-header">
+            <span class="rs-dot rs-dot-r"></span>
+            <span class="rs-dot rs-dot-y"></span>
+            <span class="rs-dot rs-dot-g"></span>
+            Environment
+          </div>
+          <div class="env-pane-body" id="env-pane">
+            <div class="env-empty">Environment is empty</div>
+          </div>
+        </div>
+
+        <!-- Console pane -->
+        <div class="rs-pane">
+          <div class="rs-pane-header">
+            <span class="rs-dot rs-dot-r"></span>
+            <span class="rs-dot rs-dot-y"></span>
+            <span class="rs-dot rs-dot-g"></span>
+            Console
+          </div>
+          <div class="console-body" id="console-pane">
+            <span class="con-muted"># Select a scenario to get started</span>
+          </div>
+        </div>
+
+        <!-- Result badge -->
+        <div id="result-badge"></div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Code + annotation panel -->
+    <div class="panel code-panel">
+      <div class="panel-header">
+        <div class="panel-label">R Code</div>
+        <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-scroll" id="code-out">
+        <code class="cl cl-setup"># Select a scenario on the left</code>
+      </div>
+      <div class="ann" id="ann-box"></div>
+    </div>
+
+  </div>
+
+  <!-- TOOLTIP -->
+  <div id="code-tip"></div>
+
+  <!-- FOOTER -->
+  <footer style="text-align:center;padding:10px 0 14px;font-size:0.72rem;color:var(--muted);font-family:'DM Sans',system-ui,sans-serif;">&copy; 2026 Violet Brown</footer>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────────
+    const DEFAULTS = { scenario: null, assign: null, target: 'df', changed: 'welcome' };
+    let S = Object.assign({}, DEFAULTS);
+
+    const DPLYR_SCENARIOS = ['filter', 'select', 'mutate'];
+
+    // ── Handlers ───────────────────────────────────────────────────────
+    function setScenario(btn) {
+      document.querySelectorAll('#scenario-btns .btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      S.scenario = btn.dataset.val;
+      S.changed  = 'scenario';
+      // reset assign/target when switching scenario
+      S.assign = null;
+      S.target = 'df';
+      syncToggle('assign-tog', null);
+      syncToggle('target-tog', 'df');
+      render();
+    }
+
+    function setAssign(btn) {
+      S.assign  = btn.dataset.val;
+      S.changed = 'assign';
+      syncToggle('assign-tog', S.assign);
+      render();
+    }
+
+    function setTarget(btn) {
+      S.target  = btn.dataset.val;
+      S.changed = 'target';
+      syncToggle('target-tog', S.target);
+      render();
+    }
+
+    function syncToggle(id, val) {
+      document.querySelectorAll(`#${id} .btn`).forEach(b => {
+        b.classList.toggle('on', b.dataset.val === val);
+      });
+    }
+
+    function resetAll() {
+      S = Object.assign({}, DEFAULTS);
+      S.changed = 'welcome';
+      document.querySelectorAll('#scenario-btns .btn').forEach(b => b.classList.remove('on'));
+      syncToggle('assign-tog', null);
+      syncToggle('target-tog', 'df');
+      render();
+    }
+
+    // ── Render ─────────────────────────────────────────────────────────
+    function render() {
+      // Disable assign buttons until a scenario is chosen
+      document.querySelectorAll('#assign-tog .btn').forEach(b => { b.disabled = !S.scenario; });
+
+      // Show/hide target section (only for dplyr scenarios when assigned)
+      const isDplyr  = DPLYR_SCENARIOS.includes(S.scenario);
+      const showTgt  = isDplyr && S.assign === 'yes';
+      document.getElementById('target-section').style.display = showTgt ? 'block' : 'none';
+
+      renderEnv();
+      renderConsole();
+      renderBadge();
+      renderCode();
+
+      const {cls, html} = getAnn();
+      const ann = document.getElementById('ann-box');
+      ann.className = 'ann show ' + cls;
+      ann.innerHTML = html;
+    }
+
+    // ── Environment pane ───────────────────────────────────────────────
+    function renderEnv() {
+      const el = document.getElementById('env-pane');
+      if (!S.scenario) { el.innerHTML = '<div class="env-empty">Environment is empty</div>'; return; }
+
+      const isError = S.assign === 'yes' && S.target === 'col';
+      const hasObj  = S.assign === 'yes' && !isError;
+
+      if (!hasObj) {
+        el.innerHTML = '<div class="env-empty">Environment is empty</div>';
+        return;
+      }
+
+      // What object was created and what does it look like?
+      const envInfo = getEnvInfo();
+      el.innerHTML = `
+        <div class="env-object">
+          <span class="env-name">${envInfo.name}</span>
+          <span class="env-type">${envInfo.type}</span>
+          <span class="env-dims">${envInfo.dims}</span>
+        </div>`;
+    }
+
+    function getEnvInfo() {
+      switch (S.scenario) {
+        case 'read':
+          return { name: 'mydata', type: 'data.frame', dims: '150 obs. × 6 vars' };
+        case 'numeric':
+          return { name: 'mydata', type: 'data.frame', dims: '150 obs. × 6 vars' };
+        case 'filter':
+          return { name: 'mydata', type: 'data.frame', dims: '68 obs. × 6 vars' };
+        case 'select':
+          return { name: 'mydata', type: 'data.frame', dims: '150 obs. × 3 vars' };
+        case 'mutate':
+          return { name: 'mydata', type: 'data.frame', dims: '150 obs. × 7 vars' };
+        default:
+          return { name: 'mydata', type: 'data.frame', dims: '' };
+      }
+    }
+
+    // ── Console pane ───────────────────────────────────────────────────
+    function renderConsole() {
+      const el = document.getElementById('console-pane');
+      if (!S.scenario) {
+        el.innerHTML = '<span class="con-muted"># Select a scenario to get started</span>';
+        return;
+      }
+
+      const isError = S.assign === 'yes' && S.target === 'col';
+      el.innerHTML = buildConsole(S.scenario, S.assign, isError);
+    }
+
+    function buildConsole(scenario, assign, isError) {
+      const cmd = getConsoleCmd(scenario, assign, isError);
+      let line1 = cmd.line1;
+      if (assign === 'yes' && !isError) {
+        line1 = line1.replace(/^(.*?&lt;- )/, '<span class="con-assign-hl">$1</span>');
+      }
+      let out = `<span class="con-line"><span class="con-prompt">&gt; </span><span class="con-cmd">${line1}</span></span>`;
+
+      if (isError) {
+        out += `<span class="con-error">Error in ${getErrorMsg(scenario)}</span>`;
+        return out;
+      }
+
+      if (assign === 'yes') {
+        // Silent assignment — no output
+        out += `<span class="con-muted"># (no output; R is silent when you assign)</span>`;
+        out += `<span class="con-line"><span class="con-prompt">&gt; </span><span class="con-muted">█</span></span>`;
+        return out;
+      }
+
+      // No assignment — R prints to console
+      out += getConsoleOutput(scenario);
+      return out;
+    }
+
+    function getConsoleCmd(scenario, assign, isError) {
+      if (isError) {
+        // target === 'col', dplyr scenario
+        return getDplyrColCmd(scenario);
+      }
+      if (assign === 'yes') {
+        return getAssignedCmd(scenario);
+      }
+      return getUnassignedCmd(scenario);
+    }
+
+    function getUnassignedCmd(scenario) {
+      switch (scenario) {
+        case 'read':
+          return { line1: 'read_csv("mydata.csv")' };
+        case 'numeric':
+          return { line1: 'as.numeric(mydata$score)' };
+        case 'filter':
+          return { line1: 'mydata %&gt;% filter(species == "Adelie")' };
+        case 'select':
+          return { line1: 'mydata %&gt;% select(species, bill_length_mm, sex)' };
+        case 'mutate':
+          return { line1: 'mydata %&gt;% mutate(bill_ratio = bill_length_mm / flipper_length_mm)' };
+      }
+    }
+
+    function getAssignedCmd(scenario) {
+      switch (scenario) {
+        case 'read':
+          return { line1: 'mydata &lt;- read_csv("mydata.csv")' };
+        case 'numeric':
+          return { line1: 'mydata$score &lt;- as.numeric(mydata$score)' };
+        case 'filter':
+          return { line1: 'mydata &lt;- mydata %&gt;% filter(species == "Adelie")' };
+        case 'select':
+          return { line1: 'mydata &lt;- mydata %&gt;% select(species, bill_length_mm, sex)' };
+        case 'mutate':
+          return { line1: 'mydata &lt;- mydata %&gt;% mutate(bill_ratio = bill_length_mm / flipper_length_mm)' };
+      }
+    }
+
+    function getDplyrColCmd(scenario) {
+      switch (scenario) {
+        case 'filter':
+          return { line1: 'mydata$species &lt;- mydata %&gt;% filter(species == "Adelie")' };
+        case 'select':
+          return { line1: 'mydata$species &lt;- mydata %&gt;% select(species, bill_length_mm, sex)' };
+        case 'mutate':
+          return { line1: 'mydata$bill_ratio &lt;- mydata$bill_ratio %&gt;% mutate(bill_ratio = bill_length_mm / flipper_length_mm)' };
+      }
+    }
+
+    function getErrorMsg(scenario) {
+      if (scenario === 'mutate') {
+        return `mutate(mydata$bill_ratio) :<br>&nbsp;&nbsp;object 'bill_length_mm' not found`;
+      }
+      return `\`[&lt;-.data.frame\`(\`*tmp*\`, ...) :<br>&nbsp;&nbsp;replacement has ${scenario === 'filter' ? '68' : '3'} rows, data has 150`;
+    }
+
+    function getConsoleOutput(scenario) {
+      switch (scenario) {
+        case 'read':
+          return `
+<span class="con-output">Rows: 150  Columns: 6</span>
+<span class="con-output">── Column specification ─────────────────────────</span>
+<span class="con-output">chr  (2): species, island, sex</span>
+<span class="con-output">dbl  (4): bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g</span>
+<span class="con-warn">ℹ Use \`spec()\` to retrieve the full column specification.</span>
+<span class="con-output"># A tibble: 150 × 6</span>
+<span class="con-output">   species  island    bill_length_mm ...</span>
+<span class="con-output">   &lt;chr&gt;    &lt;chr&gt;              &lt;dbl&gt;</span>
+<span class="con-output"> 1 Adelie   Torgersen           39.1</span>
+<span class="con-output"> 2 Adelie   Torgersen           39.5</span>
+<span class="con-output"> 3 Adelie   Torgersen           40.3</span>
+<span class="con-muted"> # ℹ 147 more rows</span>`;
+        case 'numeric':
+          return `
+<span class="con-output">  [1]  39.1  39.5  40.3  36.7  39.3  38.9  39.2  34.1  42.0  37.8</span>
+<span class="con-output"> [11]  37.8  41.1  38.6  34.6  36.6  38.7  42.5  34.4  46.0  37.8</span>
+<span class="con-muted"> # ... 130 more values</span>`;
+        case 'filter':
+          return `
+<span class="con-output"># A tibble: 68 × 6</span>
+<span class="con-output">   species island    bill_length_mm flipper_length_mm body_mass_g sex</span>
+<span class="con-output">   &lt;chr&gt;   &lt;chr&gt;              &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt; &lt;chr&gt;</span>
+<span class="con-output"> 1 Adelie  Torgersen           39.1               181        3750 male</span>
+<span class="con-output"> 2 Adelie  Torgersen           39.5               186        3800 female</span>
+<span class="con-output"> 3 Adelie  Torgersen           40.3               195        3250 female</span>
+<span class="con-muted"> # ℹ 65 more rows</span>`;
+        case 'select':
+          return `
+<span class="con-output"># A tibble: 150 × 3</span>
+<span class="con-output">   species bill_length_mm sex   </span>
+<span class="con-output">   &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt; </span>
+<span class="con-output"> 1 Adelie            39.1 male  </span>
+<span class="con-output"> 2 Adelie            39.5 female</span>
+<span class="con-output"> 3 Adelie            40.3 female</span>
+<span class="con-muted"> # ℹ 147 more rows</span>`;
+        case 'mutate':
+          return `
+<span class="con-output"># A tibble: 150 × 7</span>
+<span class="con-output">   species bill_length_mm flipper_length_mm bill_ratio</span>
+<span class="con-output">   &lt;chr&gt;            &lt;dbl&gt;             &lt;int&gt;      &lt;dbl&gt;</span>
+<span class="con-output"> 1 Adelie            39.1               181      0.216</span>
+<span class="con-output"> 2 Adelie            39.5               186      0.212</span>
+<span class="con-output"> 3 Adelie            40.3               195      0.207</span>
+<span class="con-muted"> # ℹ 147 more rows</span>`;
+      }
+    }
+
+    // ── Result badge ───────────────────────────────────────────────────
+    function renderBadge() {
+      const el = document.getElementById('result-badge');
+      if (!S.scenario) { el.innerHTML = ''; return; }
+
+      const isError = S.assign === 'yes' && S.target === 'col';
+      if (isError) {
+        el.innerHTML = `<div class="result-badge fail">✗ Error: Nothing changed (look to the right to find out why!)</div>`;
+      } else if (S.assign === 'yes') {
+        el.innerHTML = `<div class="result-badge ok">✓ Saved to your environment</div>`;
+      } else {
+        el.innerHTML = `<div class="result-badge fail">✗ The output was printed to the console, but nothing was saved because you didn't assign the output to an object.</div>`;
+      }
+    }
+
+    // ── Code panel ─────────────────────────────────────────────────────
+    function renderCode() {
+      const el = document.getElementById('code-out');
+      if (!S.scenario) {
+        el.innerHTML = '<code class="cl cl-setup"># Select a scenario on the left</code>';
+        return;
+      }
+      el.innerHTML = buildCode();
+    }
+
+    function buildCode() {
+      const isError = S.assign === 'yes' && S.target === 'col';
+      const yes     = S.assign === 'yes';
+      const sc      = S.scenario;
+
+      let lines = [];
+      lines.push(`<code class="cl cl-setup"><span class="sc"># setup</span></code>`);
+      lines.push(`<code class="cl cl-setup"><span class="sf">library</span>(<span class="sv">tidyverse</span>)</code>`);
+      lines.push(`<code class="cl cl-setup"> </code>`);
+
+      if (sc === 'read') {
+        if (!yes) {
+          lines.push(`<code class="cl cl-fn"><span class="sc"># read_csv() runs, but nothing is saved!</span></code>`);
+          lines.push(`<code class="cl cl-fn"><span class="sf">read_csv</span>(<span class="ss">"mydata.csv"</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata does NOT exist in your environment</span></code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># R just printed the tibble to the console</span></code>`);
+        } else {
+          lines.push(`<code class="cl cl-assign"><span class="sc"># &lt;- saves the result to an object</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sf">read_csv</span>(<span class="ss">"mydata.csv"</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># now mydata appears in your environment</span></code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># 150 obs. × 6 variables</span></code>`);
+        }
+      }
+
+      if (sc === 'numeric') {
+        if (!yes) {
+          lines.push(`<code class="cl cl-fn"><span class="sc"># as.numeric() converts but doesn't save</span></code>`);
+          lines.push(`<code class="cl cl-fn"><span class="sf">as.numeric</span>(<span class="sv">mydata</span><span class="so">$</span>score)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata$score is still the original type</span></code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># R showed you the result but threw it away</span></code>`);
+        } else {
+          lines.push(`<code class="cl cl-assign"><span class="sc"># assign result back to the column</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span><span class="so">$</span>score <span class="so">&lt;-</span> <span class="sf">as.numeric</span>(<span class="sv">mydata</span><span class="so">$</span>score)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># now mydata$score is numeric</span></code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># (this is the one case where $col &lt;- works!)</span></code>`);
+        }
+      }
+
+      if (sc === 'filter') {
+        if (!yes) {
+          lines.push(`<code class="cl cl-pipe"><span class="sc"># pipe result is printed, not saved</span></code>`);
+          lines.push(`<code class="cl cl-pipe"><span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-pipe">  <span class="sf">filter</span>(<span class="sv">species</span> <span class="sb">==</span> <span class="ss">"Adelie"</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata still has 150 rows; there data are unchanged</span></code>`);
+        } else if (isError) {
+          lines.push(`<code class="cl cl-error"><span class="sc"># ✗ wrong: You can't assign a dataframe to a column</span></code>`);
+          lines.push(`<code class="cl cl-error"><span class="sv">mydata</span><span class="so">$</span>species <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-error">  <span class="sf">filter</span>(<span class="sv">species</span> <span class="sb">==</span> <span class="ss">"Adelie"</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># Error: replacement has 68 rows, data has 150</span></code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sc"># ✓ correct: Overwrite the whole dataframe</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-assign">  <span class="sf">filter</span>(<span class="sv">species</span> <span class="sb">==</span> <span class="ss">"Adelie"</span>)</code>`);
+        } else {
+          lines.push(`<code class="cl cl-assign"><span class="sc"># overwrite mydata with the filtered version</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-assign">  <span class="sf">filter</span>(<span class="sv">species</span> <span class="sb">==</span> <span class="ss">"Adelie"</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata now has 68 rows (Adelie only)</span></code>`);
+        }
+      }
+
+      if (sc === 'select') {
+        if (!yes) {
+          lines.push(`<code class="cl cl-pipe"><span class="sc"># pipe result is printed, not saved</span></code>`);
+          lines.push(`<code class="cl cl-pipe"><span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-pipe">  <span class="sf">select</span>(<span class="sv">species</span>, <span class="sv">bill_length_mm</span>, <span class="sv">sex</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata still has all 6 columns; nothing was changed</span></code>`);
+        } else if (isError) {
+          lines.push(`<code class="cl cl-error"><span class="sc"># ✗ wrong: select() returns a dataframe, not a column</span></code>`);
+          lines.push(`<code class="cl cl-error"><span class="sv">mydata</span><span class="so">$</span>species <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-error">  <span class="sf">select</span>(<span class="sv">species</span>, <span class="sv">bill_length_mm</span>, <span class="sv">sex</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># Error: replacement has 3 columns, data has 1</span></code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sc"># ✓ correct: Overwrite the whole dataframe</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-assign">  <span class="sf">select</span>(<span class="sv">species</span>, <span class="sv">bill_length_mm</span>, <span class="sv">sex</span>)</code>`);
+        } else {
+          lines.push(`<code class="cl cl-assign"><span class="sc"># overwrite mydata with only the selected columns</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-assign">  <span class="sf">select</span>(<span class="sv">species</span>, <span class="sv">bill_length_mm</span>, <span class="sv">sex</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata now has 3 columns instead of 6</span></code>`);
+        }
+      }
+
+      if (sc === 'mutate') {
+        if (!yes) {
+          lines.push(`<code class="cl cl-pipe"><span class="sc"># pipe result is printed, not saved</span></code>`);
+          lines.push(`<code class="cl cl-pipe"><span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-pipe">  <span class="sf">mutate</span>(<span class="sv">bill_ratio</span> <span class="so">=</span> <span class="sv">bill_length_mm</span> <span class="so">/</span> <span class="sv">flipper_length_mm</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata still has 6 columns; bill_ratio wasn't added</span></code>`);
+        } else if (isError) {
+          lines.push(`<code class="cl cl-error"><span class="sc"># ✗ wrong: mutate() needs the full dataframe</span></code>`);
+          lines.push(`<code class="cl cl-error"><span class="sv">mydata</span><span class="so">$</span>bill_ratio <span class="so">&lt;-</span> <span class="sv">mydata</span><span class="so">$</span>bill_ratio <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-error">  <span class="sf">mutate</span>(<span class="sv">bill_ratio</span> <span class="so">=</span> <span class="sv">bill_length_mm</span> <span class="so">/</span> <span class="sv">flipper_length_mm</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># Error: object 'bill_length_mm' not found</span></code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># (mydata$bill_ratio is just a vector; it has no</span></code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc">#  idea what bill_length_mm is!)</span></code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sc"># ✓ correct: mutate() needs the whole dataframe</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-assign">  <span class="sf">mutate</span>(<span class="sv">bill_ratio</span> <span class="so">=</span> <span class="sv">bill_length_mm</span> <span class="so">/</span> <span class="sv">flipper_length_mm</span>)</code>`);
+        } else {
+          lines.push(`<code class="cl cl-assign"><span class="sc"># overwrite mydata. The new column is now part of it</span></code>`);
+          lines.push(`<code class="cl cl-assign"><span class="sv">mydata</span> <span class="so">&lt;-</span> <span class="sv">mydata</span> <span class="so">%&gt;%</span></code>`);
+          lines.push(`<code class="cl cl-assign">  <span class="sf">mutate</span>(<span class="sv">bill_ratio</span> <span class="so">=</span> <span class="sv">bill_length_mm</span> <span class="so">/</span> <span class="sv">flipper_length_mm</span>)</code>`);
+          lines.push(`<code class="cl cl-setup"> </code>`);
+          lines.push(`<code class="cl cl-setup"><span class="sc"># mydata now has 7 columns (bill_ratio added)</span></code>`);
+        }
+      }
+
+      return lines.join('\n');
+    }
+
+    // ── Annotations ────────────────────────────────────────────────────
+    function getAnn() {
+      if (!S.scenario) return { cls: 'ann-welcome', html: `
+        <span style="color:var(--text);font-weight:700;">Here's how this Explorer works.</span><br><br>
+        Pick a <strong>scenario</strong> on the left—something you're trying to do with data in R.
+        Like maybe you're trying to make a column in a dataframe a numeric rather than a character vector.
+        Or maybe you're trying to filter the dataframe to remove certain rows.
+        Then toggle whether you assigned the result or not. The middle panel shows what your
+        <strong>RStudio environment and console</strong> would look like, and the code panel on the right
+        shows the correct and incorrect ways to write it.<br><br>
+        The key idea: in R, a function like <code>filter()</code> or <code>read_csv()</code>
+        <em>produces</em> a result but doesn't automatically save it anywhere.
+        The <code>&lt;-</code> operator is what saves the result to an object in your environment.` };
+
+      const isError = S.assign === 'yes' && S.target === 'col';
+      const yes     = S.assign === 'yes';
+      const sc      = S.scenario;
+
+      if (sc === 'read') {
+        if (!yes) return { cls: '', html: `
+          <code>read_csv()</code> ran successfully...you can see the tibble printed in the console!
+          But look at your environment: <strong>it's empty.</strong> The data was never saved to anything.<br><br>
+          R's attitude: <em>"You asked me to read the file. I did. You didn't tell me to save it, so I didn't."</em><br><br>
+          Fix it: put <code>mydata &lt;-</code> in front of the call.` };
+        return { cls: '', html: `
+          Now <code>mydata</code> appears in your environment with 150 rows and 6 columns.
+          Notice that R didn't print anything to the console—that's normal.
+          <strong>When you assign, R stays quiet.</strong> The silence is a good sign, not a problem.` };
+      }
+
+      if (sc === 'numeric') {
+        if (!yes) return { cls: '', html: `
+          <code>as.numeric()</code> converted the column...you can see the numeric values printed
+          in the console! But <strong>the column in your dataframe wasn't changed.</strong>
+          R just handed you the result and then threw it away.<br><br>
+          Fix it: assign the result back to the column with <code>mydata$score &lt;- as.numeric(mydata$score)</code>.` };
+        return { cls: '', html: `
+          <code>mydata$score</code> is now numeric. This is one of the few places where assigning
+          to a <strong>specific column</strong> with <code>$</code> is the right move, because
+          you're replacing exactly one column with the same column converted to a new type.<br><br>
+          This is different from dplyr functions like <code>filter()</code> and <code>mutate()</code>,
+          which return a whole new dataframe and need to overwrite the whole thing.` };
+      }
+
+      if (sc === 'filter') {
+        if (!yes) return { cls: '', html: `
+          The filtered result (68 rows) was printed to the console, but <strong>mydata still has 150 rows.</strong>
+          Nothing was saved! <code>filter()</code> builds a new dataframe; it doesn't modify the existing one unless you tell it to (it would be chaos if it did!).<br><br>
+          Fix it: assign with <code>mydata &lt;- mydata %&gt;% filter(...)</code>` };
+        if (isError) return { cls: '', html: `
+          <span class="ann-error">Error: replacement has 68 rows, data has 150.</span><br><br>
+          Here's what went wrong: <code>filter()</code> returns a <em>whole dataframe</em> (68 rows × 6 columns).
+          You tried to stuff that entire dataframe into a single column (<code>mydata$species</code>),
+          which only has room for 150 individual values. The sizes don't match, so R throws an error.<br><br>
+          The fix: assign to <code>mydata</code> (the whole dataframe), not to a column inside it.
+          <code>mydata &lt;- mydata %&gt;% filter(...)</code>` };
+        return { cls: '', html: `
+          <code>mydata</code> has been overwritten with the filtered version: 68 rows instead of 150.
+          Notice you're assigning to <strong>mydata</strong>, not to a column inside it, because
+          <code>filter()</code> returns a whole new dataframe, not a single column.` };
+      }
+
+      if (sc === 'select') {
+        if (!yes) return { cls: '', html: `
+          The 3-column result was printed to the console, but <strong>mydata still has all 6 columns.</strong>
+          <code>select()</code> returns a new dataframe; it doesn't remove columns from the original unless you explicitly tell it to (it would be chaos if it did!).<br><br>
+          Fix it: <code>mydata &lt;- mydata %&gt;% select(...)</code>` };
+        if (isError) return { cls: '', html: `
+          <span class="ann-error">Error: replacement has 3 columns, data has 1.</span><br><br>
+          <code>select()</code> returns a <em>whole dataframe</em> with 3 columns.
+          You tried to assign that into <code>mydata$species</code>, which is a single column
+          that can only hold one column's worth of values. R can't fit a 3-column dataframe into one column.<br><br>
+          Fix it: assign to <code>mydata</code> itself, not to a column inside it.` };
+        return { cls: '', html: `
+          <code>mydata</code> now has 3 columns instead of 6. The original columns that weren't
+          selected are gone. You assigned to <strong>mydata</strong> because <code>select()</code>
+          returns a whole dataframe—the result has to go somewhere that can hold a dataframe.` };
+      }
+
+      if (sc === 'mutate') {
+        if (!yes) return { cls: '', html: `
+          The new column was printed to the console, but <strong>mydata still has only 6 columns.</strong>
+          <code>mutate()</code> builds a new dataframe with the extra column included; it doesn't
+          add columns to the original dataframe unless you explicitly tell it to (it would be chaos if it did!).<br><br>
+          Fix it: <code>mydata &lt;- mydata %&gt;% mutate(...)</code>` };
+        if (isError) return { cls: '', html: `
+          <span class="ann-error">Error: object 'bill_length_mm' not found.</span><br><br>
+          Here's why: <code>mydata$bill_ratio</code> is just a plain vector—a list of numbers with no column names
+          and no connection to the rest of the dataframe. When you pipe it into <code>mutate()</code>,
+          R looks for <code>bill_length_mm</code> inside that vector and can't find it, because
+          <strong>vectors don't have columns.</strong><br><br>
+          <code>mutate()</code> needs the <em>whole dataframe</em> so it can see all the columns.
+          Fix it: <code>mydata &lt;- mydata %&gt;% mutate(...)</code>` };
+        return { cls: '', html: `
+          <code>mydata</code> now has 7 columns because <code>bill_ratio</code> was added.
+          You assigned to <strong>mydata</strong> (not <code>mydata$bill_ratio</code>) because
+          <code>mutate()</code> needs access to the whole dataframe to calculate the new column,
+          and it <em>returns</em> the whole dataframe with the new column included.` };
+      }
+
+      return { cls: '', html: '' };
+    }
+
+    // ── Copy code ──────────────────────────────────────────────────────
+    function copyCode() {
+      const raw = document.getElementById('code-out').innerText;
+      navigator.clipboard.writeText(raw).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    // ── Tooltip ────────────────────────────────────────────────────────
+    document.addEventListener('mousemove', e => {
+      const tip = document.getElementById('code-tip');
+      const el  = e.target.closest('[data-tip]');
+      if (el) {
+        tip.style.display = 'block';
+        tip.style.left    = (e.clientX + 14) + 'px';
+        tip.style.top     = (e.clientY + 14) + 'px';
+        tip.textContent   = el.dataset.tip;
+      } else {
+        tip.style.display = 'none';
+      }
+    });
+
+    // ── Init ───────────────────────────────────────────────────────────
+    render();
+  </script>
+
+</body>
+</html>

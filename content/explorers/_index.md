@@ -33,6 +33,11 @@ Good luck, have fun, and remember: WE ARE ALL MATH PEOPLE.
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Reshape data between wide and long formats with tidyr</div>
   </a>
 
+   <a href="/explorers/object-assignment-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
+    <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Object Assignment Explorer</div>
+    <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Why does it sometimes seem like R is ignoring you when you're trying to modify a column or dataframe?</div>
+  </a>
+
   <a href="/explorers/indexing-explorer/" target="_blank" style="display:block;text-decoration:none;background:#fdfcf9;border:1.5px solid #dbd3c3;border-radius:10px;padding:16px 18px;transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#b85520';this.style.boxShadow='0 2px 8px rgba(184,85,32,0.12)'" onmouseout="this.style.borderColor='#dbd3c3';this.style.boxShadow='none'">
     <div style="font-family:'Lora',Georgia,serif;font-weight:600;color:#1c1811;margin-bottom:5px;">Indexing Explorer</div>
     <div style="font-size:0.82rem;color:#79705f;line-height:1.4;">Learn how R indexes vectors and data frames, and practice using logical operators and Booleans to filter rows </div>
