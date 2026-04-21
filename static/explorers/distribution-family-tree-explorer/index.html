@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Distribution Family Tree Explorer</title>
-  <link rel="icon" href="tool_icon.png">
+  <link rel="icon" href="tree-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Lora:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -187,7 +187,7 @@
     #tree-svg {
       display: block;
       width: 100%;
-      height: 540px;
+      height: auto;
       cursor: default;
       overflow: visible;
     }
@@ -483,8 +483,8 @@
           <div class="panel-label">Distribution Families</div>
           <button class="copy-btn" onclick="resetAll()">Reset</button>
         </div>
-        <svg id="tree-svg" width="100%" viewBox="0 0 820 610" role="img" xmlns="http://www.w3.org/2000/svg">
-  <title>Distribution family tree</title>
+        <svg id="tree-svg" width="100%" viewBox="0 -30 820 690" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title aria-hidden="true">Distribution family tree</title>
   <desc>Three mirrored rows: Bernoulli/Binomial, Normal/Chi-square, t/F, with Poisson as offshoot</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -492,86 +492,88 @@
     </marker>
   </defs>
 
-  <!-- BERNOULLI: x=10 y=20 w=250 h=95  center-x=135 mid-y=67 right=260 bottom=115 -->
+  <!-- BERNOULLI: x=10 y=-10 w=250 h=95  center-x=135 mid-y=37 right=260 bottom=85 -->
   <g id="tnode-bernoulli" class="tree-node" onclick="setDist('bernoulli')">
-    <rect x="10" y="20" width="250" height="95" rx="9" style="fill:rgb(250,238,218);stroke:rgb(133,79,11);stroke-width:0.5px;"/>
-    <text x="135" y="42" text-anchor="middle" dominant-baseline="central" style="fill:rgb(99,56,6);font-size:18px;font-weight:500;font-family:sans-serif;">Bernoulli(p)</text>
-    <text x="135" y="67" text-anchor="middle" dominant-baseline="central" style="fill:rgb(133,79,11);font-size:16px;font-family:sans-serif;">One yes/no trial</text>
-    <text x="135" y="92" text-anchor="middle" dominant-baseline="central" style="fill:rgb(133,79,11);font-size:16px;font-family:sans-serif;">P(X=1) = p</text>
+    <rect x="10" y="-10" width="250" height="107" rx="9" style="fill:rgb(250,238,218);stroke:rgb(133,79,11);stroke-width:0.5px;"/>
+    <text x="135" y="16" text-anchor="middle" dominant-baseline="central" style="fill:rgb(99,56,6);font-size:20px;font-weight:500;font-family:sans-serif;">Bernoulli(p)</text>
+    <text x="135" y="43" text-anchor="middle" dominant-baseline="central" style="fill:rgb(133,79,11);font-size:18px;font-family:sans-serif;">One yes/no trial</text>
+    <text x="135" y="70" text-anchor="middle" dominant-baseline="central" style="fill:rgb(133,79,11);font-size:18px;font-family:sans-serif;">P(X=1) = p</text>
   </g>
 
-  <!-- BINOMIAL: x=555 y=20 w=255 h=95  center-x=682 mid-y=67 right=810 bottom=115 -->
+  <!-- BINOMIAL: x=555 y=-10 w=255 h=95  center-x=682 mid-y=37 right=810 bottom=85 -->
   <g id="tnode-binomial" class="tree-node" onclick="setDist('binomial')">
-    <rect x="555" y="20" width="255" height="95" rx="9" style="fill:rgb(230,241,251);stroke:rgb(24,95,165);stroke-width:0.5px;"/>
-    <text x="682" y="42" text-anchor="middle" dominant-baseline="central" style="fill:rgb(12,68,124);font-size:18px;font-weight:500;font-family:sans-serif;">Binomial(n, p)</text>
-    <text x="682" y="67" text-anchor="middle" dominant-baseline="central" style="fill:rgb(24,95,165);font-size:16px;font-family:sans-serif;">Successes in n trials</text>
-    <text x="682" y="92" text-anchor="middle" dominant-baseline="central" style="fill:rgb(24,95,165);font-size:16px;font-family:sans-serif;">X ~ Binom(n, p)</text>
+    <rect x="555" y="-10" width="255" height="107" rx="9" style="fill:rgb(230,241,251);stroke:rgb(24,95,165);stroke-width:0.5px;"/>
+    <text x="682" y="16" text-anchor="middle" dominant-baseline="central" style="fill:rgb(12,68,124);font-size:20px;font-weight:500;font-family:sans-serif;">Binomial(n, p)</text>
+    <text x="682" y="43" text-anchor="middle" dominant-baseline="central" style="fill:rgb(24,95,165);font-size:18px;font-family:sans-serif;">Successes in n trials</text>
+    <text x="682" y="70" text-anchor="middle" dominant-baseline="central" style="fill:rgb(24,95,165);font-size:18px;font-family:sans-serif;">X ~ Binom(n, p)</text>
   </g>
 
   <!-- Arrow: Bernoulli → Binomial  (horizontal at y=67, leaves right=260, enters left=555) -->
-  <path d="M 260 67 C 390 67, 420 67, 553 67" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="407" y="57" text-anchor="middle" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">Sum n trials</text>
+  <path d="M 260 43 C 390 43, 420 43, 553 43" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="407" y="33" text-anchor="middle" style="fill:rgb(61,61,58);font-size:18px;font-family:sans-serif;">Sum n trials</text>
 
   <!-- POISSON: x=280 y=180 w=256 h=95  center-x=408 mid-y=227 right=536 bottom=275 -->
   <g id="tnode-poisson" class="tree-node" onclick="setDist('poisson')">
-    <rect x="280" y="180" width="256" height="95" rx="9" style="fill:rgb(234,243,222);stroke:rgb(59,109,17);stroke-width:0.5px;"/>
-    <text x="408" y="202" text-anchor="middle" dominant-baseline="central" style="fill:rgb(39,80,10);font-size:18px;font-weight:500;font-family:sans-serif;">Poisson(λ)</text>
-    <text x="408" y="227" text-anchor="middle" dominant-baseline="central" style="fill:rgb(59,109,17);font-size:16px;font-family:sans-serif;">Rare events per interval</text>
-    <text x="408" y="252" text-anchor="middle" dominant-baseline="central" style="fill:rgb(59,109,17);font-size:16px;font-family:sans-serif;">mean = var = λ</text>
+    <rect x="280" y="180" width="256" height="107" rx="9" style="fill:rgb(234,243,222);stroke:rgb(59,109,17);stroke-width:0.5px;"/>
+    <text x="408" y="209" text-anchor="middle" dominant-baseline="central" style="fill:rgb(39,80,10);font-size:20px;font-weight:500;font-family:sans-serif;">Poisson(λ)</text>
+    <text x="408" y="233" text-anchor="middle" dominant-baseline="central" style="fill:rgb(59,109,17);font-size:18px;font-family:sans-serif;">Rare events per interval</text>
+    <text x="408" y="257" text-anchor="middle" dominant-baseline="central" style="fill:rgb(59,109,17);font-size:18px;font-family:sans-serif;">mean = var = λ</text>
   </g>
 
   <!-- Arrow: Binomial → Poisson  (from Binomial bottom x=660,y=115; enters Poisson right x=534,y=227) -->
-  <path d="M 660 115 C 660 227, 618 227, 538 227" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="668" y="168" text-anchor="start" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">n→∞, p→0, np=λ</text>
+  <path d="M 660 97 C 660 227, 618 227, 538 227" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="668" y="168" text-anchor="start" style="fill:rgb(61,61,58);font-size:18px;font-family:sans-serif;">n→∞, p→0, np=λ</text>
 
   <!-- Arrow: Binomial → Normal  (from Binomial bottom x=635,y=115; horizontal bridge at y=150 above Poisson; into Normal top x=135,y=325) -->
-  <path d="M 635 115 C 635 150, 635 150, 408 150 C 135 150, 135 278, 135 323" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="408" y="140" text-anchor="middle" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">n large (CLT)</text>
+  <path d="M 635 97 C 635 130, 635 130, 408 130 C 135 130, 135 278, 135 298" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="408" y="120" text-anchor="middle" style="fill:rgb(61,61,58);font-size:18px;font-family:sans-serif;">n large (CLT)</text>
 
   <!-- NORMAL: x=10 y=325 w=250 h=95  center-x=135 mid-y=372 right=260 bottom=420 -->
   <g id="tnode-normal" class="tree-node" onclick="setDist('normal')">
-    <rect x="10" y="325" width="250" height="95" rx="9" style="fill:rgb(238,237,254);stroke:rgb(83,74,183);stroke-width:0.5px;"/>
-    <text x="135" y="347" text-anchor="middle" dominant-baseline="central" style="fill:rgb(60,52,137);font-size:18px;font-weight:500;font-family:sans-serif;">Normal(μ, σ)</text>
-    <text x="135" y="372" text-anchor="middle" dominant-baseline="central" style="fill:rgb(83,74,183);font-size:16px;font-family:sans-serif;">Symmetric bell curve</text>
-    <text x="135" y="397" text-anchor="middle" dominant-baseline="central" style="fill:rgb(83,74,183);font-size:16px;font-family:sans-serif;">X ~ N(μ, σ²)</text>
+    <rect x="10" y="300" width="250" height="107" rx="9" style="fill:rgb(238,237,254);stroke:rgb(83,74,183);stroke-width:0.5px;"/>
+    <text x="135" y="326" text-anchor="middle" dominant-baseline="central" style="fill:rgb(60,52,137);font-size:20px;font-weight:500;font-family:sans-serif;">Normal(μ, σ)</text>
+    <text x="135" y="353" text-anchor="middle" dominant-baseline="central" style="fill:rgb(83,74,183);font-size:18px;font-family:sans-serif;">Symmetric bell curve</text>
+    <text x="135" y="379" text-anchor="middle" dominant-baseline="central" style="fill:rgb(83,74,183);font-size:18px;font-family:sans-serif;">X ~ N(μ, σ²)</text>
   </g>
 
   <!-- Arrow: Normal → Chi-square  (horizontal at y=372, leaves right=260, enters left=555) -->
-  <path d="M 260 372 C 390 372, 420 372, 553 372" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="407" y="362" text-anchor="middle" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">square k normals, add them up</text>
+  <path d="M 260 347 C 390 347, 420 347, 553 347" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="407" y="337" text-anchor="middle" style="fill:rgb(61,61,58);font-size:18px;font-family:sans-serif;">square k normals, add them up</text>
 
   <!-- CHI-SQUARE: x=555 y=325 w=255 h=95  center-x=682 mid-y=372 right=810 bottom=420 -->
   <g id="tnode-chisq" class="tree-node" onclick="setDist('chisq')">
-    <rect x="555" y="325" width="255" height="95" rx="9" style="fill:rgb(252,235,235);stroke:rgb(163,45,45);stroke-width:0.5px;"/>
-    <text x="682" y="347" text-anchor="middle" dominant-baseline="central" style="fill:rgb(121,31,31);font-size:18px;font-weight:500;font-family:sans-serif;">Chi-square(k)</text>
-    <text x="682" y="372" text-anchor="middle" dominant-baseline="central" style="fill:rgb(163,45,45);font-size:16px;font-family:sans-serif;">Sum of k squared normals</text>
-    <text x="682" y="397" text-anchor="middle" dominant-baseline="central" style="fill:rgb(163,45,45);font-size:16px;font-family:sans-serif;">sampling dist of s²; X~χ²(k)</text>
+    <rect x="555" y="300" width="255" height="107" rx="9" style="fill:rgb(252,235,235);stroke:rgb(163,45,45);stroke-width:0.5px;"/>
+    <text x="682" y="326" text-anchor="middle" dominant-baseline="central" style="fill:rgb(121,31,31);font-size:20px;font-weight:500;font-family:sans-serif;">Chi-square(k)</text>
+    <text x="682" y="353" text-anchor="middle" dominant-baseline="central" style="fill:rgb(163,45,45);font-size:18px;font-family:sans-serif;">Sum of k squared normals</text>
+    <text x="682" y="379" text-anchor="middle" dominant-baseline="central" style="fill:rgb(163,45,45);font-size:18px;font-family:sans-serif;">sampling dist of s²; X~χ²(k)</text>
   </g>
 
   <!-- Arrow: Chi-square → t  (from Chi-sq bottom x=600,y=420; curves left then arrives STRAIGHT DOWN into t top x=130,y=495) -->
   <!-- Last CP x=130 = endpoint x, so final tangent is vertical -->
-  <path d="M 600 420 C 600 470, 130 445, 130 493" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="350" y="456" text-anchor="middle" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">Z / √(χ²/df)</text>
+  <path d="M 570 407 C 570 470, 570 470, 420 470 C 272 470, 272 470, 272 543" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="390" y="458" text-anchor="middle" style="fill:rgb(61,61,58);font-size:18px;font-family:sans-serif;">Z / √(χ²/df)</text>
 
   <!-- Arrow: Chi-square → F  (from Chi-sq bottom x=682,y=420; arrives STRAIGHT DOWN into F top x=689,y=495) -->
   <!-- Last CP x=689 = endpoint x, so final tangent is vertical -->
-  <path d="M 682 420 C 682 455, 689 460, 689 493" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="704" y="456" text-anchor="start" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">(χ²/df₁)÷(χ²/df₂)</text>
+  <path d="M 682 407 C 682 490, 689 495, 689 545" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="748" y="438" text-anchor="middle" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">(χ²/df₁)</text>
+  <line x1="718" y1="448" x2="778" y2="448" stroke="#888780" stroke-width="1"/>
+  <text x="748" y="466" text-anchor="middle" style="fill:rgb(61,61,58);font-size:16px;font-family:sans-serif;">(χ²/df₂)</text>
 
-  <!-- t: x=8 y=495 w=245 h=92  center-x=130 mid-y=541 right=253 bottom=587 -->
+  <!-- t: x=8 y=525 w=245 h=92  center-x=130 mid-y=571 right=253 bottom=617 -->
   <g id="tnode-tdist" class="tree-node" onclick="setDist('tdist')">
-    <rect x="8" y="495" width="245" height="92" rx="9" style="fill:rgb(225,245,238);stroke:rgb(15,110,86);stroke-width:0.5px;"/>
-    <text x="130" y="517" text-anchor="middle" dominant-baseline="central" style="fill:rgb(8,80,65);font-size:18px;font-weight:500;font-family:sans-serif;">t(df)</text>
-    <text x="130" y="541" text-anchor="middle" dominant-baseline="central" style="fill:rgb(15,110,86);font-size:16px;font-family:sans-serif;">Normal ÷ √(χ²/df)</text>
-    <text x="130" y="565" text-anchor="middle" dominant-baseline="central" style="fill:rgb(15,110,86);font-size:16px;font-family:sans-serif;">fat tails; df = n−1</text>
+    <rect x="150" y="545" width="245" height="110" rx="9" style="fill:rgb(225,245,238);stroke:rgb(15,110,86);stroke-width:0.5px;"/>
+    <text x="272" y="571" text-anchor="middle" dominant-baseline="central" style="fill:rgb(8,80,65);font-size:20px;font-weight:500;font-family:sans-serif;">t(df)</text>
+    <text x="272" y="597" text-anchor="middle" dominant-baseline="central" style="fill:rgb(15,110,86);font-size:18px;font-family:sans-serif;">Normal ÷ √(χ²/df)</text>
+    <text x="272" y="623" text-anchor="middle" dominant-baseline="central" style="fill:rgb(15,110,86);font-size:18px;font-family:sans-serif;">fat tails; df = n−1</text>
   </g>
 
-  <!-- F: x=567 y=495 w=245 h=92  center-x=689 mid-y=541 right=812 bottom=587 -->
+  <!-- F: x=567 y=525 w=245 h=92  center-x=689 mid-y=571 right=812 bottom=617 -->
   <g id="tnode-fdist" class="tree-node" onclick="setDist('fdist')">
-    <rect x="567" y="495" width="245" height="92" rx="9" style="fill:rgb(251,234,240);stroke:rgb(153,53,86);stroke-width:0.5px;"/>
-    <text x="689" y="517" text-anchor="middle" dominant-baseline="central" style="fill:rgb(114,36,62);font-size:18px;font-weight:500;font-family:sans-serif;">F(df₁, df₂)</text>
-    <text x="689" y="541" text-anchor="middle" dominant-baseline="central" style="fill:rgb(153,53,86);font-size:16px;font-family:sans-serif;">Ratio of two χ²s</text>
-    <text x="689" y="565" text-anchor="middle" dominant-baseline="central" style="fill:rgb(153,53,86);font-size:16px;font-family:sans-serif;">used in ANOVA</text>
+    <rect x="567" y="545" width="245" height="110" rx="9" style="fill:rgb(251,234,240);stroke:rgb(153,53,86);stroke-width:0.5px;"/>
+    <text x="689" y="571" text-anchor="middle" dominant-baseline="central" style="fill:rgb(114,36,62);font-size:20px;font-weight:500;font-family:sans-serif;">F(df₁, df₂)</text>
+    <text x="689" y="597" text-anchor="middle" dominant-baseline="central" style="fill:rgb(153,53,86);font-size:18px;font-family:sans-serif;">Ratio of two χ²s</text>
+    <text x="689" y="623" text-anchor="middle" dominant-baseline="central" style="fill:rgb(153,53,86);font-size:18px;font-family:sans-serif;">used in ANOVA</text>
   </g>
 
 </svg>

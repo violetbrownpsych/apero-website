@@ -441,6 +441,8 @@ Each tool has a favicon. Add to `<head>`:
 .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
 ```
 
+**IMPORTANT — cascade order:** `.pill-pkg` must be defined **after** `.pill` in the stylesheet, not before. `.pill` uses the `background`, `border`, and `color` shorthands which will silently overwrite `.pill-pkg`'s blue values if `.pill` comes later. This has caused the package pill to render purple (inheriting `--accent`) multiple times.
+
 ---
 
 ## Footer

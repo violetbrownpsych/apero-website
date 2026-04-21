@@ -62,7 +62,6 @@
       margin-bottom: 4px;
     }
     header p { font-size: 0.86rem; color: var(--muted); margin-bottom: 5px; }
-    .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
     .pill {
       display: inline-block;
       padding: 2px 9px;
@@ -74,6 +73,7 @@
       color: var(--muted);
       margin: 0 2px;
     }
+    .pill-pkg { background: #e2ecf4; border-color: #b8cedd; color: #3a6278; }
 
     /* === PANELS === */
     .panel {
@@ -512,19 +512,19 @@
         <div style="display:flex;flex-direction:column;gap:4px;font-size:0.75rem">
           <div style="display:flex;align-items:center;gap:7px">
             <div style="width:10px;height:10px;border-radius:2px;background:var(--c-cols);flex-shrink:0"></div>
-            <span><strong>cols</strong> — columns being pivoted</span>
+            <span><strong>cols</strong>: columns being pivoted</span>
           </div>
           <div style="display:flex;align-items:center;gap:7px">
             <div style="width:10px;height:10px;border-radius:2px;background:var(--c-names);flex-shrink:0"></div>
-            <span><strong>names_to / names_from</strong> — column name destination</span>
+            <span><strong>names_to / names_from</strong>: column name destination</span>
           </div>
           <div style="display:flex;align-items:center;gap:7px">
             <div style="width:10px;height:10px;border-radius:2px;background:var(--c-values);flex-shrink:0"></div>
-            <span><strong>values_to / values_from</strong> — value destination</span>
+            <span><strong>values_to / values_from</strong>: value destination</span>
           </div>
           <div style="display:flex;align-items:center;gap:7px">
             <div style="width:10px;height:10px;border-radius:2px;background:var(--c-id);flex-shrink:0"></div>
-            <span><strong>id columns</strong> — not pivoted, just repeated</span>
+            <span><strong>id columns</strong>: not pivoted, just repeated</span>
           </div>
           <div style="display:flex;align-items:center;gap:7px">
             <div style="width:10px;height:10px;border-radius:2px;background:var(--c-adv);flex-shrink:0"></div>
@@ -843,7 +843,7 @@
 
     function buildCode() {
       const df   = `<span class="sv">reading_study</span>`;
-      const pipe = `<span class="so"> |&gt;</span>`;
+      const pipe = `<span class="so"> %&gt;%</span>`;
       let lines = [];
 
       lines.push(cl('cl-setup', `<span class="sc"># Load the tidyverse (includes tidyr)</span>`));
@@ -929,7 +929,7 @@
     function getAnn() {
       if (S.changed === 'welcome') return { cls: 'ann-welcome', html: `
         <strong>Here's how this Explorer works.</strong><br><br>
-        The data table in the middle shows a <em>wide-format</em> reading study — each row is one child,
+        The data table in the middle shows a <em>wide-format</em> reading study in which each row is one child,
         and their reading scores at ages 6, 7, and 8 are spread across three separate columns.
         R often needs this in <em>long format</em> instead—one row per child <em>per age</em>.<br><br>
         <strong>pivot_longer()</strong> collapses those three columns into two: one for the age label
@@ -941,8 +941,8 @@
       };
 
       if (S.changed === 'mode-longer') return { cls: 'ann-mode', html: `
-        <strong>pivot_longer()</strong> takes a <em>wide</em> data frame and makes it <em>longer</em> —
-        more rows, fewer columns.<br><br>
+        <strong>pivot_longer()</strong> takes a <em>wide</em> data frame and makes it <em>longer</em>, meaning there are
+        more rows and fewer columns.<br><br>
         Each measurement column you select (shown in <span style="color:var(--c-cols);font-weight:600">blue</span>)
         gets collapsed. Its column <em>name</em> becomes a value in the
         <span style="color:var(--c-names);font-weight:600">names_to</span> column, and its
@@ -1006,7 +1006,7 @@
         const pfx = S.widerNamesPrefix;
         return { cls: 'ann-adv', html: pfx === '' ? `
           <strong>names_prefix</strong> is currently empty, so the new column names will just be the bare values from the <code>${S.namesFrom}</code> column: <code>6</code>, <code>7</code>, <code>8</code>.<br><br>
-          In R, column names that start with a number are legal but awkward; you have to wrap them in backticks every time you use them: <code>df\`6\`</code>, <code>df\`7\`</code>, <code>df\`8\`</code>. A prefix like <code>"reading_age"</code> gives you <code>reading_age6</code>, <code>reading_age7</code>, <code>reading_age8</code> — clean, self-describing, no backticks needed.`
+          In R, column names that start with a number are legal but awkward; you have to wrap them in backticks every time you use them: <code>df\`6\`</code>, <code>df\`7\`</code>, <code>df\`8\`</code>. A prefix like <code>"reading_age"</code> gives you <code>reading_age6</code>, <code>reading_age7</code>, <code>reading_age8</code>. We prefer this because it's clean, self-describing, and no backticks are needed.`
         : `
           <strong>names_prefix</strong> adds <code>"${pfx}"</code> to the front of every new column name.<br><br>
           The <code>${S.namesFrom}</code> column contains <code>6</code>, <code>7</code>, <code>8</code>—those become the new column headers. With the prefix applied, they become <code>${pfx}6</code>, <code>${pfx}7</code>, <code>${pfx}8</code>. This makes the column names self-describing and avoids the awkwardness of bare numbers as variable names in R.`

@@ -195,6 +195,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 .ann-labs  { border-color:var(--c-labs);   background:#fefaf0; }
 .ann-warn    { border-color:#e86060;         background:#fff2f2; }
 .ann-stat    { border-color:var(--c-stat);   background:#fdf8f0; }
+.ann-scale   { border-color:#3dbcb0;         background:#f0fbfa; }
 .ann-welcome { border-color:var(--accent);   background:#f0edfb; }
 
 .fix-btn {
@@ -249,7 +250,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   <h1>ggplot2 Layer Explorer</h1>
   <p>Toggle layers on and off; each colored block in the code is one layer of the plot</p>
   <span class="pill pill-pkg">ggplot2</span>
-  <span class="pill">data: palmerpenguins::penguins</span>
+  <span class="pill pill-pkg">data: palmerpenguins::penguins</span>
   <span class="pill">n ≈ 60 simulated obs.</span>
 </header>
 
@@ -286,6 +287,24 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
           <button class="obtn on" id="b-vp" onclick="setOrder('violin-point')">violin → point</button>
           <button class="obtn"    id="b-pv" onclick="setOrder('point-violin')">point → violin</button>
         </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- aes() location — stacked, full width -->
+    <div class="cs">
+      <div class="ch"><span class="dot d-base"></span> Where does <code>aes()</code> live?</div>
+      <div class="sub"><code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">aes()</code> tells ggplot which data columns control what you see (x-axis, y-axis, color…)</div>
+      <div class="aes-stack">
+        <button class="aesbtn on" id="b-global" onclick="setAes('ggplot')"
+          title="Write aes() once inside ggplot(). Every layer inherits x and y automatically">
+          In ggplot() &rarr; global
+        </button>
+        <button class="aesbtn" id="b-local" onclick="setAes('geom')"
+          title="Each layer gets its own aes(). This is more repetitive, but shows what breaks when you forget">
+          In each layer &rarr; local
+        </button>
       </div>
     </div>
 
@@ -328,19 +347,15 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
 
     <div class="hr"></div>
 
-    <!-- aes() location — stacked, full width -->
-    <div class="cs">
-      <div class="ch"><span class="dot d-base"></span> Where does <code>aes()</code> live?</div>
-      <div class="sub"><code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">aes()</code> tells ggplot which data columns control what you see (x-axis, y-axis, color…)</div>
-      <div class="aes-stack">
-        <button class="aesbtn on" id="b-global" onclick="setAes('ggplot')"
-          title="Write aes() once inside ggplot(). Every layer inherits x and y automatically">
-          In ggplot() &rarr; global
-        </button>
-        <button class="aesbtn" id="b-local" onclick="setAes('geom')"
-          title="Each layer gets its own aes(). This is more repetitive, but shows what breaks when you forget">
-          In each layer &rarr; local
-        </button>
+    <!-- Scale palette — visible only when color is mapped to a variable -->
+    <div class="cs" id="scale-section" style="display:none">
+      <div class="ch">Custom color palette</div>
+      <div class="sub" style="margin-bottom:6px">Adds <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">scale_fill_manual()</code> for violin and/or <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">scale_color_manual()</code> for points, depending on which geoms are active.</div>
+      <div class="br" id="palette-row">
+        <button class="btn on" data-palette="default" onclick="setPalette(this,'default')">ggplot2 default</button>
+        <button class="btn"    data-palette="pastel"  onclick="setPalette(this,'pastel')">pastel</button>
+        <button class="btn"    data-palette="rgb"     onclick="setPalette(this,'rgb')">rgb</button>
+        <button class="btn"    data-palette="phillies" onclick="setPalette(this,'phillies')">phillies</button>
       </div>
     </div>
 
@@ -367,7 +382,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
     <!-- Customize with theme() -->
     <div class="cs">
       <div class="ch"><span class="dot d-theme"></span> Customize with <code>theme()</code></div>
-      <div class="sub" style="margin-bottom:10px">Stack a <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">theme()</code> call on top of any pre-built theme — or use it alone.</div>
+      <div class="sub" style="margin-bottom:10px">Stack a <code style="font-family:'Fira Code',monospace;font-size:.84em;background:#e8e3f5;padding:0 3px;border-radius:2px">theme()</code> call on top of any pre-built theme, or use it alone to build your own theme from scratch.</div>
 
       <div class="sub" style="margin-bottom:4px;margin-top:2px">Gridlines</div>
       <div class="aes-stack" id="grid-stack" style="margin-bottom:9px">
@@ -409,7 +424,7 @@ header p  { font-size:0.86rem; color:var(--muted); margin-bottom:5px; }
   <!-- ══ CODE ════════════════════════════════ -->
   <div class="panel code-panel">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
-      <div class="panel-label" style="margin-bottom:0">ggplot2 Code — paste into RStudio to run</div>
+      <div class="panel-label" style="margin-bottom:0">ggplot2 Code (paste into RStudio to run)</div>
       <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy code</button>
     </div>
     <div class="code-scroll"><code id="code-out"></code></div>
@@ -449,13 +464,20 @@ const penguins = (() => {
 
 const SP = ['Adelie','Chinstrap','Gentoo'];
 
-// Violin fill palette (warm)
-const VF = { Adelie:'#e07040', Chinstrap:'#7060b0', Gentoo:'#25a090',
-             male:'#4278b4', female:'#b84474' };
-// Point open-circle stroke palette (cool — clearly distinct from violin fills)
-const PC = { Adelie:'#1a5f8a', Chinstrap:'#8a3010', Gentoo:'#4a7020',
-             male:'#7a3898', female:'#1a7858' };
+// Fixed-color options
 const FC = { purple:'#7955a8', orange:'#d96a2e' };
+
+// All mapped-color palettes live here — default uses ggplot2's actual hue_pal() output
+const PALETTES = {
+  default: { species:{ Adelie:'#F8766D', Chinstrap:'#00BA38', Gentoo:'#619CFF' },
+             sex:    { female:'#F8766D', male:'#00BFC4' } },
+  pastel:  { species:{ Adelie:'#F5B89A', Chinstrap:'#B8ADDC', Gentoo:'#85CFB8' },
+             sex:    { male:'#88BFDF', female:'#DF8FAF' } },
+  rgb:     { species:{ Adelie:'#2171b5', Chinstrap:'#b03030', Gentoo:'#238b45' },
+             sex:    { male:'#2171b5', female:'#b03030' } },
+  phillies: { species:{ Adelie:'#6F263D', Chinstrap:'#6BACE4', Gentoo:'#969696' },
+             sex:    { male:'#6BACE4', female:'#6F263D' } },
+};
 
 // ─── STATE ─────────────────────────────────────────────────────────
 const S = {
@@ -470,6 +492,7 @@ const S = {
   aesLoc:      'ggplot',
   mapApply:    'both',     // where mapping is applied when using local aes(): 'both'|'violin'|'point'
   statHasAes:  false,   // only matters when aesLoc='geom' && showStat
+  scalePalette:'default',
   theme:       'none',
   addLabs:     false,
   themeGrid:   'all',   // 'all' | 'no-x' | 'none'
@@ -479,20 +502,18 @@ const S = {
   changed:     'init',
 };
 
-function getViolinCol(d) {
+function violinColor(key) {
   if (S.colorMode === 'fixed') return FC[S.fixedColor];
-  // If aes is global, mapping applies to both geoms. If aes is local, mapping only applies
-  // to the violin when mapApply is 'both' or 'violin'. Otherwise use fixedColor.
-  if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin')
-    return VF[S.mappedVar === 'species' ? d.species : d.sex];
-  return FC[S.fixedColor];
+  if (!(S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin')) return FC[S.fixedColor];
+  return PALETTES[S.scalePalette][S.mappedVar][key];
 }
-function getPointCol(d) {
+function pointColor(key) {
   if (S.colorMode === 'fixed') return FC[S.fixedColor];
-  if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'point')
-    return PC[S.mappedVar === 'species' ? d.species : d.sex];
-  return FC[S.fixedColor];
+  if (!(S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'point')) return FC[S.fixedColor];
+  return PALETTES[S.scalePalette][S.mappedVar][key];
 }
+function getViolinCol(d) { return violinColor(S.mappedVar === 'species' ? d.species : d.sex); }
+function getPointCol(d)  { return pointColor(S.mappedVar === 'species' ? d.species : d.sex); }
 
 // ─── UI HANDLERS ───────────────────────────────────────────────────
 function pick(btn, key, val) {
@@ -534,6 +555,12 @@ function setColorMode(mode) {
   document.getElementById('fc-row').style.display = mode === 'fixed'  ? 'flex' : 'none';
   document.getElementById('mv-row').style.display = mode === 'mapped' ? 'flex' : 'none';
   document.getElementById('map-apply-row').style.display = mode === 'mapped' && S.aesLoc === 'geom' ? 'flex' : 'none';
+  document.getElementById('scale-section').style.display = mode === 'mapped' ? '' : 'none';
+  if (mode === 'fixed') {
+    S.scalePalette = 'default';
+    document.querySelectorAll('#palette-row .btn').forEach(b =>
+      b.classList.toggle('on', b.dataset.palette === 'default'));
+  }
   render();
 }
 
@@ -542,6 +569,13 @@ function setMapApply(v) {
   document.getElementById('m-both').classList.toggle('on', v === 'both');
   document.getElementById('m-violin').classList.toggle('on', v === 'violin');
   document.getElementById('m-point').classList.toggle('on', v === 'point');
+  render();
+}
+
+function setPalette(btn, val) {
+  S.scalePalette = val; S.changed = 'scalePalette';
+  document.querySelectorAll('#palette-row .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.palette === val));
   render();
 }
 
@@ -591,7 +625,7 @@ function resetAll() {
     showViolin:true, showPoint:true, showStat:false,
     layerOrder:'violin-point', colorMode:'fixed', fixedColor:'purple',
     mappedVar:'species', alpha:0.6, aesLoc:'ggplot', mapApply:'both',
-    statHasAes:false, theme:'none', addLabs:false,
+    statHasAes:false, scalePalette:'default', theme:'none', addLabs:false,
     themeGrid:'all', themeTicks:'show', themeText:'normal', themeTitle:'show',
     changed:'init'
   });
@@ -628,6 +662,10 @@ function resetAll() {
   // theme buttons
   document.querySelectorAll('#theme-row .btn').forEach(b =>
     b.classList.toggle('on', b.textContent === 'default'));
+  // scale section — hidden on reset (colorMode resets to fixed)
+  document.getElementById('scale-section').style.display = 'none';
+  document.querySelectorAll('#palette-row .btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.palette === 'default'));
   // labs checkbox
   document.getElementById('chk-labs').checked = false;
   // theme customizations
@@ -664,8 +702,10 @@ const FN_TIPS = {
   theme_classic: 'white background with axis lines only: traditional journal style',
   theme_bw:      'white background with grey gridlines and a border',
   labs:          'sets the plot title and axis labels: purely cosmetic, no effect on the data',
-  theme:         'fine-tunes individual theme elements — stacks on top of a pre-built theme, or works alone',
-  element_blank: 'removes a theme element entirely — the ggplot2 way to hide gridlines, ticks, text, and more',
+  scale_fill_manual:  'overrides ggplot2\'s automatic fill palette: you specify exactly which color each group gets. Only works when fill is mapped to a variable inside aes()',
+  scale_color_manual: 'overrides ggplot2\'s automatic color (outline/stroke) palette. Only works when color is mapped to a variable inside aes()',
+  theme:         'fine-tunes individual theme elements; stacks on top of a pre-built theme, or works alone',
+  element_blank: 'removes a theme element entirely; the ggplot2 way to hide gridlines, ticks, text, and more',
   element_text:  'controls the appearance of text: size, font face (bold/italic), color, angle, and more',
 };
 const fn = s => {
@@ -694,13 +734,14 @@ const KW_TIPS = {
   fun:   'the summary function to compute per group (here: mean)',
   geom:  'what shape to use when drawing the computed summary',
   title:                'the main title displayed above the plot',
-  'panel.grid':         'all gridlines inside the plot panel — major and minor, both axes',
-  'panel.grid.major.x': 'vertical gridlines at each x-axis position; nested inside panel.grid.major, which is inside panel.grid — more specific names win when both are set',
+  'panel.grid':         'all gridlines inside the plot panel: major and minor, both axes',
+  'panel.grid.major.x': 'vertical gridlines at each x-axis position; nested inside panel.grid.major, which is inside panel.grid (more specific names win when both are set)',
   'axis.ticks':         'the short tick marks on both axes, showing where the labels are',
   'axis.text':          'the tick label text on both axes: numbers on y, category names on x',
   'axis.title':         'the axis title text on both axes (e.g., "species", "body_mass_g")',
   'axis.title.x':       'the x-axis title only; more specific than axis.title, so it takes priority when both are set',
   'axis.title.y':       'the y-axis title only; more specific than axis.title, so it takes priority when both are set',
+  values:               'a named vector mapping each data value to a color: c("Adelie" = "#e07040", …). Names must match exactly what\'s in the data column',
   size:                 'the font size of the text element in points',
 };
 const kw = s => {
@@ -735,7 +776,7 @@ function mkAes(extra = '') {
 function buildCode() {
   const { showViolin, showPoint, showStat, layerOrder, colorMode,
       fixedColor, mappedVar, mapApply, alpha, aesLoc, statHasAes,
-      theme, addLabs, themeGrid, themeTicks, themeText, themeTitle } = S;
+      scalePalette, theme, addLabs, themeGrid, themeTicks, themeText, themeTitle } = S;
 
   const a = nu(alpha.toFixed(1));
 
@@ -750,7 +791,12 @@ function buildCode() {
   if (themeTitle === 'hide')   tweaks.push({ k: kw('axis.title'),       v: `${fn('element_blank')}()` });
   const hasTweaks = tweaks.length > 0;
 
-  const hasMore = theme !== 'none' || hasTweaks || addLabs;
+  const needFill  = scalePalette !== 'default' && colorMode === 'mapped' && showViolin &&
+                    (aesLoc === 'ggplot' || mapApply === 'both' || mapApply === 'violin');
+  const needColor = scalePalette !== 'default' && colorMode === 'mapped' && showPoint  &&
+                    (aesLoc === 'ggplot' || mapApply === 'both' || mapApply === 'point');
+  const hasScale  = needFill || needColor;
+  const hasMore = theme !== 'none' || hasTweaks || addLabs || hasScale;
 
   // Draw order for violin/point; stat always last
   const gBase = (showViolin && showPoint)
@@ -772,7 +818,7 @@ function buildCode() {
   lines.push({ id:'lib1', layer:'setup', t:`${fn('library')}(tidyverse)` });
   lines.push({ id:'lib2', layer:'setup', t:`${fn('library')}(palmerpenguins)` });
   lines.push({ id:'cmt1', layer:'setup', t:`# ${SP.join(', ')} penguins: body mass (g) by species` });
-  lines.push({ id:'cmt2', layer:'setup', t:`# Source: Gorman et al. 2020 — note: preview uses ~60 simulated points, your output will show all 344` });
+  lines.push({ id:'cmt2', layer:'setup', t:`# Source: Gorman et al. 2020. Note: Preview uses ~60 simulated points, your output will show all 344` });
   lines.push({ id:'blank',layer:'setup', t:`` });
 
   // ── ggplot() base ──
@@ -841,6 +887,27 @@ function buildCode() {
     }
   });
 
+  // ── scale_fill_manual / scale_color_manual ──
+  if (hasScale) {
+    const pal  = PALETTES[scalePalette][mappedVar];
+    const keys = mappedVar === 'species' ? SP : ['female', 'male'];
+    const afterScale = theme !== 'none' || hasTweaks || addLabs;
+    if (needFill) {
+      lines.push({ id:'sf0', layer:'violin', t:`  ${fn('scale_fill_manual')}(${kw('values')} = c(` });
+      keys.forEach((k, i) => {
+        lines.push({ id:`sf${i+1}`, layer:'violin', t:`    ${ss(k)} = ${ss(pal[k])}${i < keys.length-1 ? ',' : ''}` });
+      });
+      lines.push({ id:`sf${keys.length+1}`, layer:'violin', t:`  ))${needColor || afterScale ? pl() : ''}` });
+    }
+    if (needColor) {
+      lines.push({ id:'sc0', layer:'point', t:`  ${fn('scale_color_manual')}(${kw('values')} = c(` });
+      keys.forEach((k, i) => {
+        lines.push({ id:`sc${i+1}`, layer:'point', t:`    ${ss(k)} = ${ss(pal[k])}${i < keys.length-1 ? ',' : ''}` });
+      });
+      lines.push({ id:`sc${keys.length+1}`, layer:'point', t:`  ))${afterScale ? pl() : ''}` });
+    }
+  }
+
   // ── theme ──
   if (theme !== 'none') {
     lines.push({ id:'theme', layer:'theme', t:`  ${fn('theme_'+theme)}()${(hasTweaks || addLabs) ? pl() : ''}` });
@@ -888,7 +955,7 @@ function getAnn() {
 
   if (changed === 'geom') {
     if (showStat && aesLoc === 'ggplot')
-      return { cls:'ann-stat', html:`<b>stat_summary() just works.</b> With global <code>aes()</code>, <code>stat_summary()</code> inherits <code>x = species</code> and <code>y = body_mass_g</code> automatically—no extra work needed. Try switching to <em>In each layer → local</em> to see what breaks.` };
+      return { cls:'ann-stat', html:`<b>stat_summary() just works.</b> With global <code>aes()</code>, <code>stat_summary()</code> inherits <code>x = species</code> and <code>y = body_mass_g</code> automatically; no extra work needed. Try switching to <em>In each layer → local</em> to see what breaks.` };
     if (showViolin && showPoint)
       return { cls:'ann-geom', html:`<b>Two geoms, one base.</b> Both inherit <code>x = species</code> and <code>y = body_mass_g</code> from <code>ggplot()</code>. Notice also that violin and point are <em>different colors</em> for the same species:violin uses <code>fill</code>, point uses <code>color</code>, each geom picks up what it needs.` };
     const g = showViolin ? 'violin' : 'point';
@@ -911,6 +978,22 @@ function getAnn() {
     return { cls:'ann-aes', html:`<b>Local aes() in each layer.</b> Now every geom carries its own <code>aes(x = species, y = body_mass_g)</code>. This is repetitive, and it has a consequence: any layer you add must also get its own aes() or it won't know what to plot. Try adding <code>stat_summary()</code> to see this happen.` };
   }
 
+  if (changed === 'scalePalette') {
+    const { scalePalette, showViolin, showPoint, aesLoc, mapApply, mappedVar } = S;
+    const nf = showViolin && (aesLoc === 'ggplot' || mapApply === 'both' || mapApply === 'violin');
+    const nc = showPoint  && (aesLoc === 'ggplot' || mapApply === 'both' || mapApply === 'point');
+    if (scalePalette === 'default')
+      return { cls:'ann-scale', html:`<b>No scale call; ggplot2 picks colors automatically.</b> When you remove the scale, ggplot2 uses its built-in palette. No <code>scale_fill_manual()</code> or <code>scale_color_manual()</code> appears in the code.` };
+    const fillLine  = nf ? `<code>scale_fill_manual()</code>` : null;
+    const colorLine = nc ? `<code>scale_color_manual()</code>` : null;
+    const both = fillLine && colorLine;
+    const which = both ? `${fillLine} and ${colorLine}` : (fillLine || colorLine);
+    const whyTwo = both ? `<br><br><b>Why two separate scale calls?</b> Violin uses the <code>fill</code> aesthetic; points use the <code>color</code> aesthetic. They're different aesthetics in ggplot2's eyes, so they each get their own scale. The <code>values =</code> argument takes a named vector—each name must match exactly what's in the data column.` : '';
+    const onlyOne = !both && nf ? `Only <code>scale_fill_manual()</code> appears (no point geom is mapped right now). Add a point layer and map it to see <code>scale_color_manual()</code> appear alongside it.`
+                  : !both && nc ? `Only <code>scale_color_manual()</code> appears (no violin fill is mapped right now). Add a violin and map it to see <code>scale_fill_manual()</code> appear alongside it.` : '';
+    return { cls:'ann-scale', html:`<b>Custom palette: ${which} added.</b> ${onlyOne}<br><br>The <code>values = c(...)</code> argument maps each data value to an exact color. Names must match the data: <code>"${mappedVar === 'species' ? 'Adelie' : 'female'}"</code>, etc.${whyTwo}` };
+  }
+
   if (changed === 'alpha')
     return { cls:'ann-alpha', html:`<b>alpha = ${alpha}: outside aes().</b> A uniform style setting, not a data mapping. It goes <em>outside</em> <code>aes()</code>. With both geoms overlapping, lower alpha lets you see the violin shape through the scattered points.` };
 
@@ -922,15 +1005,15 @@ function getAnn() {
 
   if (changed === 'themeGrid') {
     if (themeGrid === 'all')
-      return { cls:'ann-theme', html:`<b>All gridlines back.</b> No <code>theme()</code> override needed — this is the default.` };
+      return { cls:'ann-theme', html:`<b>All gridlines back.</b> No <code>theme()</code> override needed; this is the default.` };
     if (themeGrid === 'no-x')
       return { cls:'ann-theme', html:`<b>Vertical gridlines hidden.</b> <code>panel.grid.major.x = element_blank()</code> removes just the vertical lines (one at each species column).<br><br>Think of the names as a folder hierarchy: <code>panel.grid</code> is the whole folder. Inside it is <code>panel.grid.major</code>. Inside that is <code>panel.grid.major.x</code>. Targeting the specific file leaves everything else untouched.` };
-    return { cls:'ann-theme', html:`<b>All gridlines hidden.</b> <code>panel.grid = element_blank()</code> removes the entire gridline family at once — major, minor, both axes. Targeting the top-level "folder" clears everything inside it.` };
+    return { cls:'ann-theme', html:`<b>All gridlines hidden.</b> <code>panel.grid = element_blank()</code> removes the entire gridline family at once: major, minor, both axes. Targeting the top-level "folder" clears everything inside it.` };
   }
 
   if (changed === 'themeTicks') {
     if (themeTicks === 'hide')
-      return { cls:'ann-theme', html:`<b>Tick marks hidden.</b> Tick marks "live" in <code>axis.ticks</code>. Setting it to <code>element_blank()</code> removes them from both axes at once.<br><br><code>element_blank()</code> is the ggplot2 way to say "remove this entirely" — it works on any theme element: gridlines, ticks, text, borders, and more.` };
+      return { cls:'ann-theme', html:`<b>Tick marks hidden.</b> Tick marks "live" in <code>axis.ticks</code>. Setting it to <code>element_blank()</code> removes them from both axes at once.<br><br><code>element_blank()</code> is the ggplot2 way to say "remove this entirely"—it works on any theme element: gridlines, ticks, text, borders, and more.` };
     return { cls:'ann-theme', html:`<b>Tick marks back.</b> Removing the <code>axis.ticks</code> override lets the default take over.` };
   }
 
@@ -942,11 +1025,11 @@ function getAnn() {
 
   if (changed === 'themeTitle') {
     if (themeTitle === 'show')
-      return { cls:'ann-theme', html:`<b>Both axis titles visible.</b> No override needed — this is the default.` };
+      return { cls:'ann-theme', html:`<b>Both axis titles visible.</b> No override needed; this is the default.` };
     if (themeTitle === 'hide-x')
       return { cls:'ann-theme', html:`<b>X-axis title hidden.</b> <code>axis.title.x = element_blank()</code> removes just the x-axis title, leaving the y-axis title in place. It's more specific than <code>axis.title</code>, which would remove both at once.` };
     if (themeTitle === 'hide-y')
-      return { cls:'ann-theme', html:`<b>Y-axis title hidden.</b> <code>axis.title.y = element_blank()</code> removes just the y-axis title — the x-axis title stays. More specific beats more general: <code>axis.title.y</code> targets exactly one thing.` };
+      return { cls:'ann-theme', html:`<b>Y-axis title hidden.</b> <code>axis.title.y = element_blank()</code> removes just the y-axis title (the x-axis title stays). More specific beats more general: <code>axis.title.y</code> targets exactly one thing.` };
     return { cls:'ann-theme', html:`<b>Both axis titles hidden.</b> <code>axis.title = element_blank()</code> removes both at once, since <code>axis.title</code> is the parent of both <code>axis.title.x</code> and <code>axis.title.y</code>.` };
   }
 
@@ -1037,7 +1120,7 @@ function drawViolins(sy,cx) {
     let c;
     if (S.colorMode === 'fixed') c = FC[S.fixedColor];
     else if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin')
-      c = VF[S.mappedVar === 'species' ? sp : (penguins.find(d=>d.species===sp)?.sex||'male')];
+      c = violinColor(S.mappedVar === 'species' ? sp : (penguins.find(d=>d.species===sp)?.sex||'male'));
     else c = FC[S.fixedColor];
     const dw=d=>hw*d/maxD;
     const right=pts.map(p=>`${x+dw(p.d)},${sy(p.y)}`).join(' ');
@@ -1055,7 +1138,7 @@ function drawPoints(sy,cx) {
     let col;
     if (S.colorMode === 'fixed') col = FC[S.fixedColor];
     else if (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'point')
-      col = PC[S.mappedVar === 'species' ? d.species : d.sex];
+      col = getPointCol(d);
     else col = FC[S.fixedColor];
     if (bothGeoms) {
       // open circle: white fill + colored stroke — distinct from filled violin
@@ -1083,12 +1166,9 @@ function drawStat(sy,cx) {
 function drawLegend(cx) {
   if (S.colorMode !== 'mapped') return '';
   const isSpecies = S.mappedVar === 'species';
-  const vEntries = isSpecies
-    ? SP.map(sp => [sp, VF[sp]])
-    : [['male', VF.male], ['female', VF.female]];
-  const pEntries = isSpecies
-    ? SP.map(sp => [sp, PC[sp]])
-    : [['male', PC.male], ['female', PC.female]];
+  const keys = isSpecies ? SP : ['male', 'female'];
+  const vEntries = keys.map(k => [k, violinColor(k)]);
+  const pEntries = keys.map(k => [k, pointColor(k)]);
 
   // Determine whether mapping actually applies to violin/point in the current config
   const showV = S.showViolin && (S.aesLoc === 'ggplot' || S.mapApply === 'both' || S.mapApply === 'violin');
@@ -1134,7 +1214,7 @@ function drawLegend(cx) {
         items += `<rect x="${lx+pad}" y="${y}" width="11" height="11" fill="${c}" rx="2" opacity="0.85"/>
                   <text x="${lx+pad+15}" y="${y+9}" font-size="9.5" fill="#1c1811">${k}</text>`;
       } else {
-        items += `<circle cx="${lx+pad+6}" cy="${y+5}" r="5" fill="white" stroke="${c}" stroke-width="2"/>
+        items += `<circle cx="${lx+pad+6}" cy="${y+5}" r="5" fill="${c}" stroke="white" stroke-width="0.7"/>
                   <text x="${lx+pad+16}" y="${y+9}" font-size="9.5" fill="#1c1811">${k}</text>`;
       }
       y += 15;
